@@ -89,7 +89,7 @@ Parser::SyntaxNode* Parser::MatchTokensAgainstRule(const std::vector<Lexer::Toke
 				case Grammar::Token::MatchResult::MAYBE:
 				{
 					const Grammar::Rule* subRule = grammar.LookupRule(ruleName);
-					if (subRule)
+					if (subRule && (*subRule->name != *rule->name || parsePosition != initialParsePosition))
 					{
 						SyntaxNode* childNode = this->MatchTokensAgainstRule(tokenArray, parsePosition, subRule, grammar);
 						if (childNode)
