@@ -1,0 +1,24 @@
+#pragma once
+
+#include <wx/frame.h>
+
+class Frame : public wxFrame
+{
+public:
+	Frame(wxWindow* parent, const wxPoint& pos, const wxSize& size);
+	virtual ~Frame();
+
+	void OnExit(wxCommandEvent& event);
+	void OnGrammarFile(wxCommandEvent& event);
+	void OnParseFile(wxCommandEvent& event);
+	void OnAbout(wxCommandEvent& event);
+
+	enum
+	{
+		ID_Exit = wxID_HIGHEST,
+		ID_ReadGrammarFile,
+		ID_WriteGrammarFile,
+		ID_ParseFile,
+		ID_About
+	};
+};
