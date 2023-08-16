@@ -1,0 +1,12 @@
+# ScopeTest.pow
+
+a = 1;
+
+blah = func(a)
+{
+    a = 2;
+};
+
+blah(a);
+
+output("a = " + as_str(a));

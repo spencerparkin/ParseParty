@@ -1,0 +1,6 @@
+# HelloWorld.pow
+
+while(1) {
+	output("Hello, World!\n");
+	sleep(1);
+}

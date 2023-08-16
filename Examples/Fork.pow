@@ -1,0 +1,39 @@
+# Fork.pow
+
+output("Hello!\n");
+
+fork_a = func()
+{
+	while(i < 10)
+    {
+        output("fork A: " + i + "\n");
+        yield;
+        i += 1;
+    }
+};
+
+fork_b = func()
+{
+	while(j > -10)
+    {
+        output("fork B: " + j + "\n");
+        yield;
+        j -= 1;
+    };
+};
+
+fork
+{
+    i = 0;
+    fork_a();
+}
+else
+{
+    j = 0;
+    fork_b();
+};
+
+output("Good-bye!\n");
+output("So long!\n");
+yield;
+output("Until tomorrow!\n");
