@@ -58,7 +58,8 @@ Grammar::TerminalToken::TerminalToken()
 	switch (this->type)
 	{
 		case Lexer::Token::Type::STRING_LITERAL:
-		case Lexer::Token::Type::NUMBER_LITERAL:
+		case Lexer::Token::Type::NUMBER_LITERAL_FLOAT:
+		case Lexer::Token::Type::NUMBER_LITERAL_INT:
 		case Lexer::Token::Type::IDENTIFIER:
 		{
 			return (this->type == token.type) ? MatchResult::YES : MatchResult::NO;

@@ -13,7 +13,7 @@ Parser::Parser()
 {
 }
 
-Parser::SyntaxNode* Parser::Parse(const std::vector<Lexer::Token>& tokenArray, const Grammar& grammar)
+Parser::SyntaxNode* Parser::Parse(const std::vector<Lexer::Token*>& tokenArray, const Grammar& grammar)
 {
 	const Grammar::Rule* rule = grammar.GetInitialRule();
 	if (!rule)
@@ -25,7 +25,7 @@ Parser::SyntaxNode* Parser::Parse(const std::vector<Lexer::Token>& tokenArray, c
 	return rootNode;
 }
 
-Parser::SyntaxNode* Parser::MatchTokensAgainstRule(const std::vector<Lexer::Token>& tokenArray, int& parsePosition, const Grammar::Rule* rule, const Grammar& grammar)
+Parser::SyntaxNode* Parser::MatchTokensAgainstRule(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, const Grammar::Rule* rule, const Grammar& grammar)
 {
 	SyntaxNode* parentNode = new SyntaxNode();
 	*parentNode->text = *rule->name;
@@ -42,17 +42,17 @@ Parser::SyntaxNode* Parser::MatchTokensAgainstRule(const std::vector<Lexer::Toke
 		for (int j = 0; j < (signed)tokenSequence.size(); j++)
 		{
 			const Grammar::Token* grammarToken = tokenSequence[j];
-			const Lexer::Token& token = tokenArray[parsePosition];
+			const Lexer::Token* token = tokenArray[parsePosition];
 
 			std::string ruleName;
 			goodMatch = false;
 			
-			switch (grammarToken->Matches(token, ruleName))
+			switch (grammarToken->Matches(*token, ruleName))
 			{
 				case Grammar::Token::MatchResult::YES:
 				{
 					SyntaxNode* childNode = new SyntaxNode();
-					*childNode->text = *token.text;
+					*childNode->text = *token->text;
 					parentNode->childArray->push_back(childNode);
 					goodMatch = true;
 					parsePosition++;

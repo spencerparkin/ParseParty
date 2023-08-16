@@ -19,6 +19,9 @@
     <ClInclude Include="Source\Grammar.h">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="Source\JsonValue.h">
+      <Filter>Source</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Lexer.cpp">
@@ -28,6 +31,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Grammar.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\JsonValue.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
