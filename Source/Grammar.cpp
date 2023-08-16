@@ -177,7 +177,6 @@ Grammar::NonTerminalToken::NonTerminalToken(const std::string& givenRuleName)
 Grammar::MatchSequence::MatchSequence()
 {
 	this->tokenSequence = new std::vector<Token*>();
-	this->type = Type::LEFT_TO_RIGHT;
 }
 
 /*virtual*/ Grammar::MatchSequence::~MatchSequence()
@@ -237,16 +236,6 @@ bool Grammar::Rule::Read(const JsonArray* jsonRuleArray, const JsonObject* jsonR
 
 		for (int j = 0; j < (signed)jsonRuleSequence->GetSize(); j++)
 		{
-			if (j == jsonRuleSequence->GetSize() - 1)
-			{
-				const JsonInt* jsonInt = dynamic_cast<const JsonInt*>(jsonRuleSequence->GetValue(j));
-				if (jsonInt && jsonInt->GetValue() == -1)
-				{
-					matchSequence->type = MatchSequence::Type::RIGHT_TO_LEFT;
-					break;
-				}
-			}
-
 			const JsonString* jsonToken = dynamic_cast<const JsonString*>(jsonRuleSequence->GetValue(j));
 			if (!jsonToken)
 				return false;

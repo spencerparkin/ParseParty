@@ -71,14 +71,7 @@ namespace ParseParty
 
 			void Clear();
 
-			enum class Type
-			{
-				LEFT_TO_RIGHT,
-				RIGHT_TO_LEFT
-			};
-
 			std::vector<Token*>* tokenSequence;
-			Type type;
 		};
 
 		class Rule

@@ -84,7 +84,7 @@
     [ "expression", "in", "expression" ]
   ],
   "member-access-expression": [
-    [ "expression", ".", "identifier", -1 ]
+    [ "expression", ".", "identifier" ]
   ],
   "list-push-pop-expression": [
     [ "expression", "-->", "expression" ],
@@ -102,7 +102,7 @@
     [ "keys", "(", "expression", ")" ]
   ],
   "container-field-expression": [
-    [ "expression", "[", "expression", "]", -1 ]
+    [ "expression", "[", "expression", "]" ]
   ],
   "assignment-expression": [
     [ "expression", "=", "expression" ]
@@ -168,8 +168,8 @@
     [ "expression", ":", "expression" ]
   ],
   "function-call": [
-    [ "expression", "(", ")", -1 ],
-    [ "expression", "(", "argument-list", ")", -1 ]
+    [ "expression", "(", ")" ],
+    [ "expression", "(", "argument-list", ")" ]
   ],
   "argument-list": [
     [ "argument-list", ",", "argument-list" ],
