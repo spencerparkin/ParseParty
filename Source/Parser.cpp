@@ -32,16 +32,17 @@ Parser::SyntaxNode* Parser::MatchTokensAgainstRule(const std::vector<Lexer::Toke
 
 	// TODO: First look in the cache.  If we have already successfully parsed the token array at the given position, against the given rule, then return the result.
 
-	for (int i = 0; i < (signed)rule->tokenSequenceSize; i++)
+	for(const Grammar::MatchSequence* matchSequence : *rule->matchSequenceArray)
 	{
-		const std::vector<Grammar::Token*>& tokenSequence = rule->tokenSequenceArray[i];
-
 		int initialParsePosition = parsePosition;
 		bool goodMatch = false;
 
-		for (int j = 0; j < (signed)tokenSequence.size(); j++)
+		// TODO: How do we adhere to the match sequence's type?  (L-to-R or R-to-L?)  I think we may need to use a parse range instead of a parse position.
+		//       Also, the type will indicate which direction we're trying to match tokens.  For now, it is always, L-to-R.
+
+		for (int j = 0; j < (signed)matchSequence->tokenSequence->size(); j++)
 		{
-			const Grammar::Token* grammarToken = tokenSequence[j];
+			const Grammar::Token* grammarToken = (*matchSequence->tokenSequence)[j];
 			const Lexer::Token* token = tokenArray[parsePosition];
 
 			std::string ruleName;

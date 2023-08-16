@@ -63,6 +63,24 @@ namespace ParseParty
 			std::string* ruleName;
 		};
 
+		class MatchSequence
+		{
+		public:
+			MatchSequence();
+			virtual ~MatchSequence();
+
+			void Clear();
+
+			enum class Type
+			{
+				LEFT_TO_RIGHT,
+				RIGHT_TO_LEFT
+			};
+
+			std::vector<Token*>* tokenSequence;
+			Type type;
+		};
+
 		class Rule
 		{
 		public:
@@ -72,8 +90,9 @@ namespace ParseParty
 			bool Read(const JsonArray* jsonRuleArray, const JsonObject* jsonRuleMap);
 			bool Write(JsonArray* jsonRuleArray) const;
 
-			std::vector<Token*>* tokenSequenceArray;
-			unsigned int tokenSequenceSize;
+			void Clear();
+
+			std::vector<MatchSequence*>* matchSequenceArray;
 			std::string* name;
 		};
 

@@ -172,24 +172,51 @@ Grammar::NonTerminalToken::NonTerminalToken(const std::string& givenRuleName)
 	return MatchResult::MAYBE;
 }
 
+//------------------------------- Grammar::MatchSequence -------------------------------
+
+Grammar::MatchSequence::MatchSequence()
+{
+	this->tokenSequence = new std::vector<Token*>();
+	this->type = Type::LEFT_TO_RIGHT;
+}
+
+/*virtual*/ Grammar::MatchSequence::~MatchSequence()
+{
+	this->Clear();
+
+	delete this->tokenSequence;
+}
+
+void Grammar::MatchSequence::Clear()
+{
+	for (Token* token : *this->tokenSequence)
+		delete token;
+
+	this->tokenSequence->clear();
+}
+
 //------------------------------- Grammar::Rule -------------------------------
 
 Grammar::Rule::Rule()
 {
-	this->tokenSequenceArray = nullptr;
-	this->tokenSequenceSize = 0;
+	this->matchSequenceArray = new std::vector<MatchSequence*>();
 	this->name = new std::string();
 }
 
 /*virtual*/ Grammar::Rule::~Rule()
 {
+	this->Clear();
+
 	delete this->name;
+	delete this->matchSequenceArray;
+}
 
-	for (int i = 0; i < (signed)this->tokenSequenceSize; i++)
-		for (int j = 0; j < (signed)this->tokenSequenceArray[j].size(); j++)
-			delete this->tokenSequenceArray[i][j];
+void Grammar::Rule::Clear()
+{
+	for (MatchSequence* matchSequence : *this->matchSequenceArray)
+		delete matchSequence;
 
-	delete[] this->tokenSequenceArray;
+	this->matchSequenceArray->clear();
 }
 
 bool Grammar::Rule::Read(const JsonArray* jsonRuleArray, const JsonObject* jsonRuleMap)
@@ -197,15 +224,12 @@ bool Grammar::Rule::Read(const JsonArray* jsonRuleArray, const JsonObject* jsonR
 	if (jsonRuleArray->GetSize() == 0)
 		return false;
 
-	if (this->tokenSequenceSize != 0 || this->tokenSequenceArray != nullptr)
-		return false;
-
-	this->tokenSequenceSize = jsonRuleArray->GetSize();
-	this->tokenSequenceArray = new std::vector<Token*>[this->tokenSequenceSize];
+	this->Clear();
 
 	for (int i = 0; i < (signed)jsonRuleArray->GetSize(); i++)
 	{
-		std::vector<Token*>* tokenSequence = &this->tokenSequenceArray[i];
+		MatchSequence* matchSequence = new MatchSequence();
+		this->matchSequenceArray->push_back(matchSequence);
 
 		const JsonArray* jsonRuleSequence = dynamic_cast<const JsonArray*>(jsonRuleArray->GetValue(i));
 		if (!jsonRuleSequence)
@@ -213,6 +237,16 @@ bool Grammar::Rule::Read(const JsonArray* jsonRuleArray, const JsonObject* jsonR
 
 		for (int j = 0; j < (signed)jsonRuleSequence->GetSize(); j++)
 		{
+			if (j == jsonRuleSequence->GetSize() - 1)
+			{
+				const JsonInt* jsonInt = dynamic_cast<const JsonInt*>(jsonRuleSequence->GetValue(j));
+				if (jsonInt && jsonInt->GetValue() == -1)
+				{
+					matchSequence->type = MatchSequence::Type::RIGHT_TO_LEFT;
+					break;
+				}
+			}
+
 			const JsonString* jsonToken = dynamic_cast<const JsonString*>(jsonRuleSequence->GetValue(j));
 			if (!jsonToken)
 				return false;
@@ -224,7 +258,7 @@ bool Grammar::Rule::Read(const JsonArray* jsonRuleArray, const JsonObject* jsonR
 			else
 				token = new TerminalToken(jsonToken->GetValue());
 
-			tokenSequence->push_back(token);
+			matchSequence->tokenSequence->push_back(token);
 		}
 	}
 

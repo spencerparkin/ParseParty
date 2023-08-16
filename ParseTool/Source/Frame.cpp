@@ -53,9 +53,9 @@ void Frame::OnGrammarFile(wxCommandEvent& event)
 				wxBusyCursor busyCursor;
 				wxString grammarFile = fileDialog.GetPath();
 				if (!wxGetApp().grammar.ReadFile((const char*)grammarFile.c_str()))
-				{
 					wxMessageBox("Failed to open grammar file: " + grammarFile, "Error!", wxICON_ERROR | wxOK, this);
-				}
+				else
+					wxMessageBox("Grammar file read!", "Success!", wxICON_INFORMATION | wxOK, this);
 			}
 			break;
 		}
@@ -67,9 +67,9 @@ void Frame::OnGrammarFile(wxCommandEvent& event)
 				wxBusyCursor busyCursor;
 				wxString grammarFile = fileDialog.GetPath();
 				if (!wxGetApp().grammar.WriteFile((const char*)grammarFile.c_str()))
-				{
 					wxMessageBox("Failed to save grammar file: " + grammarFile, "Error!", wxICON_ERROR | wxOK, this);
-				}
+				else
+					wxMessageBox("Grammar file written!", "Success!", wxICON_INFORMATION | wxOK, this);
 			}
 
 			break;

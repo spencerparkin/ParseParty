@@ -304,6 +304,15 @@ JsonObject::JsonObject()
 
 		if (!jsonValue->ParseTokens(tokenArray, parsePosition))
 			return false;
+
+		if (parsePosition >= (signed)tokenArray.size())
+			return false;
+
+		token = tokenArray[parsePosition];
+		if (token->type == Lexer::Token::Type::COMMA)
+			parsePosition++;
+		else if (token->type != Lexer::Token::Type::CLOSE_CURCLY_BRACE)
+			return false;
 	}
 
 	return true;
@@ -428,7 +437,10 @@ JsonArray::JsonArray(const std::vector<int>& intArray)
 
 		token = tokenArray[parsePosition];
 		if (token->type == Lexer::Token::Type::CLOSE_SQUARE_BRACKET)
+		{
+			parsePosition++;
 			break;
+		}
 
 		JsonValue* jsonValue = ValueFactory(*token);
 		if (!jsonValue)
@@ -443,10 +455,10 @@ JsonArray::JsonArray(const std::vector<int>& intArray)
 			return false;
 
 		token = tokenArray[parsePosition];
-		if (token->type != Lexer::Token::Type::COMMA && token->type != Lexer::Token::Type::CLOSE_SQUARE_BRACKET)
+		if (token->type == Lexer::Token::Type::COMMA)
+			parsePosition++;
+		else if (token->type != Lexer::Token::Type::CLOSE_SQUARE_BRACKET)
 			return false;
-
-		parsePosition++;
 	}
 	
 	return true;
