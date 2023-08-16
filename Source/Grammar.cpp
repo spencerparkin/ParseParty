@@ -1,4 +1,5 @@
 #include "Grammar.h"
+#include "Lexer.h"
 
 using namespace ParseParty;
 
@@ -12,8 +13,18 @@ Grammar::Grammar()
 
 /*virtual*/ Grammar::~Grammar()
 {
+	this->Clear();
+
 	delete this->ruleMap;
 	delete this->initialRule;
+}
+
+void Grammar::Clear()
+{
+	for (std::pair<std::string, Rule*> pair : *this->ruleMap)
+		delete pair.second;
+
+	this->ruleMap->clear();
 }
 
 const Grammar::Rule* Grammar::GetInitialRule() const
@@ -28,6 +39,61 @@ const Grammar::Rule* Grammar::LookupRule(const std::string& ruleName) const
 		return nullptr;
 
 	return iter->second;
+}
+
+bool Grammar::ReadFile(const std::string& grammarFile)
+{
+	bool success = false;
+	JsonValue* jsonRootValue = nullptr;
+
+	this->Clear();
+
+	while (true)
+	{
+		std::ifstream fileStream;
+		fileStream.open(grammarFile.c_str(), std::ios::in);
+		if (!fileStream.is_open())
+			break;
+
+		std::stringstream stringStream;
+		stringStream << fileStream.rdbuf();
+		std::string jsonString = stringStream.str();
+		jsonRootValue = JsonValue::ParseJson(jsonString);
+		if (!jsonRootValue)
+			break;
+
+		JsonObject* jsonRuleMap = dynamic_cast<JsonObject*>(jsonRootValue);
+		if (!jsonRuleMap)
+			break;
+
+		for (std::pair<std::string, JsonValue*> pair : *jsonRuleMap)
+		{
+			Rule* rule = new Rule();
+			*rule->name = pair.first;
+			this->ruleMap->insert(std::pair<std::string, Rule*>(*rule->name, rule));
+
+			JsonArray* jsonRuleValue = dynamic_cast<JsonArray*>(pair.second);
+			if (!jsonRuleValue)
+				break;
+
+			if (!rule->Read(jsonRuleValue, jsonRuleMap))
+				break;
+		}
+
+		if (this->ruleMap->size() != jsonRuleMap->GetSize())
+			break;
+
+		success = true;
+		break;
+	}
+
+	delete jsonRootValue;
+	return success;
+}
+
+bool Grammar::WriteFile(const std::string& grammarFile) const
+{
+	return false;
 }
 
 //------------------------------- Grammar::Token -------------------------------
@@ -46,6 +112,19 @@ Grammar::TerminalToken::TerminalToken()
 {
 	this->text = new std::string();
 	this->type = Lexer::Token::Type::UNKNOWN;
+}
+
+Grammar::TerminalToken::TerminalToken(const std::string& givenText)
+{
+	this->text = new std::string();
+	*this->text = givenText;
+
+	Lexer::Token token;
+	int i = 0;
+	if (token.Eat(givenText.c_str(), i))
+		this->type = token.type;
+	else
+		this->type = Lexer::Token::Type::UNKNOWN;
 }
 
 /*virtual*/ Grammar::TerminalToken::~TerminalToken()
@@ -74,6 +153,12 @@ Grammar::TerminalToken::TerminalToken()
 Grammar::NonTerminalToken::NonTerminalToken()
 {
 	this->ruleName = new std::string();
+}
+
+Grammar::NonTerminalToken::NonTerminalToken(const std::string& givenRuleName)
+{
+	this->ruleName = new std::string();
+	*this->ruleName = givenRuleName;
 }
 
 /*virtual*/ Grammar::NonTerminalToken::~NonTerminalToken()
@@ -105,4 +190,48 @@ Grammar::Rule::Rule()
 			delete this->tokenSequenceArray[i][j];
 
 	delete[] this->tokenSequenceArray;
+}
+
+bool Grammar::Rule::Read(const JsonArray* jsonRuleArray, const JsonObject* jsonRuleMap)
+{
+	if (jsonRuleArray->GetSize() == 0)
+		return false;
+
+	if (this->tokenSequenceSize != 0 || this->tokenSequenceArray != nullptr)
+		return false;
+
+	this->tokenSequenceSize = jsonRuleArray->GetSize();
+	this->tokenSequenceArray = new std::vector<Token*>[this->tokenSequenceSize];
+
+	for (int i = 0; i < (signed)jsonRuleArray->GetSize(); i++)
+	{
+		std::vector<Token*>* tokenSequence = &this->tokenSequenceArray[i];
+
+		const JsonArray* jsonRuleSequence = dynamic_cast<const JsonArray*>(jsonRuleArray->GetValue(i));
+		if (!jsonRuleSequence)
+			return false;
+
+		for (int j = 0; j < (signed)jsonRuleSequence->GetSize(); j++)
+		{
+			const JsonString* jsonToken = dynamic_cast<const JsonString*>(jsonRuleSequence->GetValue(j));
+			if (!jsonToken)
+				return false;
+
+			Token* token = nullptr;
+
+			if (jsonRuleMap->GetValue(jsonToken->GetValue()))
+				token = new NonTerminalToken(jsonToken->GetValue());
+			else
+				token = new TerminalToken(jsonToken->GetValue());
+
+			tokenSequence->push_back(token);
+		}
+	}
+
+	return true;
+}
+
+bool Grammar::Rule::Write(JsonArray* jsonRuleArray) const
+{
+	return false;
 }

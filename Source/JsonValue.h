@@ -88,10 +88,14 @@ namespace ParseParty
 		bool SetValue(const std::string& key, JsonValue* value);
 		bool DeleteValue(const std::string& key);
 
-		// TODO: Provide iteration.
+		typedef std::map<std::string, JsonValue*> JsonValueMap;
+
+		JsonValueMap::iterator begin() { return this->valueMap->begin(); }
+		JsonValueMap::const_iterator begin() const { return this->valueMap->begin(); }
+		JsonValueMap::iterator end() { return this->valueMap->end(); }
+		JsonValueMap::const_iterator end() const { return this->valueMap->end(); }
 
 	private:
-		typedef std::map<std::string, JsonValue*> JsonValueMap;
 		JsonValueMap* valueMap;
 	};
 

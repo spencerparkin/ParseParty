@@ -2,6 +2,7 @@
 
 #include "Common.h"
 #include "Lexer.h"
+#include "JsonValue.h"
 
 namespace ParseParty
 {
@@ -11,7 +12,10 @@ namespace ParseParty
 		Grammar();
 		virtual ~Grammar();
 
-		// TODO: Be able to read/write grammar from/to file.
+		bool ReadFile(const std::string& grammarFile);
+		bool WriteFile(const std::string& grammarFile) const;
+
+		void Clear();
 
 		class Rule;
 
@@ -38,6 +42,7 @@ namespace ParseParty
 		{
 		public:
 			TerminalToken();
+			TerminalToken(const std::string& givenText);
 			virtual ~TerminalToken();
 
 			virtual MatchResult Matches(const Lexer::Token& token, std::string& ruleName) const override;
@@ -50,6 +55,7 @@ namespace ParseParty
 		{
 		public:
 			NonTerminalToken();
+			NonTerminalToken(const std::string& givenRuleName);
 			virtual ~NonTerminalToken();
 
 			virtual MatchResult Matches(const Lexer::Token& token, std::string& ruleName) const override;
@@ -62,6 +68,9 @@ namespace ParseParty
 		public:
 			Rule();
 			virtual ~Rule();
+
+			bool Read(const JsonArray* jsonRuleArray, const JsonObject* jsonRuleMap);
+			bool Write(JsonArray* jsonRuleArray) const;
 
 			std::vector<Token*>* tokenSequenceArray;
 			unsigned int tokenSequenceSize;
