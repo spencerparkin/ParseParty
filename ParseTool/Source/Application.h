@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wx/app.h>
+#include "Grammar.h"
 
 class Frame;
 
@@ -14,6 +15,8 @@ public:
 	virtual int OnExit(void) override;
 
 	Frame* frame;
+
+	ParseParty::Grammar grammar;
 };
 
 wxDECLARE_APP(Application);

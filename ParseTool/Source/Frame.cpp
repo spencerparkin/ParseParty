@@ -1,6 +1,9 @@
 #include "Frame.h"
+#include "Application.h"
 #include <wx/menu.h>
 #include <wx/aboutdlg.h>
+#include <wx/filedlg.h>
+#include <wx/msgdlg.h>
 
 Frame::Frame(wxWindow* parent, const wxPoint& pos, const wxSize& size) : wxFrame(parent, wxID_ANY, "Parse Tool", pos, size)
 {
@@ -40,6 +43,38 @@ void Frame::OnExit(wxCommandEvent& event)
 
 void Frame::OnGrammarFile(wxCommandEvent& event)
 {
+	switch (event.GetId())
+	{
+		case ID_ReadGrammarFile:
+		{
+			wxFileDialog fileDialog(this, "Open Grammar File", wxEmptyString, wxEmptyString, "JSON file (*.json)|*.json", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+			if (wxID_OK == fileDialog.ShowModal())
+			{
+				wxBusyCursor busyCursor;
+				wxString grammarFile = fileDialog.GetPath();
+				if (!wxGetApp().grammar.ReadFile((const char*)grammarFile.c_str()))
+				{
+					wxMessageBox("Failed to open grammar file: " + grammarFile, "Error!", wxICON_ERROR | wxOK, this);
+				}
+			}
+			break;
+		}
+		case ID_WriteGrammarFile:
+		{
+			wxFileDialog fileDialog(this, "Save Grammar File", wxEmptyString, wxEmptyString, "JSON file (*.json)|*.json", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+			if (wxID_OK == fileDialog.ShowModal())
+			{
+				wxBusyCursor busyCursor;
+				wxString grammarFile = fileDialog.GetPath();
+				if (!wxGetApp().grammar.WriteFile((const char*)grammarFile.c_str()))
+				{
+					wxMessageBox("Failed to save grammar file: " + grammarFile, "Error!", wxICON_ERROR | wxOK, this);
+				}
+			}
+
+			break;
+		}
+	}
 }
 
 void Frame::OnParseFile(wxCommandEvent& event)
