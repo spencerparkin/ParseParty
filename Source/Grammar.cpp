@@ -172,33 +172,11 @@ Grammar::NonTerminalToken::NonTerminalToken(const std::string& givenRuleName)
 	return MatchResult::MAYBE;
 }
 
-//------------------------------- Grammar::MatchSequence -------------------------------
-
-Grammar::MatchSequence::MatchSequence()
-{
-	this->tokenSequence = new std::vector<Token*>();
-}
-
-/*virtual*/ Grammar::MatchSequence::~MatchSequence()
-{
-	this->Clear();
-
-	delete this->tokenSequence;
-}
-
-void Grammar::MatchSequence::Clear()
-{
-	for (Token* token : *this->tokenSequence)
-		delete token;
-
-	this->tokenSequence->clear();
-}
-
 //------------------------------- Grammar::Rule -------------------------------
 
 Grammar::Rule::Rule()
 {
-	this->matchSequenceArray = new std::vector<MatchSequence*>();
+	this->matchSequenceArray = new std::vector<std::vector<Token*>*>();
 	this->name = new std::string();
 }
 
@@ -213,7 +191,12 @@ Grammar::Rule::Rule()
 void Grammar::Rule::Clear()
 {
 	for (MatchSequence* matchSequence : *this->matchSequenceArray)
+	{
+		for (Token* token : *matchSequence)
+			delete token;
+
 		delete matchSequence;
+	}
 
 	this->matchSequenceArray->clear();
 }
@@ -247,7 +230,7 @@ bool Grammar::Rule::Read(const JsonArray* jsonRuleArray, const JsonObject* jsonR
 			else
 				token = new TerminalToken(jsonToken->GetValue());
 
-			matchSequence->tokenSequence->push_back(token);
+			matchSequence->push_back(token);
 		}
 	}
 

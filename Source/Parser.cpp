@@ -32,14 +32,14 @@ Parser::SyntaxNode* Parser::MatchTokensAgainstRule(const std::vector<Lexer::Toke
 
 	// TODO: First look in the cache.  If we have already successfully parsed the token array at the given position, against the given rule, then return the result.
 
-	for(const Grammar::MatchSequence* matchSequence : *rule->matchSequenceArray)
+	for(const Grammar::Rule::MatchSequence* matchSequence : *rule->matchSequenceArray)
 	{
 		int initialParsePosition = parsePosition;
 		bool goodMatch = false;
 
-		for (int j = 0; j < (signed)matchSequence->tokenSequence->size(); j++)
+		for (int j = 0; j < (signed)matchSequence->size(); j++)
 		{
-			const Grammar::Token* grammarToken = (*matchSequence->tokenSequence)[j];
+			const Grammar::Token* grammarToken = (*matchSequence)[j];
 			const Lexer::Token* token = tokenArray[parsePosition];
 
 			std::string ruleName;
