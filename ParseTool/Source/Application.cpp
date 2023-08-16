@@ -6,10 +6,12 @@ wxIMPLEMENT_APP(Application);
 Application::Application()
 {
 	this->frame = nullptr;
+	this->rootNode = nullptr;
 }
 
 /*virtual*/ Application::~Application()
 {
+	delete this->rootNode;
 }
 
 /*virtual*/ bool Application::OnInit(void)

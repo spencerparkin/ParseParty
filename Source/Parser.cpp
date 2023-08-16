@@ -13,6 +13,36 @@ Parser::Parser()
 {
 }
 
+Parser::SyntaxNode* Parser::ParseFile(const std::string& codeFile, const Grammar& grammar)
+{
+	std::fstream fileStream(codeFile.c_str(), std::ios::in);
+	if (!fileStream.is_open())
+		return nullptr;
+
+	std::stringstream stringStream;
+	stringStream << fileStream.rdbuf();
+	std::string codeText = stringStream.str();
+	SyntaxNode* rootNode = this->Parse(codeText, grammar);
+	fileStream.close();
+	return rootNode;
+}
+
+Parser::SyntaxNode* Parser::Parse(const std::string& codeText, const Grammar& grammar)
+{
+	std::vector<Lexer::Token*> tokenArray;
+
+	Lexer lexer;
+	if (!lexer.Tokenize(codeText, tokenArray))
+		return nullptr;
+
+	SyntaxNode* rootNode = this->Parse(tokenArray, grammar);
+
+	for (Lexer::Token* token : tokenArray)
+		delete token;
+
+	return rootNode;
+}
+
 Parser::SyntaxNode* Parser::Parse(const std::vector<Lexer::Token*>& tokenArray, const Grammar& grammar)
 {
 	const Grammar::Rule* rule = grammar.GetInitialRule();

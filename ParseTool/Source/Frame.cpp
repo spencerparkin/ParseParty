@@ -4,6 +4,7 @@
 #include <wx/aboutdlg.h>
 #include <wx/filedlg.h>
 #include <wx/msgdlg.h>
+#include <wx/sizer.h>
 
 Frame::Frame(wxWindow* parent, const wxPoint& pos, const wxSize& size) : wxFrame(parent, wxID_ANY, "Parse Tool", pos, size)
 {
@@ -30,6 +31,12 @@ Frame::Frame(wxWindow* parent, const wxPoint& pos, const wxSize& size) : wxFrame
 	this->Bind(wxEVT_MENU, &Frame::OnGrammarFile, this, ID_ReadGrammarFile);
 	this->Bind(wxEVT_MENU, &Frame::OnGrammarFile, this, ID_WriteGrammarFile);
 	this->Bind(wxEVT_MENU, &Frame::OnParseFile, this, ID_ParseFile);
+
+	this->treeControl = new wxTreeCtrl(this);
+
+	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+	sizer->Add(this->treeControl, 1, wxGROW | wxALL, 0);
+	this->SetSizer(sizer);
 }
 
 /*virtual*/ Frame::~Frame()
@@ -79,6 +86,52 @@ void Frame::OnGrammarFile(wxCommandEvent& event)
 
 void Frame::OnParseFile(wxCommandEvent& event)
 {
+	wxFileDialog fileDialog(this, "Open Code File", wxEmptyString, wxEmptyString, "Any File (*.*)|*.*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	if (wxID_OK == fileDialog.ShowModal())
+	{
+		wxString codeFile = fileDialog.GetPath();
+		ParseParty::Parser parser;
+		delete wxGetApp().rootNode;
+		wxGetApp().rootNode = parser.ParseFile((const char*)codeFile.c_str(), wxGetApp().grammar);
+		if (!wxGetApp().rootNode)
+			wxMessageBox("Failed to parse file: " + codeFile, "Error!", wxICON_ERROR | wxOK, this);
+		else
+			this->RebuildTreeControl();
+	}
+}
+
+void Frame::RebuildTreeControl()
+{
+	this->treeControl->DeleteAllItems();
+
+	if (wxGetApp().rootNode)
+	{
+		wxTreeItemId rootItemId = this->treeControl->AddRoot(wxGetApp().rootNode->text->c_str());
+
+		struct Node
+		{
+			wxTreeItemId parentItemId;
+			const ParseParty::Parser::SyntaxNode* parentNode;
+		};
+
+		std::list<Node> nodeQueue;
+		nodeQueue.push_back(Node{ rootItemId, wxGetApp().rootNode });
+		while (nodeQueue.size() > 0)
+		{
+			std::list<Node>::iterator iter = nodeQueue.begin();
+			Node node = *iter;
+			nodeQueue.erase(iter);
+
+			for (int i = 0; i < (signed)node.parentNode->childArray->size(); i++)
+			{
+				const ParseParty::Parser::SyntaxNode* childNode = (*node.parentNode->childArray)[i];
+				wxTreeItemId childItemId = this->treeControl->AppendItem(node.parentItemId, childNode->text->c_str());
+				nodeQueue.push_back(Node{ childItemId, childNode });
+			}
+		}
+
+		this->treeControl->ExpandAllChildren(rootItemId);
+	}
 }
 
 void Frame::OnAbout(wxCommandEvent& event)

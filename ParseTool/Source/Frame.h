@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wx/frame.h>
+#include <wx/treectrl.h>
 
 class Frame : public wxFrame
 {
@@ -21,4 +22,8 @@ public:
 		ID_ParseFile,
 		ID_About
 	};
+
+	void RebuildTreeControl();
+
+	wxTreeCtrl* treeControl;
 };

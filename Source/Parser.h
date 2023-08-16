@@ -14,6 +14,9 @@ namespace ParseParty
 
 		class SyntaxNode;
 
+		SyntaxNode* ParseFile(const std::string& codeFile, const Grammar& grammar);
+		SyntaxNode* Parse(const std::string& codeText, const Grammar& grammar);
+
 		// The goal here is to provide an algorithm that, for some grammars, parses in linear time.
 		// For other grammars, performance should be reasonably improved through the use of something
 		// close to the concept of memoization.  Memory copies should be minimally performed, if not

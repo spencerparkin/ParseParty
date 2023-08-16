@@ -2,6 +2,7 @@
 
 #include <wx/app.h>
 #include "Grammar.h"
+#include "Parser.h"
 
 class Frame;
 
@@ -17,6 +18,7 @@ public:
 	Frame* frame;
 
 	ParseParty::Grammar grammar;
+	ParseParty::Parser::SyntaxNode* rootNode;
 };
 
 wxDECLARE_APP(Application);
