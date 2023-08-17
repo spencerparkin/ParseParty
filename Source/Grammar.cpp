@@ -62,7 +62,17 @@ bool Grammar::ReadFile(const std::string& grammarFile)
 		if (!jsonRootValue)
 			break;
 
-		JsonObject* jsonRuleMap = dynamic_cast<JsonObject*>(jsonRootValue);
+		JsonObject* jsonObject = dynamic_cast<JsonObject*>(jsonRootValue);
+		if (!jsonObject)
+			break;
+
+		JsonString* jsonInitialRule = dynamic_cast<JsonString*>(jsonObject->GetValue("initial_rule"));
+		if (!jsonInitialRule)
+			break;
+
+		*this->initialRule = jsonInitialRule->GetValue();
+
+		JsonObject* jsonRuleMap = dynamic_cast<JsonObject*>(jsonObject->GetValue("rules"));
 		if (!jsonRuleMap)
 			break;
 
@@ -111,20 +121,12 @@ Grammar::Token::Token()
 Grammar::TerminalToken::TerminalToken()
 {
 	this->text = new std::string();
-	this->type = Lexer::Token::Type::UNKNOWN;
 }
 
 Grammar::TerminalToken::TerminalToken(const std::string& givenText)
 {
 	this->text = new std::string();
 	*this->text = givenText;
-
-	Lexer::Token token;
-	int i = 0;
-	if (token.Eat(givenText.c_str(), i))
-		this->type = token.type;
-	else
-		this->type = Lexer::Token::Type::UNKNOWN;
 }
 
 /*virtual*/ Grammar::TerminalToken::~TerminalToken()
@@ -134,18 +136,7 @@ Grammar::TerminalToken::TerminalToken(const std::string& givenText)
 
 /*virtual*/ Grammar::Token::MatchResult Grammar::TerminalToken::Matches(const Lexer::Token& token, std::string& ruleName) const
 {
-	switch (this->type)
-	{
-		case Lexer::Token::Type::STRING_LITERAL:
-		case Lexer::Token::Type::NUMBER_LITERAL_FLOAT:
-		case Lexer::Token::Type::NUMBER_LITERAL_INT:
-		case Lexer::Token::Type::IDENTIFIER:
-		{
-			return (this->type == token.type) ? MatchResult::YES : MatchResult::NO;
-		}
-	}
-
-	return (this->type == token.type && *this->text == *token.text) ? MatchResult::YES : MatchResult::NO;
+	return (*this->text == *token.text) ? MatchResult::YES : MatchResult::NO;
 }
 
 //------------------------------- Grammar::NonTerminalToken -------------------------------

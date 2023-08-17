@@ -13,6 +13,7 @@ public:
 	void OnGrammarFile(wxCommandEvent& event);
 	void OnParseFile(wxCommandEvent& event);
 	void OnAbout(wxCommandEvent& event);
+	void OnUpdateUI(wxUpdateUIEvent& event);
 
 	enum
 	{

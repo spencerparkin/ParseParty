@@ -31,6 +31,7 @@ Frame::Frame(wxWindow* parent, const wxPoint& pos, const wxSize& size) : wxFrame
 	this->Bind(wxEVT_MENU, &Frame::OnGrammarFile, this, ID_ReadGrammarFile);
 	this->Bind(wxEVT_MENU, &Frame::OnGrammarFile, this, ID_WriteGrammarFile);
 	this->Bind(wxEVT_MENU, &Frame::OnParseFile, this, ID_ParseFile);
+	this->Bind(wxEVT_UPDATE_UI, &Frame::OnUpdateUI, this, ID_ParseFile);
 
 	this->treeControl = new wxTreeCtrl(this);
 
@@ -131,6 +132,18 @@ void Frame::RebuildTreeControl()
 		}
 
 		this->treeControl->ExpandAllChildren(rootItemId);
+	}
+}
+
+void Frame::OnUpdateUI(wxUpdateUIEvent& event)
+{
+	switch (event.GetId())
+	{
+		case ID_ParseFile:
+		{
+			event.Enable(wxGetApp().grammar.ruleMap->size() > 0);
+			break;
+		}
 	}
 }
 

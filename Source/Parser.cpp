@@ -81,6 +81,7 @@ Parser::SyntaxNode* Parser::MatchTokensAgainstRule(const std::vector<Lexer::Toke
 				{
 					SyntaxNode* childNode = new SyntaxNode();
 					*childNode->text = *token->text;
+					childNode->fileLocation = token->fileLocation;
 					parentNode->childArray->push_back(childNode);
 					goodMatch = true;
 					parsePosition++;
@@ -133,6 +134,8 @@ Parser::SyntaxNode::SyntaxNode()
 	this->parentNode = nullptr;
 	this->childArray = new std::vector<SyntaxNode*>();
 	this->text = new std::string();
+	this->fileLocation.line = -1;
+	this->fileLocation.column = -1;
 }
 
 /*virtual*/ Parser::SyntaxNode::~SyntaxNode()

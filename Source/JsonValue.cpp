@@ -52,7 +52,7 @@ JsonValue::JsonValue()
 		return new JsonFloat();
 	else if (token.type == Lexer::Token::Type::NUMBER_LITERAL_INT)
 		return new JsonInt();
-	else if (token.type == Lexer::Token::Type::BOOLEAN_LITERAL)
+	else if (token.type == Lexer::Token::Type::IDENTIFIER)
 		return new JsonBool();
 
 	return nullptr;
@@ -285,7 +285,7 @@ JsonObject::JsonObject()
 			return false;
 
 		token = tokenArray[parsePosition];
-		if (token->type != Lexer::Token::Type::COLON)
+		if (token->type != Lexer::Token::Type::DELIMETER_COLON)
 			return false;
 
 		if (++parsePosition >= (signed)tokenArray.size())
@@ -309,7 +309,7 @@ JsonObject::JsonObject()
 			return false;
 
 		token = tokenArray[parsePosition];
-		if (token->type == Lexer::Token::Type::COMMA)
+		if (token->type == Lexer::Token::Type::DELIMETER_COMMA)
 			parsePosition++;
 		else if (token->type != Lexer::Token::Type::CLOSE_CURCLY_BRACE)
 			return false;
@@ -455,7 +455,7 @@ JsonArray::JsonArray(const std::vector<int>& intArray)
 			return false;
 
 		token = tokenArray[parsePosition];
-		if (token->type == Lexer::Token::Type::COMMA)
+		if (token->type == Lexer::Token::Type::DELIMETER_COMMA)
 			parsePosition++;
 		else if (token->type != Lexer::Token::Type::CLOSE_SQUARE_BRACKET)
 			return false;
@@ -548,7 +548,7 @@ JsonBool::JsonBool(bool value)
 		return false;
 
 	const Lexer::Token* token = tokenArray[parsePosition];
-	if (token->type != Lexer::Token::Type::BOOLEAN_LITERAL)
+	if (token->type != Lexer::Token::Type::IDENTIFIER)
 		return false;
 
 	if (*token->text == "true")

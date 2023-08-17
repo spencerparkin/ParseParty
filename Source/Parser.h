@@ -35,6 +35,7 @@ namespace ParseParty
 			SyntaxNode* parentNode;
 			std::vector<SyntaxNode*>* childArray;
 			std::string* text;
+			Lexer::FileLocation fileLocation;
 		};
 
 	private:

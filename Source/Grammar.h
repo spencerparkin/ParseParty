@@ -47,7 +47,6 @@ namespace ParseParty
 
 			virtual MatchResult Matches(const Lexer::Token& token, std::string& ruleName) const override;
 
-			Lexer::Token::Type type;
 			std::string* text;
 		};
 

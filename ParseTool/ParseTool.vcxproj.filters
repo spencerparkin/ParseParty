@@ -5,6 +5,9 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Examples">
+      <UniqueIdentifier>{319b8849-9fd9-408a-871a-66aabe15e8f6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Application.h">
@@ -21,5 +24,73 @@
     <ClCompile Include="Source\Frame.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Examples\Closure.pow">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\DoWhile.pow">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\Fibbonacci.pow">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\Fork.pow">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\ForLoop.pow">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\Function.pow">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\GCTest.pow">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\HelloWorld.pow">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\IfThenElse.pow">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\IOTest.pow">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\ListTests.pow">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\MapTests.pow">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\MathExpression.pow">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\Matrix.pow">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\Membership.pow">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\Object.pow">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\PowderGrammar.json">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\RefTest.pow">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\ScopeTest.pow">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\TowersOfHanoi.pow">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\VectorLibrary.pow">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\VectorTest.pow">
+      <Filter>Examples</Filter>
+    </None>
   </ItemGroup>
 </Project>
