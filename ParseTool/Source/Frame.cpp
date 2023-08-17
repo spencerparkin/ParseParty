@@ -123,9 +123,8 @@ void Frame::RebuildTreeControl()
 			Node node = *iter;
 			nodeQueue.erase(iter);
 
-			for (int i = 0; i < (signed)node.parentNode->childArray->size(); i++)
+			for (const ParseParty::Parser::SyntaxNode* childNode : *node.parentNode->childList)
 			{
-				const ParseParty::Parser::SyntaxNode* childNode = (*node.parentNode->childArray)[i];
 				wxTreeItemId childItemId = this->treeControl->AppendItem(node.parentItemId, childNode->text->c_str());
 				nodeQueue.push_back(Node{ childItemId, childNode });
 			}

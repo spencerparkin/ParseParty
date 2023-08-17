@@ -31,14 +31,18 @@ namespace ParseParty
 			virtual ~SyntaxNode();
 
 			void WipeChildren();
+			void Flatten();
 
 			SyntaxNode* parentNode;
-			std::vector<SyntaxNode*>* childArray;
+			std::list<SyntaxNode*>* childList;
 			std::string* text;
 			Lexer::FileLocation fileLocation;
 		};
 
 	private:
+
+		// TODO: Abstract the algorithm...
+		//class Algorithm { ... };
 
 		SyntaxNode* MatchTokensAgainstRule(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, const Grammar::Rule* rule, const Grammar& grammar);
 

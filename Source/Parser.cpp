@@ -51,8 +51,12 @@ Parser::SyntaxNode* Parser::Parse(const std::vector<Lexer::Token*>& tokenArray, 
 	if (!rule)
 		return nullptr;
 
+	// TODO: Factory-create a parse algorithm object here, then delegate parsing to that thing.
+
 	int parsePosition = 0;
 	SyntaxNode* rootNode = this->MatchTokensAgainstRule(tokenArray, parsePosition, rule, grammar);
+
+	rootNode->Flatten();
 
 	return rootNode;
 }
@@ -92,7 +96,8 @@ Parser::SyntaxNode* Parser::MatchTokensAgainstRule(const std::vector<Lexer::Toke
 					SyntaxNode* childNode = new SyntaxNode();
 					*childNode->text = *token->text;
 					childNode->fileLocation = token->fileLocation;
-					parentNode->childArray->push_back(childNode);
+					parentNode->childList->push_back(childNode);
+					childNode->parentNode = parentNode;
 					goodMatch = true;
 					parsePosition++;
 					break;
@@ -107,7 +112,8 @@ Parser::SyntaxNode* Parser::MatchTokensAgainstRule(const std::vector<Lexer::Toke
 						SyntaxNode* childNode = this->MatchTokensAgainstRule(tokenArray, parsePosition, subRule, grammar);
 						if (childNode)
 						{
-							parentNode->childArray->push_back(childNode);
+							parentNode->childList->push_back(childNode);
+							childNode->parentNode = parentNode;
 							goodMatch = true;
 						}
 					}
@@ -130,7 +136,7 @@ Parser::SyntaxNode* Parser::MatchTokensAgainstRule(const std::vector<Lexer::Toke
 		}
 	}
 
-	if (parentNode->childArray->size() == 0)
+	if (parentNode->childList->size() == 0)
 	{
 		delete parentNode;
 		parentNode = nullptr;
@@ -155,7 +161,7 @@ bool Parser::AlreadyAttemptingParse(const ParseAttempt& attempt) const
 Parser::SyntaxNode::SyntaxNode()
 {
 	this->parentNode = nullptr;
-	this->childArray = new std::vector<SyntaxNode*>();
+	this->childList = new std::list<SyntaxNode*>();
 	this->text = new std::string();
 	this->fileLocation.line = -1;
 	this->fileLocation.column = -1;
@@ -166,13 +172,39 @@ Parser::SyntaxNode::SyntaxNode()
 	this->WipeChildren();
 
 	delete this->text;
-	delete this->childArray;
+	delete this->childList;
 }
 
 void Parser::SyntaxNode::WipeChildren()
 {
-	for (SyntaxNode* childNode : *this->childArray)
+	for (SyntaxNode* childNode : *this->childList)
 		delete childNode;
 
-	this->childArray->clear();
+	this->childList->clear();
+}
+
+void Parser::SyntaxNode::Flatten()
+{
+	for (SyntaxNode* childNode : *this->childList)
+		childNode->Flatten();
+
+	std::list<SyntaxNode*>::iterator iterA_next;
+	for (std::list<SyntaxNode*>::iterator iterA = this->childList->begin(); iterA != this->childList->end(); iterA = iterA_next)
+	{
+		iterA_next = iterA;
+		iterA_next++;
+
+		SyntaxNode* childNode = *iterA;
+
+		if (*this->text == *childNode->text)
+		{
+			for (std::list<SyntaxNode*>::iterator iterB = childNode->childList->begin(); iterB != childNode->childList->end(); iterB++)
+				this->childList->insert(iterA, *iterB);
+
+			childNode->childList->clear();
+			delete childNode;
+			this->childList->erase(iterA);
+			break;
+		}
+	}
 }
