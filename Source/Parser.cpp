@@ -7,10 +7,12 @@ using namespace ParseParty;
 
 Parser::Parser()
 {
+	this->parseAttemptStack = new std::list<ParseAttempt>();
 }
 
 /*virtual*/ Parser::~Parser()
 {
+	delete this->parseAttemptStack;
 }
 
 Parser::SyntaxNode* Parser::ParseFile(const std::string& codeFile, const Grammar& grammar)
@@ -56,10 +58,17 @@ Parser::SyntaxNode* Parser::Parse(const std::vector<Lexer::Token*>& tokenArray, 
 }
 
 // TODO: This algorithm is just plain wrong, and I really don't know the answer.  That's what makes this a really interesting problem.
+//       Correction: This algorithm is correct, but only for certain grammars; probably only those that can be parsed in linear time.
+//       For example, I have been able to use it to parse JSON correctly, but it doesn't work for code that is more like program code.
+//       Not quite sure yet how to definite exactly what constraints are needed on grammars for this algorithm to work.
+//       It has something to do with a leading token almost always being a terminal token.
+//       One constraint I don't know how to loosen is that of never allowing two non-terminals to be adjacent in any rule.
 Parser::SyntaxNode* Parser::MatchTokensAgainstRule(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, const Grammar::Rule* rule, const Grammar& grammar)
 {
 	SyntaxNode* parentNode = new SyntaxNode();
 	*parentNode->text = *rule->name;
+
+	this->parseAttemptStack->push_back(ParseAttempt{ *rule->name, parsePosition });
 
 	// TODO: First look in the cache.  If we have already successfully parsed the token array at the given position, against the given rule, then return the result.
 
@@ -91,7 +100,9 @@ Parser::SyntaxNode* Parser::MatchTokensAgainstRule(const std::vector<Lexer::Toke
 				case Grammar::Token::MatchResult::MAYBE:
 				{
 					const Grammar::Rule* subRule = grammar.LookupRule(ruleName);
-					if (subRule && (*subRule->name != *rule->name || parsePosition != initialParsePosition))
+
+					// If we're already attempting to parse the rule at this position, then we'll infinitely recurse.
+					if (subRule && !this->AlreadyAttemptingParse(ParseAttempt{ ruleName, parsePosition }))
 					{
 						SyntaxNode* childNode = this->MatchTokensAgainstRule(tokenArray, parsePosition, subRule, grammar);
 						if (childNode)
@@ -125,7 +136,18 @@ Parser::SyntaxNode* Parser::MatchTokensAgainstRule(const std::vector<Lexer::Toke
 		parentNode = nullptr;
 	}
 
+	this->parseAttemptStack->pop_back();
+
 	return parentNode;
+}
+
+bool Parser::AlreadyAttemptingParse(const ParseAttempt& attempt) const
+{
+	for (const ParseAttempt& existingAttempt : *this->parseAttemptStack)
+		if (existingAttempt.ruleName == attempt.ruleName && existingAttempt.parsePosition == attempt.parsePosition)
+			return true;
+
+	return false;
 }
 
 //------------------------------- Parser::SyntaxNode -------------------------------

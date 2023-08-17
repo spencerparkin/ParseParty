@@ -1,0 +1,37 @@
+{
+  "initial_rule": "json-value",
+  "comment": "Note that more than one grammar might describe the same language, but not all of those can be used to parse that language in linear time.",
+  "algorithm": "TODO: Tell the parser which algorithm is best to use with this grammar.",
+  "rules": {
+    "json-value": [
+      [ "json-null" ],
+      [ "json-number" ],
+      [ "json-string" ],
+      [ "json-list" ],
+      [ "json-object" ]
+    ],
+    "json-null": [
+      [ "null" ]
+    ],
+    "json-number": [
+      [ "@number" ]
+    ],
+    "json-string": [
+      [ "@string" ]
+    ],
+    "json-list": [
+      [ "[", "json-list-item" ]
+    ],
+    "json-list-item": [
+      [ "json-value", ",", "json-list-item" ],
+      [ "json-value", "]" ]
+    ],
+    "json-object": [
+      [ "{", "json-object-pair" ]
+    ],
+    "json-object-pair": [
+      [ "json-string", ":", "json-value", ",", "json-object-pair" ],
+      [ "json-string", ":", "json-value", "}" ]
+    ]
+  }
+}

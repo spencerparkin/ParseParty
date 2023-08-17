@@ -42,6 +42,16 @@ namespace ParseParty
 
 		SyntaxNode* MatchTokensAgainstRule(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, const Grammar::Rule* rule, const Grammar& grammar);
 
+		struct ParseAttempt
+		{
+			std::string ruleName;
+			int parsePosition;
+		};
+
+		bool AlreadyAttemptingParse(const ParseAttempt& attempt) const;
+
+		std::list<ParseAttempt>* parseAttemptStack;
+
 		// TODO: Store parse cache here.
 	};
 }

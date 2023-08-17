@@ -26,76 +26,16 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Examples\Closure.pow">
-      <Filter>Examples</Filter>
-    </None>
-    <None Include="..\Examples\DoWhile.pow">
-      <Filter>Examples</Filter>
-    </None>
-    <None Include="..\Examples\Fibbonacci.pow">
-      <Filter>Examples</Filter>
-    </None>
-    <None Include="..\Examples\Fork.pow">
-      <Filter>Examples</Filter>
-    </None>
-    <None Include="..\Examples\ForLoop.pow">
-      <Filter>Examples</Filter>
-    </None>
-    <None Include="..\Examples\Function.pow">
-      <Filter>Examples</Filter>
-    </None>
-    <None Include="..\Examples\GCTest.pow">
-      <Filter>Examples</Filter>
-    </None>
-    <None Include="..\Examples\HelloWorld.pow">
-      <Filter>Examples</Filter>
-    </None>
-    <None Include="..\Examples\IfThenElse.pow">
-      <Filter>Examples</Filter>
-    </None>
-    <None Include="..\Examples\IOTest.pow">
-      <Filter>Examples</Filter>
-    </None>
-    <None Include="..\Examples\ListTests.pow">
-      <Filter>Examples</Filter>
-    </None>
-    <None Include="..\Examples\MapTests.pow">
-      <Filter>Examples</Filter>
-    </None>
-    <None Include="..\Examples\MathExpression.pow">
-      <Filter>Examples</Filter>
-    </None>
-    <None Include="..\Examples\Matrix.pow">
-      <Filter>Examples</Filter>
-    </None>
-    <None Include="..\Examples\Membership.pow">
-      <Filter>Examples</Filter>
-    </None>
-    <None Include="..\Examples\Object.pow">
-      <Filter>Examples</Filter>
-    </None>
-    <None Include="..\Examples\PowderGrammar.json">
-      <Filter>Examples</Filter>
-    </None>
-    <None Include="..\Examples\RefTest.pow">
-      <Filter>Examples</Filter>
-    </None>
-    <None Include="..\Examples\ScopeTest.pow">
-      <Filter>Examples</Filter>
-    </None>
-    <None Include="..\Examples\TowersOfHanoi.pow">
-      <Filter>Examples</Filter>
-    </None>
-    <None Include="..\Examples\VectorLibrary.pow">
-      <Filter>Examples</Filter>
-    </None>
-    <None Include="..\Examples\VectorTest.pow">
-      <Filter>Examples</Filter>
-    </None>
-    <None Include="..\Examples\Test.pow">
+    <None Include="..\Examples\SimpleGrammarTest.txt">
       <Filter>Examples</Filter>
     </None>
     <None Include="..\Examples\SimpleGrammar.json">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\JsonGrammar.json">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\JsonGrammarTest.json">
       <Filter>Examples</Filter>
     </None>
   </ItemGroup>
