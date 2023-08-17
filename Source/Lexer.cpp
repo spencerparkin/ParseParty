@@ -14,6 +14,7 @@ Lexer::Lexer()
 	this->tokenGeneratorList->push_back(new OperatorTokenGenerator());
 	this->tokenGeneratorList->push_back(new NumberTokenGenerator());
 	this->tokenGeneratorList->push_back(new IdentifierTokenGenerator());
+	this->tokenGeneratorList->push_back(new CommentTokenGenerator());
 }
 
 /*virtual*/ Lexer::~Lexer()
@@ -362,7 +363,7 @@ Lexer::IdentifierTokenGenerator::IdentifierTokenGenerator()
 	Token* token = new Token();
 	token->type = Token::Type::IDENTIFIER;
 
-	while (::isalpha(codeBuffer[i]) || ::isdigit(codeBuffer[i]))
+	while (::isalpha(codeBuffer[i]) || ::isdigit(codeBuffer[i]) || codeBuffer[i] == '_')
 		*token->text += codeBuffer[i++];
 
 	return token;

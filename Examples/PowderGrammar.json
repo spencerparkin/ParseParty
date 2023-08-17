@@ -2,7 +2,6 @@
   "initial_rule":  "statement-list",
   "rules": {
     "statement-list": [
-      [ "statement" ],
       [ "statement", ";" ],
       [ "statement", ";", "statement-list" ]
     ],
@@ -66,8 +65,8 @@
       [ "{", "}" ]
     ],
     "expression": [
+      [ "@identifier" ],
       [ "literal" ],
-      [ "identifier" ],
       [ "wrapped-expression" ],
       [ "assignment-expression" ],
       [ "membership-expression" ],
@@ -145,8 +144,8 @@
     ],
     "literal": [
       [ "undefined" ],
-      [ "string-literal" ],
-      [ "number-literal" ],
+      [ "@string" ],
+      [ "@number" ],
       [ "list-literal" ],
       [ "map-literal" ]
     ],

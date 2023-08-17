@@ -55,6 +55,7 @@ Parser::SyntaxNode* Parser::Parse(const std::vector<Lexer::Token*>& tokenArray, 
 	return rootNode;
 }
 
+// TODO: This algorithm is just plain wrong, and I really don't know the answer.  That's what makes this a really interesting problem.
 Parser::SyntaxNode* Parser::MatchTokensAgainstRule(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, const Grammar::Rule* rule, const Grammar& grammar)
 {
 	SyntaxNode* parentNode = new SyntaxNode();

@@ -136,6 +136,21 @@ Grammar::TerminalToken::TerminalToken(const std::string& givenText)
 
 /*virtual*/ Grammar::Token::MatchResult Grammar::TerminalToken::Matches(const Lexer::Token& token, std::string& ruleName) const
 {
+	if (*this->text == "@string" && token.type == Lexer::Token::Type::STRING_LITERAL)
+		return MatchResult::YES;
+	
+	if (*this->text == "@number" && (token.type == Lexer::Token::Type::NUMBER_LITERAL_INT || token.type == Lexer::Token::Type::NUMBER_LITERAL_FLOAT))
+		return MatchResult::YES;
+
+	if (*this->text == "@int" && token.type == Lexer::Token::Type::NUMBER_LITERAL_INT)
+		return MatchResult::YES;
+
+	if (*this->text == "@float" && token.type == Lexer::Token::Type::NUMBER_LITERAL_FLOAT)
+		return MatchResult::YES;
+
+	if (*this->text == "@identifier")
+		return MatchResult::YES;
+
 	return (*this->text == *token.text) ? MatchResult::YES : MatchResult::NO;
 }
 

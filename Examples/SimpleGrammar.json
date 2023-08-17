@@ -1,0 +1,19 @@
+{
+  "initial_rule": "statement-list",
+  "rules": {
+    "statement-list": [
+      [ "statement", ";" ],
+      [ "statement", ";", "statement-list" ]
+    ],
+    "statement": [
+      [ "expression" ]
+    ],
+    "expression": [
+      [ "@identifier" ],
+      [ "assignment-expression" ]
+    ],
+    "assignment-expression": [
+      [ "expression", "=", "expression" ]
+    ]
+  }
+}

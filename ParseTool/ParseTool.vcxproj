@@ -46,6 +46,8 @@
     <None Include="..\Examples\PowderGrammar.json" />
     <None Include="..\Examples\RefTest.pow" />
     <None Include="..\Examples\ScopeTest.pow" />
+    <None Include="..\Examples\SimpleGrammar.json" />
+    <None Include="..\Examples\Test.pow" />
     <None Include="..\Examples\TowersOfHanoi.pow" />
     <None Include="..\Examples\VectorLibrary.pow" />
     <None Include="..\Examples\VectorTest.pow" />

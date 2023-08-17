@@ -92,5 +92,11 @@
     <None Include="..\Examples\VectorTest.pow">
       <Filter>Examples</Filter>
     </None>
+    <None Include="..\Examples\Test.pow">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="..\Examples\SimpleGrammar.json">
+      <Filter>Examples</Filter>
+    </None>
   </ItemGroup>
 </Project>
