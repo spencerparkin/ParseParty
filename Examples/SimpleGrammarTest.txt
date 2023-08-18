@@ -1,15 +1,4 @@
-# Test.pow
+# SimpleGrammarTest.txt
 
 a = b;
-c = d = f;
-
-# This code is reachable from the SimpleGrammar.json definition, but how do we parse it?!
-# There probably isn't a linear time algorithm for this, but I can't even find a
-# reasonable algorithm that doesn't potentially look all the way to the end of the
-# token buffer before it can recurse.
-#
-# Note that taking a grammar and randomly generating a token-sequence from it is an
-# easy problem, but it's the inverse that is so interesting.  We have all the information
-# we need (the grammar along with a token sequence) to determine the path taking through
-# the grammar tree to reach the token-sequence, but any algorithm I can come up with is
-# terribly innefficient.
+(c = d) = f;
