@@ -1,6 +1,17 @@
 #include "Parser.h"
 #include "Grammar.h"
 
+namespace ParseParty
+{
+	bool operator<(const Parser::ParseAttempt& attemptA, const Parser::ParseAttempt& attemptB)
+	{
+		if (attemptA.parsePosition == attemptB.parsePosition)
+			return ::strcmp(attemptA.ruleName.c_str(), attemptB.ruleName.c_str()) < 0;
+
+		return attemptA.parsePosition < attemptB.parsePosition;
+	}
+}
+
 using namespace ParseParty;
 
 //------------------------------- Parser -------------------------------
@@ -58,7 +69,19 @@ Parser::SyntaxNode* Parser::Parse(const std::vector<Lexer::Token*>& tokenArray, 
 	delete algorithm;
 
 	if (rootNode)
+	{
+		// Nodes with the following text no longer give meaning or structure to the code.
+		// The structure/meaning of the code is now found in the structure of the AST.
+		std::set<std::string> textSet;
+		textSet.insert(";");
+		textSet.insert("(");
+		textSet.insert(")");
+		rootNode->RemoveNodesWithText(textSet);
+
+		// Recursive definitions in the grammar cause unnecessary structure in the AST
+		// that we are trying to remove here.
 		rootNode->Flatten();
+	}
 
 	return rootNode;
 }
@@ -79,16 +102,30 @@ Parser::Algorithm::Algorithm(const std::vector<Lexer::Token*>* tokenArray, const
 
 Parser::QuickAlgorithm::QuickAlgorithm(const std::vector<Lexer::Token*>* tokenArray, const Grammar* grammar) : Algorithm(tokenArray, grammar)
 {
+	this->parseCacheEnabled = true;
 	this->parseAttemptStack = new std::list<ParseAttempt>();
+	this->parseCacheMap = new ParseCacheMap();
 }
 
 /*virtual*/ Parser::QuickAlgorithm::~QuickAlgorithm()
 {
 	delete this->parseAttemptStack;
+
+	this->ClearCache();
+
+	delete this->parseCacheMap;
+}
+
+void Parser::QuickAlgorithm::ClearCache()
+{
+	for (std::pair<ParseAttempt, SyntaxNode*> pair : *this->parseCacheMap)
+		delete pair.second;
 }
 
 /*virtual*/ Parser::SyntaxNode* Parser::QuickAlgorithm::Parse()
 {
+	this->ClearCache();
+
 	const Grammar::Rule* rule = this->grammar->GetInitialRule();
 	if (!rule)
 		return nullptr;
@@ -102,17 +139,35 @@ Parser::QuickAlgorithm::QuickAlgorithm(const std::vector<Lexer::Token*>* tokenAr
 //       are do to syntax errors in the given code?
 Parser::SyntaxNode* Parser::QuickAlgorithm::MatchTokensAgainstRule(int& parsePosition, const Grammar::Rule* rule)
 {
-	SyntaxNode* parentNode = new SyntaxNode();
+	if (parsePosition < 0 || parsePosition >= (signed)this->tokenArray->size())
+		return nullptr;
+
+	ParseAttempt parseAttempt{ *rule->name, parsePosition };
+
+	// The parse cache is purely an optimization and is not needed for correctness of the algorithm.
+	if (this->parseCacheEnabled)
+	{
+		ParseCacheMap::iterator iter = this->parseCacheMap->find(parseAttempt);
+		if (iter != this->parseCacheMap->end())
+		{
+			QuickSyntaxNode* syntaxNode = iter->second;
+			this->parseCacheMap->erase(iter);
+			parsePosition += syntaxNode->parseSize;
+			return syntaxNode;
+		}
+	}
+
+	QuickSyntaxNode* parentNode = new QuickSyntaxNode();
 	*parentNode->text = *rule->name;
+	*parentNode->parseAttempt = parseAttempt;
+	parentNode->fileLocation = (*this->tokenArray)[parsePosition]->fileLocation;
 
-	this->parseAttemptStack->push_back(ParseAttempt{ *rule->name, parsePosition });
+	this->parseAttemptStack->push_back(parseAttempt);
 
-	// TODO: First look in the cache.  If we have already successfully parsed the token array at the given position, against the given rule, then return the result.
+	int initialParsePosition = parsePosition;
 
 	for(const Grammar::Rule::MatchSequence* matchSequence : *rule->matchSequenceArray)
 	{
-		int initialParsePosition = parsePosition;
-
 		int i;
 		for (i = 0; i < (signed)matchSequence->size(); i++)
 		{
@@ -130,7 +185,7 @@ Parser::SyntaxNode* Parser::QuickAlgorithm::MatchTokensAgainstRule(int& parsePos
 			{
 				case Grammar::Token::MatchResult::YES:
 				{
-					SyntaxNode* childNode = new SyntaxNode();
+					QuickSyntaxNode* childNode = new QuickSyntaxNode();
 					*childNode->text = *token->text;
 					childNode->fileLocation = token->fileLocation;
 					parentNode->childList->push_back(childNode);
@@ -168,13 +223,29 @@ Parser::SyntaxNode* Parser::QuickAlgorithm::MatchTokensAgainstRule(int& parsePos
 			break;
 		else
 		{
-			// TODO: Wipe the child array, but instead of deleting the child nodes, cache them for potential re-use!
+			// We didn't complete the match, but don't throw away any successful parsing that was performed if the cache is enabled.
+			if (this->parseCacheEnabled)
+			{
+				for (std::list<SyntaxNode*>::iterator iter = parentNode->childList->begin(); iter != parentNode->childList->end(); iter++)
+				{
+					QuickSyntaxNode* childNode = static_cast<QuickSyntaxNode*>(*iter);
+					if (childNode->parseAttempt->parsePosition >= 0)
+					{
+						*iter = nullptr;
+						assert(this->parseCacheMap->find(*childNode->parseAttempt) == this->parseCacheMap->end());
+						this->parseCacheMap->insert(std::pair<ParseAttempt, QuickSyntaxNode*>(*childNode->parseAttempt, childNode));
+					}
+				}
+			}
+
 			parentNode->WipeChildren();
 			parsePosition = initialParsePosition;
 		}
 	}
 
-	if (parentNode->childList->size() == 0)
+	if (parentNode->childList->size() > 0)
+		parentNode->parseSize = parsePosition - initialParsePosition;
+	else
 	{
 		delete parentNode;
 		parentNode = nullptr;
@@ -226,11 +297,11 @@ void Parser::SyntaxNode::Flatten()
 	for (SyntaxNode* childNode : *this->childList)
 		childNode->Flatten();
 
-	std::list<SyntaxNode*>::iterator iterA_next;
-	for (std::list<SyntaxNode*>::iterator iterA = this->childList->begin(); iterA != this->childList->end(); iterA = iterA_next)
+	std::list<SyntaxNode*>::iterator nextIterA;
+	for (std::list<SyntaxNode*>::iterator iterA = this->childList->begin(); iterA != this->childList->end(); iterA = nextIterA)
 	{
-		iterA_next = iterA;
-		iterA_next++;
+		nextIterA = iterA;
+		nextIterA++;
 
 		SyntaxNode* childNode = *iterA;
 
@@ -245,4 +316,39 @@ void Parser::SyntaxNode::Flatten()
 			break;
 		}
 	}
+}
+
+void Parser::SyntaxNode::RemoveNodesWithText(const std::set<std::string>& textSet)
+{
+	// TODO: Isn't there some fancy boost algorithm for this kind of stuff?  Like some sort of filter function?
+	std::list<SyntaxNode*>::iterator nextIter;
+	for (std::list<SyntaxNode*>::iterator iter = this->childList->begin(); iter != this->childList->end(); iter = nextIter)
+	{
+		nextIter = iter;
+		nextIter++;
+
+		SyntaxNode* childNode = *iter;
+		if (textSet.find(*childNode->text) != textSet.end())
+		{
+			delete childNode;
+			this->childList->erase(iter);
+		}
+	}
+
+	for (SyntaxNode* childNode : *this->childList)
+		childNode->RemoveNodesWithText(textSet);
+}
+
+//------------------------------- Parser::QuickSyntaxNode -------------------------------
+
+Parser::QuickSyntaxNode::QuickSyntaxNode()
+{
+	this->parseAttempt = new ParseAttempt;
+	this->parseAttempt->parsePosition = -1;
+	this->parseSize = -1;
+}
+
+/*virtual*/ Parser::QuickSyntaxNode::~QuickSyntaxNode()
+{
+	delete this->parseAttempt;
 }

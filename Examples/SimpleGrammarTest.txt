@@ -1,4 +1,4 @@
 # SimpleGrammarTest.txt
 
 a = b;
-(c = d) = f;
+c = d = f;

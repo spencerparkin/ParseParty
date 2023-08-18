@@ -101,6 +101,7 @@ void Frame::OnParseFile(wxCommandEvent& event)
 	}
 }
 
+// TODO: We really need to use a better tree control; one with columns and column headers.
 void Frame::RebuildTreeControl()
 {
 	this->treeControl->DeleteAllItems();
@@ -125,7 +126,8 @@ void Frame::RebuildTreeControl()
 
 			for (const ParseParty::Parser::SyntaxNode* childNode : *node.parentNode->childList)
 			{
-				wxTreeItemId childItemId = this->treeControl->AppendItem(node.parentItemId, childNode->text->c_str());
+				std::string text = std::format("{} -- (line {}, column {})", childNode->text->c_str(), childNode->fileLocation.line, childNode->fileLocation.column);
+				wxTreeItemId childItemId = this->treeControl->AppendItem(node.parentItemId, text.c_str());
 				nodeQueue.push_back(Node{ childItemId, childNode });
 			}
 		}

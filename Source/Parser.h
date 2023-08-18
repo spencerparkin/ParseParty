@@ -26,11 +26,18 @@ namespace ParseParty
 
 			void WipeChildren();
 			void Flatten();
+			void RemoveNodesWithText(const std::set<std::string>& textSet);
 
 			SyntaxNode* parentNode;
 			std::list<SyntaxNode*>* childList;
 			std::string* text;
 			Lexer::FileLocation fileLocation;
+		};
+
+		struct ParseAttempt
+		{
+			std::string ruleName;
+			int parsePosition;
 		};
 
 	private:
@@ -46,6 +53,16 @@ namespace ParseParty
 
 			const std::vector<Lexer::Token*>* tokenArray;
 			const Grammar* grammar;
+		};
+
+		class QuickSyntaxNode : public SyntaxNode
+		{
+		public:
+			QuickSyntaxNode();
+			virtual ~QuickSyntaxNode();
+		
+			ParseAttempt* parseAttempt;
+			int parseSize;
 		};
 
 		// The goal here is to provide an algorithm that, for some grammars, parses in linear time.
@@ -65,18 +82,17 @@ namespace ParseParty
 			virtual SyntaxNode* Parse() override;
 
 			SyntaxNode* MatchTokensAgainstRule(int& parsePosition, const Grammar::Rule* rule);
-
-			struct ParseAttempt		// TODO: Make this key-able in a std::map class.
-			{
-				std::string ruleName;
-				int parsePosition;
-			};
+			void ClearCache();
 
 			bool AlreadyAttemptingParse(const ParseAttempt& attempt) const;
 
 			std::list<ParseAttempt>* parseAttemptStack;
 
-			// TODO: Store parse cache here.
+			typedef std::map<ParseAttempt, QuickSyntaxNode*> ParseCacheMap;
+			ParseCacheMap* parseCacheMap;
+			bool parseCacheEnabled;
 		};
 	};
+
+	bool operator<(const Parser::ParseAttempt& attemptA, const Parser::ParseAttempt& attemptB);
 }
