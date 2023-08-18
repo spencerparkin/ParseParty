@@ -88,16 +88,20 @@ bool Grammar::ReadFile(const std::string& grammarFile)
 
 		for (std::pair<std::string, JsonValue*> pair : *jsonRuleMap)
 		{
-			Rule* rule = new Rule();
-			*rule->name = pair.first;
-			this->ruleMap->insert(std::pair<std::string, Rule*>(*rule->name, rule));
-
 			JsonArray* jsonRuleValue = dynamic_cast<JsonArray*>(pair.second);
 			if (!jsonRuleValue)
 				break;
 
+			Rule* rule = new Rule();
+			*rule->name = pair.first;
+
 			if (!rule->Read(jsonRuleValue, jsonRuleMap))
+			{
+				delete rule;
 				break;
+			}
+
+			this->ruleMap->insert(std::pair<std::string, Rule*>(*rule->name, rule));
 		}
 
 		if (this->ruleMap->size() != jsonRuleMap->GetSize())

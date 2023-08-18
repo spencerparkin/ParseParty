@@ -10,12 +10,15 @@
       [ "expression" ]
     ],
     "expression": [
-      [ "(", "expression", ")" ],
-      [ "(", "expression", ")", "binary-operator", "expression" ],
+      [ "(", "sub-expression", ")", "binary-operator", "expression" ],
+      [ "(", "sub-expression", ")" ],
       [ "@identifier", "binary-operator", "expression" ],
       [ "@number", "binary-operator", "expression" ],
       [ "@identifier" ],
       [ "@number" ]
+    ],
+    "sub-expression": [
+      [ "expression" ]
     ],
     "binary-operator": [
       [ "+" ],
