@@ -1,5 +1,6 @@
 {
   "initial_rule": "statement-list",
+  "algorithm": "quick",
   "rules": {
     "statement-list": [
       [ "statement", ";" ],
@@ -10,10 +11,20 @@
     ],
     "expression": [
       [ "@identifier" ],
-      [ "assignment-expression" ]
+      [ "@number" ],
+      [ "assignment-expression" ],
+      [ "math-expression" ],
+      [ "(", "expression", ")" ]
     ],
     "assignment-expression": [
       [ "expression", "=", "expression" ]
+    ],
+    "math-expression": [
+      [ "expression", "+", "expression" ],
+      [ "expression", "-", "expression" ],
+      [ "expression", "*", "expression" ],
+      [ "expression", "/", "expression" ],
+      [ "expression", "%", "expression" ]
     ]
   }
 }

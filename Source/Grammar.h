@@ -83,5 +83,6 @@ namespace ParseParty
 		RuleMap* ruleMap;
 
 		std::string* initialRule;
+		std::string* algorithmName;
 	};
 }

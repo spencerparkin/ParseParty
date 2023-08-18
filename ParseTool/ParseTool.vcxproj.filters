@@ -38,5 +38,8 @@
     <None Include="..\Examples\JsonGrammarTest.json">
       <Filter>Examples</Filter>
     </None>
+    <None Include="..\Examples\SimpleGrammar2.json">
+      <Filter>Examples</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -1,0 +1,29 @@
+{
+  "initial_rule": "statement-list",
+  "algorithm":  "quick",
+  "rules": {
+    "statement-list": [
+      [ "statement", ";", "statement-list" ],
+      [ "statement", ";" ]
+    ],
+    "statement": [
+      [ "expression" ]
+    ],
+    "expression": [
+      [ "(", "expression", ")" ],
+      [ "(", "expression", ")", "binary-operator", "expression" ],
+      [ "@identifier", "binary-operator", "expression" ],
+      [ "@number", "binary-operator", "expression" ],
+      [ "@identifier" ],
+      [ "@number" ]
+    ],
+    "binary-operator": [
+      [ "+" ],
+      [ "-" ],
+      [ "*" ],
+      [ "/" ],
+      [ "%" ],
+      [ "=" ]
+    ]
+  }
+}

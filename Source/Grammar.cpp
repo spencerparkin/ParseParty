@@ -9,6 +9,7 @@ Grammar::Grammar()
 {
 	this->ruleMap = new RuleMap();
 	this->initialRule = new std::string();
+	this->algorithmName = new std::string();
 }
 
 /*virtual*/ Grammar::~Grammar()
@@ -17,6 +18,7 @@ Grammar::Grammar()
 
 	delete this->ruleMap;
 	delete this->initialRule;
+	delete this->algorithmName;
 }
 
 void Grammar::Clear()
@@ -25,6 +27,8 @@ void Grammar::Clear()
 		delete pair.second;
 
 	this->ruleMap->clear();
+	*this->initialRule = "";
+	*this->algorithmName = "";
 }
 
 const Grammar::Rule* Grammar::GetInitialRule() const
@@ -71,6 +75,12 @@ bool Grammar::ReadFile(const std::string& grammarFile)
 			break;
 
 		*this->initialRule = jsonInitialRule->GetValue();
+
+		JsonString* jsonAlgorithm = dynamic_cast<JsonString*>(jsonObject->GetValue("algorithm"));
+		if (!jsonAlgorithm)
+			break;
+
+		*this->algorithmName = jsonAlgorithm->GetValue();
 
 		JsonObject* jsonRuleMap = dynamic_cast<JsonObject*>(jsonObject->GetValue("rules"));
 		if (!jsonRuleMap)

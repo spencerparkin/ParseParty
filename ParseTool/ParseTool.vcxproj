@@ -29,6 +29,7 @@
   <ItemGroup>
     <None Include="..\Examples\JsonGrammar.json" />
     <None Include="..\Examples\SimpleGrammar.json" />
+    <None Include="..\Examples\SimpleGrammar2.json" />
     <None Include="..\Examples\SimpleGrammarTest.txt" />
     <None Include="..\Examples\JsonGrammarTest.json" />
   </ItemGroup>
