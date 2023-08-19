@@ -148,7 +148,7 @@ Grammar::TerminalToken::TerminalToken(const std::string& givenText)
 	delete this->text;
 }
 
-/*virtual*/ Grammar::Token::MatchResult Grammar::TerminalToken::Matches(const Lexer::Token& token, std::string& ruleName) const
+/*virtual*/ Grammar::Token::MatchResult Grammar::TerminalToken::Matches(const Lexer::Token& token, std::string* ruleName /*= nullptr*/) const
 {
 	if (*this->text == "@string" && token.type == Lexer::Token::Type::STRING_LITERAL)
 		return MatchResult::YES;
@@ -186,9 +186,11 @@ Grammar::NonTerminalToken::NonTerminalToken(const std::string& givenRuleName)
 	delete this->ruleName;
 }
 
-/*virtual*/ Grammar::Token::MatchResult Grammar::NonTerminalToken::Matches(const Lexer::Token& token, std::string& ruleName) const
+/*virtual*/ Grammar::Token::MatchResult Grammar::NonTerminalToken::Matches(const Lexer::Token& token, std::string* ruleName /*= nullptr*/) const
 {
-	ruleName = *this->ruleName;
+	if (ruleName)
+		*ruleName = *this->ruleName;
+
 	return MatchResult::MAYBE;
 }
 

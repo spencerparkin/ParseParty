@@ -98,7 +98,7 @@ Parser::SyntaxNode* QuickParseAlgorithm::MatchTokensAgainstRule(int& parsePositi
 			std::string ruleName;
 			bool tokenMatched = false;
 
-			switch (grammarToken->Matches(*token, ruleName))
+			switch (grammarToken->Matches(*token, &ruleName))
 			{
 				case Grammar::Token::MatchResult::YES:
 				{

@@ -43,7 +43,7 @@ namespace ParseParty
 				OPEN_SQUARE_BRACKET,
 				CLOSE_SQUARE_BRACKET,
 				OPEN_CURLY_BRACE,
-				CLOSE_CURCLY_BRACE,
+				CLOSE_CURLY_BRACE,
 			};
 
 			Type type;

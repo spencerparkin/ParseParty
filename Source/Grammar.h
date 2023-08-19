@@ -35,7 +35,7 @@ namespace ParseParty
 				MAYBE
 			};
 
-			virtual MatchResult Matches(const Lexer::Token& token, std::string& ruleName) const = 0;
+			virtual MatchResult Matches(const Lexer::Token& token, std::string* ruleName = nullptr) const = 0;
 		};
 
 		class TerminalToken : public Token
@@ -45,7 +45,7 @@ namespace ParseParty
 			TerminalToken(const std::string& givenText);
 			virtual ~TerminalToken();
 
-			virtual MatchResult Matches(const Lexer::Token& token, std::string& ruleName) const override;
+			virtual MatchResult Matches(const Lexer::Token& token, std::string* ruleName = nullptr) const override;
 
 			std::string* text;
 		};
@@ -57,7 +57,7 @@ namespace ParseParty
 			NonTerminalToken(const std::string& givenRuleName);
 			virtual ~NonTerminalToken();
 
-			virtual MatchResult Matches(const Lexer::Token& token, std::string& ruleName) const override;
+			virtual MatchResult Matches(const Lexer::Token& token, std::string* ruleName = nullptr) const override;
 
 			std::string* ruleName;
 		};

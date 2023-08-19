@@ -273,7 +273,7 @@ JsonObject::JsonObject()
 			return false;
 
 		token = tokenArray[parsePosition];
-		if (token->type == Lexer::Token::Type::CLOSE_CURCLY_BRACE)
+		if (token->type == Lexer::Token::Type::CLOSE_CURLY_BRACE)
 			break;
 
 		if (token->type != Lexer::Token::Type::STRING_LITERAL)
@@ -311,7 +311,7 @@ JsonObject::JsonObject()
 		token = tokenArray[parsePosition];
 		if (token->type == Lexer::Token::Type::DELIMETER_COMMA)
 			parsePosition++;
-		else if (token->type != Lexer::Token::Type::CLOSE_CURCLY_BRACE)
+		else if (token->type != Lexer::Token::Type::CLOSE_CURLY_BRACE)
 			return false;
 	}
 

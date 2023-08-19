@@ -155,7 +155,7 @@ Lexer::ParanTokenGenerator::ParanTokenGenerator()
 	else if(codeBuffer[i] == '}')
 	{
 		token = new Token();
-		token->type = Token::Type::CLOSE_CURCLY_BRACE;
+		token->type = Token::Type::CLOSE_CURLY_BRACE;
 	}
 
 	if (token)
