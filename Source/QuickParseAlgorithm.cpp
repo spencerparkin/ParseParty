@@ -83,12 +83,12 @@ Parser::SyntaxNode* QuickParseAlgorithm::MatchTokensAgainstRule(int& parsePositi
 
 	int initialParsePosition = parsePosition;
 
-	for (const Grammar::Rule::MatchSequence* matchSequence : *rule->matchSequenceArray)
+	for (const Grammar::MatchSequence* matchSequence : *rule->matchSequenceArray)
 	{
 		int i;
-		for (i = 0; i < (signed)matchSequence->size(); i++)
+		for (i = 0; i < (signed)matchSequence->tokenSequence->size(); i++)
 		{
-			const Grammar::Token* grammarToken = (*matchSequence)[i];
+			const Grammar::Token* grammarToken = (*matchSequence->tokenSequence)[i];
 
 			if (parsePosition >= (signed)this->tokenArray->size())
 				break;
@@ -136,7 +136,7 @@ Parser::SyntaxNode* QuickParseAlgorithm::MatchTokensAgainstRule(int& parsePositi
 		}
 
 		// Did we complete the match?
-		if (i == matchSequence->size())
+		if (i == matchSequence->tokenSequence->size())
 			break;
 		else
 		{

@@ -196,7 +196,7 @@ Grammar::NonTerminalToken::NonTerminalToken(const std::string& givenRuleName)
 
 Grammar::Rule::Rule()
 {
-	this->matchSequenceArray = new std::vector<std::vector<Token*>*>();
+	this->matchSequenceArray = new std::vector<MatchSequence*>();
 	this->name = new std::string();
 }
 
@@ -212,7 +212,7 @@ void Grammar::Rule::Clear()
 {
 	for (MatchSequence* matchSequence : *this->matchSequenceArray)
 	{
-		for (Token* token : *matchSequence)
+		for (Token* token : *matchSequence->tokenSequence)
 			delete token;
 
 		delete matchSequence;
@@ -239,6 +239,16 @@ bool Grammar::Rule::Read(const JsonArray* jsonRuleArray, const JsonObject* jsonR
 
 		for (int j = 0; j < (signed)jsonRuleSequence->GetSize(); j++)
 		{
+			if (j == jsonRuleSequence->GetSize() - 1)
+			{
+				const JsonInt* jsonInt = dynamic_cast<const JsonInt*>(jsonRuleSequence->GetValue(j));
+				if (jsonInt && jsonInt->GetValue() == -1)
+				{
+					matchSequence->type = MatchSequence::Type::RIGHT_TO_LEFT;
+					break;
+				}
+			}
+
 			const JsonString* jsonToken = dynamic_cast<const JsonString*>(jsonRuleSequence->GetValue(j));
 			if (!jsonToken)
 				return false;
@@ -250,7 +260,7 @@ bool Grammar::Rule::Read(const JsonArray* jsonRuleArray, const JsonObject* jsonR
 			else
 				token = new TerminalToken(jsonToken->GetValue());
 
-			matchSequence->push_back(token);
+			matchSequence->tokenSequence->push_back(token);
 		}
 	}
 
@@ -260,4 +270,27 @@ bool Grammar::Rule::Read(const JsonArray* jsonRuleArray, const JsonObject* jsonR
 bool Grammar::Rule::Write(JsonArray* jsonRuleArray) const
 {
 	return false;
+}
+
+//------------------------------- Grammar::MatchSequence -------------------------------
+
+Grammar::MatchSequence::MatchSequence()
+{
+	this->tokenSequence = new std::vector<Token*>();
+	this->type = Type::LEFT_TO_RIGHT;
+}
+
+/*virtual*/ Grammar::MatchSequence::~MatchSequence()
+{
+	this->Clear();
+
+	delete this->tokenSequence;
+}
+
+void Grammar::MatchSequence::Clear()
+{
+	for (Token* token : *this->tokenSequence)
+		delete token;
+
+	this->tokenSequence->clear();
 }

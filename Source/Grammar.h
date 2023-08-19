@@ -62,6 +62,24 @@ namespace ParseParty
 			std::string* ruleName;
 		};
 
+		class MatchSequence
+		{
+		public:
+			MatchSequence();
+			virtual ~MatchSequence();
+
+			void Clear();
+
+			enum class Type
+			{
+				LEFT_TO_RIGHT,
+				RIGHT_TO_LEFT
+			};
+
+			std::vector<Token*>* tokenSequence;
+			Type type;
+		};
+
 		class Rule
 		{
 		public:
@@ -72,8 +90,6 @@ namespace ParseParty
 			bool Write(JsonArray* jsonRuleArray) const;
 
 			void Clear();
-
-			typedef std::vector<Token*> MatchSequence;
 
 			std::vector<MatchSequence*>* matchSequenceArray;
 			std::string* name;
