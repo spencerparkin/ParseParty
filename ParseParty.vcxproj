@@ -24,12 +24,16 @@
     <ClInclude Include="Source\JsonValue.h" />
     <ClInclude Include="Source\Lexer.h" />
     <ClInclude Include="Source\Parser.h" />
+    <ClInclude Include="Source\QuickParseAlgorithm.h" />
+    <ClInclude Include="Source\SlowParseAlgorithm.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Grammar.cpp" />
     <ClCompile Include="Source\JsonValue.cpp" />
     <ClCompile Include="Source\Lexer.cpp" />
     <ClCompile Include="Source\Parser.cpp" />
+    <ClCompile Include="Source\QuickParseAlgorithm.cpp" />
+    <ClCompile Include="Source\SlowParseAlgorithm.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
