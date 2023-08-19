@@ -10,23 +10,42 @@
       [ "expression" ]
     ],
     "expression": [
-      [ "(", "sub-expression", ")", "binary-operator", "expression" ],
+      [ "(", "sub-expression", ")", "rl-binary-operator", "sub-expression" ],
       [ "(", "sub-expression", ")" ],
-      [ "@identifier", "binary-operator", "expression" ],
-      [ "@number", "binary-operator", "expression" ],
+      [ "operand", "rl-binary-operator", "sub-expression" ],
+      [ "operand" ]
+    ],
+    "operand": [
+      [ "r-value", "r-unary-operator" ],
+      [ "l-unary-operator", "r-value" ],
+      [ "r-value" ]
+    ],
+    "r-value": [
       [ "@identifier" ],
       [ "@number" ]
+    ],
+    "l-value": [
+      [ "@identifier" ]
     ],
     "sub-expression": [
       [ "expression" ]
     ],
-    "binary-operator": [
+    "rl-binary-operator": [
       [ "+" ],
+      [ "*" ]
+    ],
+    "lr-binary-operator": [
       [ "-" ],
-      [ "*" ],
       [ "/" ],
       [ "%" ],
-      [ "=" ]
+      [ "^" ]
+    ],
+    "r-unary-operator": [
+      [ "!" ]
+    ],
+    "l-unary-operator": [
+      [ "~" ],
+      [ "-" ]
     ]
   }
 }
