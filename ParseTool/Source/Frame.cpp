@@ -5,6 +5,7 @@
 #include <wx/filedlg.h>
 #include <wx/msgdlg.h>
 #include <wx/sizer.h>
+#include <wx/time.h>
 
 Frame::Frame(wxWindow* parent, const wxPoint& pos, const wxSize& size) : wxFrame(parent, wxID_ANY, "Parse Tool", pos, size)
 {
@@ -90,14 +91,25 @@ void Frame::OnParseFile(wxCommandEvent& event)
 	wxFileDialog fileDialog(this, "Open Code File", wxEmptyString, wxEmptyString, "Any File (*.*)|*.*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 	if (wxID_OK == fileDialog.ShowModal())
 	{
+		wxBusyCursor busyCursor;
+
 		wxString codeFile = fileDialog.GetPath();
 		ParseParty::Parser parser;
 		delete wxGetApp().rootNode;
-		wxGetApp().rootNode = parser.ParseFile((const char*)codeFile.c_str(), wxGetApp().grammar);	// TODO: It would be nice to get performance metrics on this and show them.
+
+		wxLongLong parseTimeBegin = wxGetLocalTimeMillis();
+		wxGetApp().rootNode = parser.ParseFile((const char*)codeFile.c_str(), wxGetApp().grammar);
+		wxLongLong parseTimeEnd = wxGetLocalTimeMillis();
+		wxLongLong parseTimeElapsed = parseTimeEnd - parseTimeBegin;
+
 		if (!wxGetApp().rootNode)
 			wxMessageBox("Failed to parse file: " + codeFile, "Error!", wxICON_ERROR | wxOK, this);
 		else
+		{
+			wxMessageBox(wxString::Format("Parse took %llu milliseconds", parseTimeElapsed), "Parse Complete!", wxICON_INFORMATION | wxOK, this);
+
 			this->RebuildTreeControl();
+		}
 	}
 }
 
