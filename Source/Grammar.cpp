@@ -213,12 +213,7 @@ Grammar::Rule::Rule()
 void Grammar::Rule::Clear()
 {
 	for (MatchSequence* matchSequence : *this->matchSequenceArray)
-	{
-		for (Token* token : *matchSequence->tokenSequence)
-			delete token;
-
 		delete matchSequence;
-	}
 
 	this->matchSequenceArray->clear();
 }

@@ -31,7 +31,7 @@ bool Lexer::Tokenize(const std::string& codeText, std::vector<Token*>& tokenArra
 		return false;
 
 	const char* codeBuffer = codeText.c_str();
-	FileLocation fileLocation{ 0, 0 };
+	FileLocation fileLocation{ 1, 1 };
 
 	int i = 0, j = 0;
 	while (i < (signed)codeText.length())
@@ -49,7 +49,7 @@ bool Lexer::Tokenize(const std::string& codeText, std::vector<Token*>& tokenArra
 			else
 			{
 				fileLocation.line++;
-				fileLocation.column = 0;
+				fileLocation.column = 1;
 			}
 		}
 

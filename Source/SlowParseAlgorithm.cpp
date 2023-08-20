@@ -86,8 +86,7 @@ Parser::SyntaxNode* SlowParseAlgorithm::ParseRangeAgainstMatchSequence(const Ran
 {
 	std::map<int, Range> subRangeMap;
 
-	int i_start = -1, i_stop = -1;
-	int delta = 0;
+	int i_start = -1, i_stop = -1, i_delta = 0;
 	int tokenPosition = -1;
 
 	switch (matchSequence->type)
@@ -96,7 +95,7 @@ Parser::SyntaxNode* SlowParseAlgorithm::ParseRangeAgainstMatchSequence(const Ran
 		{
 			i_start = 0;
 			i_stop = matchSequence->tokenSequence->size();
-			delta = 1;
+			i_delta = 1;
 			tokenPosition = range.min;
 			break;
 		}
@@ -104,20 +103,20 @@ Parser::SyntaxNode* SlowParseAlgorithm::ParseRangeAgainstMatchSequence(const Ran
 		{
 			i_start = matchSequence->tokenSequence->size() - 1;
 			i_stop = -1;
-			delta = -1;
+			i_delta = -1;
 			tokenPosition = range.max;
 			break;
 		}
 	}
 
-	for (int i = i_start; i != i_stop; i += delta)
+	for (int i = i_start; i != i_stop; i += i_delta)
 	{
 		const Grammar::Token* grammarToken = (*matchSequence->tokenSequence)[i];
 		const Grammar::TerminalToken* terminalToken = dynamic_cast<const Grammar::TerminalToken*>(grammarToken);
 		if (!terminalToken)
 			continue;
 
-		if (!this->ScanForTokenMatch(grammarToken, tokenPosition, delta, range))
+		if (!this->ScanForTokenMatch(grammarToken, tokenPosition, i_delta, range))
 			return nullptr;
 
 		Range terminalRange{ tokenPosition, tokenPosition };
@@ -134,7 +133,7 @@ Parser::SyntaxNode* SlowParseAlgorithm::ParseRangeAgainstMatchSequence(const Ran
 		Range nonTerminalRange;
 
 		if (i == 0)
-			nonTerminalRange.min = 0;
+			nonTerminalRange.min = range.min;
 		else
 		{
 			std::map<int, Range>::iterator iter = subRangeMap.find(i - 1);
@@ -145,7 +144,7 @@ Parser::SyntaxNode* SlowParseAlgorithm::ParseRangeAgainstMatchSequence(const Ran
 		}
 
 		if (i == matchSequence->tokenSequence->size() - 1)
-			nonTerminalRange.max = matchSequence->tokenSequence->size() - 1;
+			nonTerminalRange.max = range.max;
 		else
 		{
 			std::map<int, Range>::iterator iter = subRangeMap.find(i + 1);
