@@ -83,7 +83,7 @@ Parser::SyntaxNode* Parser::Parse(const std::vector<Lexer::Token*>& tokenArray, 
 
 		// Recursive definitions in the grammar cause unnecessary structure in the AST
 		// that we are trying to remove here.
-		rootNode->Flatten();	// TODO: Is this working?  I see some things that should flatten that aren't flattening.
+		rootNode->Flatten();
 	}
 
 	return rootNode;
@@ -151,7 +151,6 @@ void Parser::SyntaxNode::Flatten()
 			childNode->childList->clear();
 			delete childNode;
 			this->childList->erase(iterA);
-			break;
 		}
 	}
 }
