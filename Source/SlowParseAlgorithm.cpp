@@ -260,7 +260,7 @@ bool SlowParseAlgorithm::ScanForTokenMatch(const Grammar::Token* grammarToken, i
 		const Lexer::Token* token = (*this->tokenArray)[tokenPosition];
 
 		if ((delta > 0 && token->IsCloser()) || (delta < 0 && token->IsOpener()))
-			level--;
+			level = (level > 0) ? (level - 1) : 0;
 
 		if (level == 0)
 		{
