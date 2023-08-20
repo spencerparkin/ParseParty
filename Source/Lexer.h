@@ -46,6 +46,9 @@ namespace ParseParty
 				CLOSE_CURLY_BRACE,
 			};
 
+			bool IsOpener() const;
+			bool IsCloser() const;
+
 			Type type;
 			std::string* text;
 			FileLocation fileLocation;

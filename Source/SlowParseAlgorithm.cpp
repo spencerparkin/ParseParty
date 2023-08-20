@@ -42,6 +42,10 @@ void SlowParseAlgorithm::ClearCache()
 	this->parseCacheMap->clear();
 }
 
+// TODO: How do we report parse errors?  This is hard, because parse failures are a normal part of an overal successful parse.
+//       Maybe we track the parse error occurring when the AST is largest?  Obviously, being able to report an error is very
+//       important to any parser.  If the parser doesn't give good feedback to the user trying to write code, no one is ever
+//       going to want to use the darn thing.
 /*virtual*/ Parser::SyntaxNode* SlowParseAlgorithm::Parse()
 {
 	const Grammar::Rule* rule = this->grammar->GetInitialRule();
@@ -255,16 +259,8 @@ bool SlowParseAlgorithm::ScanForTokenMatch(const Grammar::Token* grammarToken, i
 	{
 		const Lexer::Token* token = (*this->tokenArray)[tokenPosition];
 
-		switch (token->type)
-		{
-			case Lexer::Token::Type::CLOSE_CURLY_BRACE:
-			case Lexer::Token::Type::CLOSE_PARAN:
-			case Lexer::Token::Type::CLOSE_SQUARE_BRACKET:
-			{
-				level--;
-				break;
-			}
-		}
+		if ((delta > 0 && token->IsCloser()) || (delta < 0 && token->IsOpener()))
+			level--;
 
 		if (level == 0)
 		{
@@ -272,16 +268,8 @@ bool SlowParseAlgorithm::ScanForTokenMatch(const Grammar::Token* grammarToken, i
 				return true;
 		}
 
-		switch (token->type)
-		{
-			case Lexer::Token::Type::OPEN_CURLY_BRACE:
-			case Lexer::Token::Type::OPEN_PARAN:
-			case Lexer::Token::Type::OPEN_SQUARE_BRACKET:
-			{
-				level++;
-				break;
-			}
-		}
+		if ((delta > 0 && token->IsOpener()) || (delta < 0 && token->IsCloser()))
+			level++;
 
 		tokenPosition += delta;
 	}

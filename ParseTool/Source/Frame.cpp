@@ -93,7 +93,7 @@ void Frame::OnParseFile(wxCommandEvent& event)
 		wxString codeFile = fileDialog.GetPath();
 		ParseParty::Parser parser;
 		delete wxGetApp().rootNode;
-		wxGetApp().rootNode = parser.ParseFile((const char*)codeFile.c_str(), wxGetApp().grammar);
+		wxGetApp().rootNode = parser.ParseFile((const char*)codeFile.c_str(), wxGetApp().grammar);	// TODO: It would be nice to get performance metrics on this and show them.
 		if (!wxGetApp().rootNode)
 			wxMessageBox("Failed to parse file: " + codeFile, "Error!", wxICON_ERROR | wxOK, this);
 		else

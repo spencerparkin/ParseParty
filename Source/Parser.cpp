@@ -69,15 +69,21 @@ Parser::SyntaxNode* Parser::Parse(const std::vector<Lexer::Token*>& tokenArray, 
 	{
 		// Nodes with the following text no longer give meaning or structure to the code.
 		// The structure/meaning of the code is now found in the structure of the AST.
+		// TODO: Maybe what we remove here should be specified in the grammar file?
 		std::set<std::string> textSet;
 		textSet.insert(";");
+		textSet.insert(",");
 		textSet.insert("(");
 		textSet.insert(")");
+		textSet.insert("{");
+		textSet.insert("}");
+		textSet.insert("[");
+		textSet.insert("]");
 		rootNode->RemoveNodesWithText(textSet);
 
 		// Recursive definitions in the grammar cause unnecessary structure in the AST
 		// that we are trying to remove here.
-		rootNode->Flatten();
+		rootNode->Flatten();	// TODO: Is this working?  I see some things that should flatten that aren't flattening.
 	}
 
 	return rootNode;

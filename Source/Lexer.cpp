@@ -108,6 +108,16 @@ Lexer::Token::Token()
 	delete this->text;
 }
 
+bool Lexer::Token::IsOpener() const
+{
+	return this->type == Type::OPEN_CURLY_BRACE || this->type == Type::OPEN_PARAN || this->type == Type::OPEN_SQUARE_BRACKET;
+}
+
+bool Lexer::Token::IsCloser() const
+{
+	return this->type == Type::CLOSE_CURLY_BRACE || this->type == Type::CLOSE_PARAN || this->type == Type::CLOSE_SQUARE_BRACKET;
+}
+
 //-------------------------------- Lexer::TokenGenerator --------------------------------
 
 Lexer::TokenGenerator::TokenGenerator()
