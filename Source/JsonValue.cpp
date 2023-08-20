@@ -12,11 +12,12 @@ JsonValue::JsonValue()
 {
 }
 
-/*static*/ JsonValue* JsonValue::ParseJson(const std::string & jsonString)
+// TODO: It would be super nice if on error this returned a line and column number and an explanation!
+/*static*/ JsonValue* JsonValue::ParseJson(const std::string& jsonString)
 {
 	std::vector<Lexer::Token*> tokenArray;
 
-	Lexer lexer;
+	Lexer lexer("for_json");
 	if (!lexer.Tokenize(jsonString, tokenArray))
 		return nullptr;
 

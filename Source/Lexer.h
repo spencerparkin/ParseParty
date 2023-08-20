@@ -8,7 +8,7 @@ namespace ParseParty
 	class PARSE_PARTY_API Lexer
 	{
 	public:
-		Lexer();
+		Lexer(const std::string& hint = "");
 		virtual ~Lexer();
 
 		struct FileLocation

@@ -25,6 +25,7 @@ namespace ParseParty
 			void MakeKey(char* keyBuf, int keyBufSize) const;
 			int Size() const;
 			bool Contains(int i) const;
+			bool IsValid() const;
 		};
 
 		struct ParseCacheKey

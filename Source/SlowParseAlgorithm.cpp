@@ -159,7 +159,13 @@ Parser::SyntaxNode* SlowParseAlgorithm::ParseRangeAgainstMatchSequence(const Ran
 
 	int totalSize = 0;
 	for (std::pair<int, Range> pair : subRangeMap)
-		totalSize += pair.second.Size();
+	{
+		const Range& subRange = pair.second;
+		if (!subRange.IsValid())
+			return nullptr;
+
+		totalSize += subRange.Size();
+	}
 
 	if (totalSize != range.Size())
 		return nullptr;
@@ -301,4 +307,9 @@ bool SlowParseAlgorithm::Range::Contains(int i) const
 bool SlowParseAlgorithm::Range::operator==(const Range& range) const
 {
 	return this->min == range.min && this->max == range.max;
+}
+
+bool SlowParseAlgorithm::Range::IsValid() const
+{
+	return this->min <= this->max;
 }

@@ -27,11 +27,14 @@
     <ClCompile Include="Source\Frame.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\Examples\MapTests.pow" />
+    <None Include="..\Examples\PowderGrammar.json" />
     <None Include="..\Examples\JsonGrammar.json" />
     <None Include="..\Examples\SimpleGrammar.json" />
     <None Include="..\Examples\SimpleGrammar2.json" />
     <None Include="..\Examples\SimpleGrammarTest.txt" />
     <None Include="..\Examples\JsonGrammarTest.json" />
+    <None Include="..\Examples\Test.pow" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
