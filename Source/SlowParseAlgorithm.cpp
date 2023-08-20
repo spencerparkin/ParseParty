@@ -24,7 +24,7 @@ using namespace ParseParty;
 SlowParseAlgorithm::SlowParseAlgorithm(const std::vector<Lexer::Token*>* tokenArray, const Grammar* grammar) : Parser::Algorithm(tokenArray, grammar)
 {
 	this->parseCacheMap = new ParseCacheMap();
-	this->parseCacheMapEnabled = false;		// TODO: Enable this by default when ready.
+	this->parseCacheMapEnabled = true;
 }
 
 /*virtual*/ SlowParseAlgorithm::~SlowParseAlgorithm()
@@ -230,7 +230,7 @@ Parser::SyntaxNode* SlowParseAlgorithm::ParseRangeAgainstMatchSequence(const Ran
 			for (std::list<Parser::SyntaxNode*>::iterator iter = parentNode->childList->begin(); iter != parentNode->childList->end(); iter++)
 			{
 				Parser::SyntaxNode* childNode = *iter;
-				const Grammar::Token* grammarToken = (*matchSequence->tokenSequence)[i++];
+				const Grammar::Token* grammarToken = (*matchSequence->tokenSequence)[i];
 				const Grammar::NonTerminalToken* nonTerminalToken = dynamic_cast<const Grammar::NonTerminalToken*>(grammarToken);
 				if (nonTerminalToken)
 				{
@@ -241,6 +241,8 @@ Parser::SyntaxNode* SlowParseAlgorithm::ParseRangeAgainstMatchSequence(const Ran
 					this->parseCacheMap->insert(std::pair<ParseCacheKey, Parser::SyntaxNode*>(key, childNode));
 					*iter = nullptr;
 				}
+
+				i++;
 			}
 		}
 
