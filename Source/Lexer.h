@@ -132,4 +132,6 @@ namespace ParseParty
 
 		std::list<TokenGenerator*>* tokenGeneratorList;
 	};
+
+	bool operator<(const Lexer::FileLocation& locationA, const Lexer::FileLocation& locationB);
 }

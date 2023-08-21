@@ -97,13 +97,18 @@ void Frame::OnParseFile(wxCommandEvent& event)
 		ParseParty::Parser parser;
 		delete wxGetApp().rootNode;
 
+		std::string parseError;
+
 		wxLongLong parseTimeBegin = wxGetLocalTimeMillis();
-		wxGetApp().rootNode = parser.ParseFile((const char*)codeFile.c_str(), wxGetApp().grammar);
+		wxGetApp().rootNode = parser.ParseFile((const char*)codeFile.c_str(), wxGetApp().grammar, &parseError);
 		wxLongLong parseTimeEnd = wxGetLocalTimeMillis();
 		wxLongLong parseTimeElapsed = parseTimeEnd - parseTimeBegin;
 
 		if (!wxGetApp().rootNode)
-			wxMessageBox("Failed to parse file: " + codeFile, "Error!", wxICON_ERROR | wxOK, this);
+		{
+			wxString errorMsg(parseError.c_str());
+			wxMessageBox("Failed to parse file: " + codeFile + "\n\nError: " + errorMsg, "Error!", wxICON_ERROR | wxOK, this);
+		}
 		else
 		{
 			wxMessageBox(wxString::Format("Parse took %llu milliseconds", parseTimeElapsed), "Parse Complete!", wxICON_INFORMATION | wxOK, this);

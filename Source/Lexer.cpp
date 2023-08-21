@@ -1,5 +1,16 @@
 #include "Lexer.h"
 
+namespace ParseParty
+{
+	bool operator<(const Lexer::FileLocation& locationA, const Lexer::FileLocation& locationB)
+	{
+		if (locationA.line == locationB.line)
+			return locationA.column < locationB.column;
+
+		return locationA.line < locationB.line;
+	}
+}
+
 using namespace ParseParty;
 
 //------------------------------- Lexer -------------------------------

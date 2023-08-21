@@ -25,6 +25,7 @@ SlowParseAlgorithm::SlowParseAlgorithm(const std::vector<Lexer::Token*>* tokenAr
 {
 	this->parseCacheMap = new ParseCacheMap();
 	this->parseCacheMapEnabled = true;
+	this->maxErrorLocation = Lexer::FileLocation{ 0, 0 };
 }
 
 /*virtual*/ SlowParseAlgorithm::~SlowParseAlgorithm()
@@ -42,10 +43,6 @@ void SlowParseAlgorithm::ClearCache()
 	this->parseCacheMap->clear();
 }
 
-// TODO: How do we report parse errors?  This is hard, because parse failures are a normal part of an overal successful parse.
-//       Maybe we track the parse error occurring when the AST is largest?  Obviously, being able to report an error is very
-//       important to any parser.  If the parser doesn't give good feedback to the user trying to write code, no one is ever
-//       going to want to use the darn thing.
 /*virtual*/ Parser::SyntaxNode* SlowParseAlgorithm::Parse()
 {
 	const Grammar::Rule* rule = this->grammar->GetInitialRule();
@@ -57,6 +54,8 @@ void SlowParseAlgorithm::ClearCache()
 	Range range{ 0, int(this->tokenArray->size() - 1) };
 	if (range.Size() <= 0)
 		return nullptr;
+
+	this->maxErrorLocation = Lexer::FileLocation{ 0, 0 };
 
 	return this->ParseRangeAgainstRule(range, rule);
 }
@@ -223,6 +222,20 @@ Parser::SyntaxNode* SlowParseAlgorithm::ParseRangeAgainstMatchSequence(const Ran
 
 	if (parentNode->childList->size() != matchSequence->tokenSequence->size())
 	{
+		// I think this method of parse-error reporting will be accurate enough, provided that
+		// parsing generally happens from left to right.  There are some cases where it needs to
+		// happen right to left, but perhaps those are few enough.
+		const Lexer::FileLocation& fileLocationMin = (*this->tokenArray)[range.min]->fileLocation;
+		if (this->maxErrorLocation < fileLocationMin)
+		{
+			this->maxErrorLocation = fileLocationMin;
+			const Lexer::FileLocation& fileLocationMax = (*this->tokenArray)[range.max]->fileLocation;
+			if (fileLocationMin.line == fileLocationMax.line)
+				*this->error = std::format("Failed to parse line {}, columns {} to {}.", fileLocationMin.line, fileLocationMin.column, fileLocationMax.column);
+			else
+				*this->error = std::format("Failed to parse from line {} (column {}) to line {} (column {}).", fileLocationMin.line, fileLocationMin.column, fileLocationMax.line, fileLocationMax.column);
+		}
+
 		if (this->parseCacheMapEnabled)
 		{
 			// Cache successfully parsed child nodes from the parent node before we destroy the unsuccessfully parsed parent node.

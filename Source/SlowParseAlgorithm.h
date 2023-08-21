@@ -44,6 +44,7 @@ namespace ParseParty
 		typedef std::map<ParseCacheKey, Parser::SyntaxNode*> ParseCacheMap;
 		ParseCacheMap* parseCacheMap;
 		bool parseCacheMapEnabled;
+		Lexer::FileLocation maxErrorLocation;
 	};
 
 	bool operator<(const SlowParseAlgorithm::ParseCacheKey& keyA, const SlowParseAlgorithm::ParseCacheKey& keyB);

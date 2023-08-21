@@ -58,8 +58,6 @@ Parser::SyntaxNode* Parser::Parse(const std::vector<Lexer::Token*>& tokenArray, 
 
 	SyntaxNode* rootNode = algorithm->Parse();
 
-	delete algorithm;
-
 	if (!rootNode)
 	{
 		if (error)
@@ -85,6 +83,8 @@ Parser::SyntaxNode* Parser::Parse(const std::vector<Lexer::Token*>& tokenArray, 
 		// that we are trying to remove here.
 		rootNode->Flatten();
 	}
+
+	delete algorithm;
 
 	return rootNode;
 }
@@ -174,4 +174,14 @@ void Parser::SyntaxNode::RemoveNodesWithText(const std::set<std::string>& textSe
 
 	for (SyntaxNode* childNode : *this->childList)
 		childNode->RemoveNodesWithText(textSet);
+}
+
+int Parser::SyntaxNode::CalcSize() const
+{
+	int count = 1;
+
+	for (SyntaxNode* childNode : *this->childList)
+		count += childNode->CalcSize();
+
+	return count;
 }

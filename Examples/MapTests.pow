@@ -30,7 +30,7 @@ print_map = func(given_map)
             output(msg)
         else
             output(map_keys[i] + ": UNDEF\n");
-        i = i + 1;
+        i = i + 1
     }
 };
 
