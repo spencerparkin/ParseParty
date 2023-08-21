@@ -47,8 +47,5 @@
     <None Include="..\Examples\MapTests.pow">
       <Filter>Examples</Filter>
     </None>
-    <None Include="..\Examples\Test.pow">
-      <Filter>Examples</Filter>
-    </None>
   </ItemGroup>
 </Project>

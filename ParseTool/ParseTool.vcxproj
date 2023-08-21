@@ -34,7 +34,6 @@
     <None Include="..\Examples\SimpleGrammar2.json" />
     <None Include="..\Examples\SimpleGrammarTest.txt" />
     <None Include="..\Examples\JsonGrammarTest.json" />
-    <None Include="..\Examples\Test.pow" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
