@@ -12,7 +12,7 @@ namespace ParseParty
 		Grammar();
 		virtual ~Grammar();
 
-		bool ReadFile(const std::string& grammarFile);
+		bool ReadFile(const std::string& grammarFile, std::string& error);
 		bool WriteFile(const std::string& grammarFile) const;
 
 		void Clear();

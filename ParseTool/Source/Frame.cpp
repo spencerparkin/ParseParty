@@ -61,8 +61,9 @@ void Frame::OnGrammarFile(wxCommandEvent& event)
 			{
 				wxBusyCursor busyCursor;
 				wxString grammarFile = fileDialog.GetPath();
-				if (!wxGetApp().grammar.ReadFile((const char*)grammarFile.c_str()))
-					wxMessageBox("Failed to open grammar file: " + grammarFile, "Error!", wxICON_ERROR | wxOK, this);
+				std::string error;
+				if (!wxGetApp().grammar.ReadFile((const char*)grammarFile.c_str(), error))
+					wxMessageBox("Failed to open grammar file: " + grammarFile + "\n\n" + wxString(error.c_str()), "Error!", wxICON_ERROR | wxOK, this);
 				else
 					wxMessageBox("Grammar file read!", "Success!", wxICON_INFORMATION | wxOK, this);
 			}

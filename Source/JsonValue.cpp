@@ -12,8 +12,7 @@ JsonValue::JsonValue()
 {
 }
 
-// TODO: It would be super nice if on error this returned a line and column number and an explanation!
-/*static*/ JsonValue* JsonValue::ParseJson(const std::string& jsonString)
+/*static*/ JsonValue* JsonValue::ParseJson(const std::string& jsonString, std::string& parseError)
 {
 	std::vector<Lexer::Token*> tokenArray;
 
@@ -28,7 +27,7 @@ JsonValue::JsonValue()
 	if (jsonValue)
 	{
 		int parsePosition = 0;
-		if (!jsonValue->ParseTokens(tokenArray, parsePosition))
+		if (!jsonValue->ParseTokens(tokenArray, parsePosition, parseError))
 		{
 			delete jsonValue;
 			jsonValue = nullptr;
@@ -67,6 +66,19 @@ JsonValue::JsonValue()
 	return tabString;
 }
 
+/*static*/ std::string JsonValue::MakeError(const std::vector<Lexer::Token*>& tokenArray, int parsePosition, const std::string& errorMsg)
+{
+	std::string errorPrefix = "Error: ";
+	
+	if (0 <= parsePosition && parsePosition < (signed)tokenArray.size())
+	{
+		const Lexer::FileLocation& fileLocation = tokenArray[parsePosition]->fileLocation;
+		errorPrefix += std::format("Line {}, column {}: ", fileLocation.line, fileLocation.column);
+	}
+
+	return errorPrefix + errorMsg;
+}
+
 //-------------------------------- JsonString --------------------------------
 
 JsonString::JsonString()
@@ -90,15 +102,21 @@ JsonString::JsonString(const std::string& value)
 	return true;
 }
 
-/*virtual*/ bool JsonString::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition)
+/*virtual*/ bool JsonString::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError)
 {
 	if (parsePosition < 0 || parsePosition >= (signed)tokenArray.size())
+	{
+		parseError = "Internal error!";
 		return false;
+	}
 
 	const Lexer::Token* token = tokenArray[parsePosition];
 
 	if (token->type != Lexer::Token::Type::STRING_LITERAL)
+	{
+		parseError = MakeError(tokenArray, parsePosition, "Expected string literal.");
 		return false;
+	}
 
 	this->SetValue(*token->text);
 	parsePosition++;
@@ -139,15 +157,21 @@ JsonFloat::JsonFloat(double value)
 	return true;
 }
 
-/*virtual*/ bool JsonFloat::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition)
+/*virtual*/ bool JsonFloat::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError)
 {
 	if (parsePosition < 0 || parsePosition >= (signed)tokenArray.size())
+	{
+		parseError = "Internal error!";
 		return false;
+	}
 
 	const Lexer::Token* token = tokenArray[parsePosition];
 
 	if (token->type != Lexer::Token::Type::NUMBER_LITERAL_FLOAT)
+	{
+		parseError = MakeError(tokenArray, parsePosition, "Expected float literal.");
 		return false;
+	}
 
 	this->SetValue(::atof(token->text->c_str()));
 	parsePosition++;
@@ -188,15 +212,21 @@ JsonInt::JsonInt(long value)
 	return true;
 }
 
-/*virtual*/ bool JsonInt::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition)
+/*virtual*/ bool JsonInt::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError)
 {
 	if (parsePosition < 0 || parsePosition >= (signed)tokenArray.size())
+	{
+		parseError = "Internal error!";
 		return false;
+	}
 
 	const Lexer::Token* token = tokenArray[parsePosition];
 
 	if (token->type != Lexer::Token::Type::NUMBER_LITERAL_INT)
+	{
+		parseError = MakeError(tokenArray, parsePosition, "Expected integer literal.");
 		return false;
+	}
 
 	this->SetValue(::atoi(token->text->c_str()));
 	parsePosition++;
@@ -254,66 +284,105 @@ JsonObject::JsonObject()
 	return true;
 }
 
-/*virtual*/ bool JsonObject::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition)
+/*virtual*/ bool JsonObject::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError)
 {
 	if (parsePosition < 0 || parsePosition >= (signed)tokenArray.size())
+	{
+		parseError = "Internal error!";
 		return false;
+	}
 
 	const Lexer::Token* token = tokenArray[parsePosition];
-
 	if (token->type != Lexer::Token::Type::OPEN_CURLY_BRACE)
+	{
+		parseError = MakeError(tokenArray, parsePosition, "Expected open curly brace.");
 		return false;
+	}
 
 	this->Clear();
 
-	parsePosition++;
+	int openCurlyPosition = parsePosition++;
+
+	if (parsePosition >= (signed)tokenArray.size())
+	{
+		parseError = MakeError(tokenArray, openCurlyPosition, "Run-away curly brace.");
+		return false;
+	}
+
+	token = tokenArray[parsePosition];
+	if (token->type == Lexer::Token::Type::CLOSE_CURLY_BRACE)
+	{
+		parsePosition++;
+		return true;
+	}
 
 	while (true)
 	{
-		if (parsePosition >= (signed)tokenArray.size())
-			return false;
-
 		token = tokenArray[parsePosition];
-		if (token->type == Lexer::Token::Type::CLOSE_CURLY_BRACE)
-			break;
-
 		if (token->type != Lexer::Token::Type::STRING_LITERAL)
+		{
+			parseError = MakeError(tokenArray, parsePosition, "Expected string key.");
 			return false;
+		}
 
 		std::string key = *token->text;
 
 		if (++parsePosition >= (signed)tokenArray.size())
+		{
+			parseError = MakeError(tokenArray, openCurlyPosition, "Run-away curly brace.");
 			return false;
+		}
 
 		token = tokenArray[parsePosition];
 		if (token->type != Lexer::Token::Type::DELIMETER_COLON)
+		{
+			parseError = MakeError(tokenArray, parsePosition, "Expected colon after key.");
 			return false;
+		}
 
 		if (++parsePosition >= (signed)tokenArray.size())
+		{
+			parseError = MakeError(tokenArray, openCurlyPosition, "Run-away curly brace.");
 			return false;
+		}
 
 		token = tokenArray[parsePosition];
 		JsonValue* jsonValue = ValueFactory(*token);
 		if (!jsonValue)
+		{
+			parseError = MakeError(tokenArray, parsePosition, "Could not decypher JSON value type.");
 			return false;
+		}
 
 		if (!this->SetValue(key, jsonValue))
 		{
+			parseError = "Internal error!";
 			delete jsonValue;
 			return false;
 		}
 
-		if (!jsonValue->ParseTokens(tokenArray, parsePosition))
+		if (!jsonValue->ParseTokens(tokenArray, parsePosition, parseError))
 			return false;
 
 		if (parsePosition >= (signed)tokenArray.size())
+		{
+			parseError = MakeError(tokenArray, openCurlyPosition, "Run-away curly brace.");
 			return false;
+		}
 
 		token = tokenArray[parsePosition];
 		if (token->type == Lexer::Token::Type::DELIMETER_COMMA)
 			parsePosition++;
-		else if (token->type != Lexer::Token::Type::CLOSE_CURLY_BRACE)
+		else if (token->type == Lexer::Token::Type::CLOSE_CURLY_BRACE)
+		{
+			parsePosition++;
+			break;
+		}
+		else
+		{
+			parseError = MakeError(tokenArray, parsePosition, "Expected comma or close curly brace.");
 			return false;
+		}
 	}
 
 	return true;
@@ -417,49 +486,72 @@ JsonArray::JsonArray(const std::vector<int>& intArray)
 	return true;
 }
 
-/*virtual*/ bool JsonArray::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition)
+/*virtual*/ bool JsonArray::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError)
 {
 	if (parsePosition < 0 || parsePosition >= (signed)tokenArray.size())
+	{
+		parseError = "Internal error!";
 		return false;
+	}
 
 	const Lexer::Token* token = tokenArray[parsePosition];
-
 	if (token->type != Lexer::Token::Type::OPEN_SQUARE_BRACKET)
+	{
+		parseError = MakeError(tokenArray, parsePosition, "Expected open square bracket.");
 		return false;
+	}
 
 	this->Clear();
 
-	parsePosition++;
+	int openBracketPosition = parsePosition++;
+
+	if (parsePosition >= (signed)tokenArray.size())
+	{
+		parseError = MakeError(tokenArray, openBracketPosition, "Run-away square bracket.");
+		return false;
+	}
+
+	token = tokenArray[parsePosition];
+	if (token->type == Lexer::Token::Type::CLOSE_SQUARE_BRACKET)
+	{
+		parsePosition++;
+		return true;
+	}
 
 	while (true)
 	{
-		if (parsePosition >= (signed)tokenArray.size())
-			return false;
-
 		token = tokenArray[parsePosition];
-		if (token->type == Lexer::Token::Type::CLOSE_SQUARE_BRACKET)
-		{
-			parsePosition++;
-			break;
-		}
-
 		JsonValue* jsonValue = ValueFactory(*token);
 		if (!jsonValue)
+		{
+			parseError = MakeError(tokenArray, parsePosition, "Could not decypher JSON value type.");
 			return false;
+		}
 
 		this->PushValue(jsonValue);
 
-		if (!jsonValue->ParseTokens(tokenArray, parsePosition))
+		if (!jsonValue->ParseTokens(tokenArray, parsePosition, parseError))
 			return false;
 
 		if (parsePosition >= (signed)tokenArray.size())
+		{
+			parseError = MakeError(tokenArray, openBracketPosition, "Run-away square bracket.");
 			return false;
+		}
 
 		token = tokenArray[parsePosition];
 		if (token->type == Lexer::Token::Type::DELIMETER_COMMA)
 			parsePosition++;
-		else if (token->type != Lexer::Token::Type::CLOSE_SQUARE_BRACKET)
+		else if (token->type == Lexer::Token::Type::CLOSE_SQUARE_BRACKET)
+		{
+			parsePosition++;
+			break;
+		}
+		else
+		{
+			parseError = MakeError(tokenArray, parsePosition, "Expected comma or close square bracket.");
 			return false;
+		}
 	}
 	
 	return true;
@@ -543,21 +635,30 @@ JsonBool::JsonBool(bool value)
 	return true;
 }
 
-/*virtual*/ bool JsonBool::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition)
+/*virtual*/ bool JsonBool::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError)
 {
 	if (parsePosition < 0 || parsePosition >= (signed)tokenArray.size())
+	{
+		parseError = "Internal error!";
 		return false;
+	}
 
 	const Lexer::Token* token = tokenArray[parsePosition];
 	if (token->type != Lexer::Token::Type::IDENTIFIER)
+	{
+		parseError = MakeError(tokenArray, parsePosition, "Expected identifier.");
 		return false;
+	}
 
 	if (*token->text == "true")
 		this->SetValue(true);
 	else if (*token->text == "false")
 		this->SetValue(false);
 	else
+	{
+		parseError = MakeError(tokenArray, parsePosition, "Expected identifier to be \"true\" or \"false\".");
 		return false;
+	}
 
 	parsePosition++;
 	return true;
@@ -589,17 +690,26 @@ JsonNull::JsonNull()
 	return true;
 }
 
-/*virtual*/ bool JsonNull::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition)
+/*virtual*/ bool JsonNull::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError)
 {
 	if (parsePosition < 0 || parsePosition >= (signed)tokenArray.size())
+	{
+		parseError = "Internal error!";
 		return false;
+	}
 
 	const Lexer::Token* token = tokenArray[parsePosition];
 	if (token->type != Lexer::Token::Type::IDENTIFIER)
+	{
+		parseError = MakeError(tokenArray, parsePosition, "Expected identifier");
 		return false;
+	}
 
 	if (*token->text != "null")
+	{
+		parseError = MakeError(tokenArray, parsePosition, "Expected identifier to be \"null\".");
 		return false;
+	}
 
 	parsePosition++;
 	return true;

@@ -45,7 +45,7 @@ const Grammar::Rule* Grammar::LookupRule(const std::string& ruleName) const
 	return iter->second;
 }
 
-bool Grammar::ReadFile(const std::string& grammarFile)
+bool Grammar::ReadFile(const std::string& grammarFile, std::string& error)
 {
 	bool success = false;
 	JsonValue* jsonRootValue = nullptr;
@@ -62,41 +62,61 @@ bool Grammar::ReadFile(const std::string& grammarFile)
 		std::stringstream stringStream;
 		stringStream << fileStream.rdbuf();
 		std::string jsonString = stringStream.str();
-		jsonRootValue = JsonValue::ParseJson(jsonString);
+		std::string parseError;
+		jsonRootValue = JsonValue::ParseJson(jsonString, parseError);
 		if (!jsonRootValue)
+		{
+			error = parseError;
 			break;
+		}
 
 		JsonObject* jsonObject = dynamic_cast<JsonObject*>(jsonRootValue);
 		if (!jsonObject)
+		{
+			error = "Expected root-level JSON object.";
 			break;
+		}
 
 		JsonString* jsonInitialRule = dynamic_cast<JsonString*>(jsonObject->GetValue("initial_rule"));
 		if (!jsonInitialRule)
+		{
+			error = "No \"initial_rule\" key found or it's not a string.";
 			break;
+		}
 
 		*this->initialRule = jsonInitialRule->GetValue();
 
 		JsonString* jsonAlgorithm = dynamic_cast<JsonString*>(jsonObject->GetValue("algorithm"));
 		if (!jsonAlgorithm)
+		{
+			error = "No \"algorithm\" key found or it's not a string.";
 			break;
+		}
 
 		*this->algorithmName = jsonAlgorithm->GetValue();
 
 		JsonObject* jsonRuleMap = dynamic_cast<JsonObject*>(jsonObject->GetValue("rules"));
 		if (!jsonRuleMap)
+		{
+			error = "No \"rules\" key found or it's not an object.";
 			break;
+		}
 
 		for (std::pair<std::string, JsonValue*> pair : *jsonRuleMap)
 		{
 			JsonArray* jsonRuleValue = dynamic_cast<JsonArray*>(pair.second);
 			if (!jsonRuleValue)
+			{
+				error = "Each rule entry should be an array.";
 				break;
+			}
 
 			Rule* rule = new Rule();
 			*rule->name = pair.first;
 
 			if (!rule->Read(jsonRuleValue, jsonRuleMap))
 			{
+				error = "Failed to read rule: " + *rule->name;
 				delete rule;
 				break;
 			}
