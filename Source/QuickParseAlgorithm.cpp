@@ -51,9 +51,6 @@ void QuickParseAlgorithm::ClearCache()
 	return this->MatchTokensAgainstRule(parsePosition, rule);
 }
 
-// TODO: How do we report parse errors?  If a given token sequence ultimately fails to parse, then we must report an error,
-//       but failures to parse are inherently part of the parsing process anyway.  So how do we know which parse failures
-//       are do to syntax errors in the given code?
 Parser::SyntaxNode* QuickParseAlgorithm::MatchTokensAgainstRule(int& parsePosition, const Grammar::Rule* rule)
 {
 	if (parsePosition < 0 || parsePosition >= (signed)this->tokenArray->size())
@@ -167,13 +164,11 @@ Parser::SyntaxNode* QuickParseAlgorithm::MatchTokensAgainstRule(int& parsePositi
 		delete parentNode;
 		parentNode = nullptr;
 
-		// Failing to apply a rule is just a normal part of parsing, but when does is indicate an actual parsing error?
-		// I'm not sure, but maybe it's helpful to know which rule failed furthest along the token sequence?
-		if (parsePosition > this->maxParsePositionWithError)
+		if (this->maxParsePositionWithError < parsePosition)
 		{
 			this->maxParsePositionWithError = parsePosition;
 			const Lexer::Token* token = (*this->tokenArray)[parsePosition];
-			*this->error = std::format("Failed to parse rule \"{}\" at line {}, column {}.", rule->name->c_str(), token->fileLocation.line, token->fileLocation.column);
+			*this->error = std::format("Failed to parse at line {}, column {}.", token->fileLocation.line, token->fileLocation.column);
 		}
 	}
 
