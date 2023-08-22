@@ -122,6 +122,30 @@ Parser::SyntaxNode::SyntaxNode()
 	delete this->childList;
 }
 
+const Parser::SyntaxNode* Parser::SyntaxNode::GetParent() const
+{
+	return this->parentNode;
+}
+
+const Parser::SyntaxNode* Parser::SyntaxNode::GetChild(int i) const
+{
+	if (0 <= i && i < (signed)this->childList->size())
+	{
+		std::list<SyntaxNode*>::const_iterator iter = this->childList->begin();
+		while (--i > 0)
+			iter++;
+
+		return *iter;
+	}
+
+	return nullptr;
+}
+
+int Parser::SyntaxNode::GetChildCount() const
+{
+	return (int)this->childList->size();
+}
+
 void Parser::SyntaxNode::WipeChildren()
 {
 	for (SyntaxNode* childNode : *this->childList)

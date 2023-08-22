@@ -28,6 +28,9 @@ namespace ParseParty
 			void Flatten();
 			void RemoveNodesWithText(const std::set<std::string>& textSet);
 			int CalcSize() const;
+			const SyntaxNode* GetParent() const;
+			const SyntaxNode* GetChild(int i) const;
+			int GetChildCount() const;
 
 			SyntaxNode* parentNode;
 			std::list<SyntaxNode*>* childList;
