@@ -27,8 +27,6 @@
     <ClCompile Include="Source\Frame.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Examples\MapTests.pow" />
-    <None Include="..\Examples\PowderGrammar.json" />
     <None Include="..\Examples\JsonGrammar.json" />
     <None Include="..\Examples\SimpleGrammar.json" />
     <None Include="..\Examples\SimpleGrammar2.json" />
