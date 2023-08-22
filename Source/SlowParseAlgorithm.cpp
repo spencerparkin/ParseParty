@@ -218,6 +218,7 @@ Parser::SyntaxNode* SlowParseAlgorithm::ParseRangeAgainstMatchSequence(const Ran
 			break;
 
 		parentNode->childList->push_back(childNode);
+		childNode->parentNode = parentNode;
 	}
 
 	if (parentNode->childList->size() != matchSequence->tokenSequence->size())
@@ -253,6 +254,7 @@ Parser::SyntaxNode* SlowParseAlgorithm::ParseRangeAgainstMatchSequence(const Ran
 					assert(this->parseCacheMap->find(key) == this->parseCacheMap->end());
 					this->parseCacheMap->insert(std::pair<ParseCacheKey, Parser::SyntaxNode*>(key, childNode));
 					*iter = nullptr;
+					childNode->parentNode = nullptr;
 				}
 
 				i++;
