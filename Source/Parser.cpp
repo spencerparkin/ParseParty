@@ -122,7 +122,7 @@ Parser::SyntaxNode::SyntaxNode()
 	delete this->childList;
 }
 
-const Parser::SyntaxNode* Parser::SyntaxNode::FindChild(const std::string& text, uint32_t maxRecurseDepth, uint32_t depth /*= 1*/) const
+const Parser::SyntaxNode* Parser::SyntaxNode::FindChild(const std::string& text, int maxRecurseDepth, int depth /*= 1*/) const
 {
 	for (const SyntaxNode* childNode : *this->childList)
 	{
@@ -135,6 +135,24 @@ const Parser::SyntaxNode* Parser::SyntaxNode::FindChild(const std::string& text,
 			if (foundNode)
 				return foundNode;
 		}
+	}
+
+	return nullptr;
+}
+
+const Parser::SyntaxNode* Parser::SyntaxNode::FindParent(const std::string& text, int maxRecurseDepth, int depth /*= 1*/) const
+{
+	if (!this->parentNode)
+		return nullptr;
+
+	if (*this->parentNode->text == text)
+		return this->parentNode;
+
+	if (depth < maxRecurseDepth)
+	{
+		const SyntaxNode* foundNode = this->parentNode->FindParent(text, maxRecurseDepth, depth + 1);
+		if (foundNode)
+			return foundNode;
 	}
 
 	return nullptr;

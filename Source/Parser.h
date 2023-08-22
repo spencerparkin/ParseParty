@@ -28,7 +28,8 @@ namespace ParseParty
 			void Flatten();
 			void RemoveNodesWithText(const std::set<std::string>& textSet);
 			int CalcSize() const;
-			const SyntaxNode* FindChild(const std::string& text, uint32_t maxRecurseDepth, uint32_t depth = 1) const;
+			const SyntaxNode* FindChild(const std::string& text, int maxRecurseDepth, int depth = 1) const;
+			const SyntaxNode* FindParent(const std::string& text, int maxRecurseDepth, int depth = 1) const;
 			const SyntaxNode* GetParent() const;
 			const SyntaxNode* GetChild(int i) const;
 			int GetChildCount() const;
