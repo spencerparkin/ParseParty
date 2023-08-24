@@ -22,6 +22,7 @@ namespace ParseParty
 		{
 		public:
 			SyntaxNode();
+			SyntaxNode(const std::string& text, const Lexer::FileLocation& fileLocation);
 			virtual ~SyntaxNode();
 
 			void WipeChildren();
@@ -32,7 +33,14 @@ namespace ParseParty
 			const SyntaxNode* FindParent(const std::string& text, int maxRecurseDepth, int depth = 1) const;
 			const SyntaxNode* GetParent() const;
 			const SyntaxNode* GetChild(int i) const;
+			SyntaxNode* GetParent();
+			SyntaxNode* GetChild(int i);
+			bool SetChild(int i, SyntaxNode* childNode);
+			bool DelChild(int i);
 			int GetChildCount() const;
+			void Print(std::ostream& stream, int tabCount = 0) const;
+			SyntaxNode* Clone() const;
+			bool GetChildIterator(std::list<SyntaxNode*>::iterator& iter, int i);
 
 			SyntaxNode* parentNode;
 			std::list<SyntaxNode*>* childList;
@@ -54,5 +62,7 @@ namespace ParseParty
 
 			std::string* error;
 		};
+
+		Lexer lexer;
 	};
 }

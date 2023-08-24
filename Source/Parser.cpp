@@ -32,8 +32,7 @@ Parser::SyntaxNode* Parser::Parse(const std::string& codeText, const Grammar& gr
 {
 	std::vector<Lexer::Token*> tokenArray;
 
-	Lexer lexer;
-	if (!lexer.Tokenize(codeText, tokenArray))
+	if (!this->lexer.Tokenize(codeText, tokenArray))
 		return nullptr;
 
 	SyntaxNode* rootNode = this->Parse(tokenArray, grammar, error);
@@ -65,23 +64,28 @@ Parser::SyntaxNode* Parser::Parse(const std::vector<Lexer::Token*>& tokenArray, 
 	}
 	else
 	{
-		// Nodes with the following text no longer give meaning or structure to the code.
-		// The structure/meaning of the code is now found in the structure of the AST.
-		// TODO: Maybe what we remove here should be specified in the grammar file?
-		std::set<std::string> textSet;
-		textSet.insert(";");
-		textSet.insert(",");
-		textSet.insert("(");
-		textSet.insert(")");
-		textSet.insert("{");
-		textSet.insert("}");
-		textSet.insert("[");
-		textSet.insert("]");
-		rootNode->RemoveNodesWithText(textSet);
+		if ((grammar.flags & PARSE_PARTY_GRAMMAR_FLAG_DELETE_STRUCTURE_TOKENS) != 0)
+		{
+			// Nodes with the following text no longer give meaning or structure to the code.
+			// The structure/meaning of the code is now found in the structure of the AST.
+			std::set<std::string> textSet;
+			textSet.insert(";");
+			textSet.insert(",");
+			textSet.insert("(");
+			textSet.insert(")");
+			textSet.insert("{");
+			textSet.insert("}");
+			textSet.insert("[");
+			textSet.insert("]");
+			rootNode->RemoveNodesWithText(textSet);
+		}
 
-		// Recursive definitions in the grammar cause unnecessary structure in the AST
-		// that we are trying to remove here.
-		rootNode->Flatten();
+		if ((grammar.flags & PARSE_PARTY_GRAMMAR_FLAG_FLATTEN_AST) != 0)
+		{
+			// Recursive definitions in the grammar cause unnecessary structure in the AST
+			// that we are trying to remove here.  This makes the tree easier to read and process.
+			rootNode->Flatten();
+		}
 	}
 
 	delete algorithm;
@@ -112,6 +116,14 @@ Parser::SyntaxNode::SyntaxNode()
 	this->text = new std::string();
 	this->fileLocation.line = -1;
 	this->fileLocation.column = -1;
+}
+
+Parser::SyntaxNode::SyntaxNode(const std::string& text, const Lexer::FileLocation& fileLocation)
+{
+	this->parentNode = nullptr;
+	this->childList = new std::list<SyntaxNode*>();
+	this->text = new std::string(text.c_str());
+	this->fileLocation = fileLocation;
 }
 
 /*virtual*/ Parser::SyntaxNode::~SyntaxNode()
@@ -165,16 +177,60 @@ const Parser::SyntaxNode* Parser::SyntaxNode::GetParent() const
 
 const Parser::SyntaxNode* Parser::SyntaxNode::GetChild(int i) const
 {
+	return const_cast<SyntaxNode*>(this)->GetChild(i);
+}
+
+Parser::SyntaxNode* Parser::SyntaxNode::GetParent()
+{
+	return this->parentNode;
+}
+
+Parser::SyntaxNode* Parser::SyntaxNode::GetChild(int i)
+{
+	std::list<SyntaxNode*>::iterator iter;
+	if (this->GetChildIterator(iter, i))
+		return *iter;
+
+	return nullptr;
+}
+
+bool Parser::SyntaxNode::SetChild(int i, SyntaxNode* childNode)
+{
+	std::list<SyntaxNode*>::iterator iter;
+	if (this->GetChildIterator(iter, i))
+	{
+		*iter = childNode;
+		return true;
+	}
+
+	return false;
+}
+
+bool Parser::SyntaxNode::DelChild(int i)
+{
+	std::list<SyntaxNode*>::iterator iter;
+	if (this->GetChildIterator(iter, i))
+	{
+		delete* iter;
+		this->childList->erase(iter);
+		return true;
+	}
+
+	return false;
+}
+
+bool Parser::SyntaxNode::GetChildIterator(std::list<SyntaxNode*>::iterator& iter, int i)
+{
 	if (0 <= i && i < (signed)this->childList->size())
 	{
-		std::list<SyntaxNode*>::const_iterator iter = this->childList->begin();
+		iter = this->childList->begin();
 		while (--i > 0)
 			iter++;
 
-		return *iter;
+		return true;
 	}
 
-	return nullptr;
+	return false;
 }
 
 int Parser::SyntaxNode::GetChildCount() const
@@ -244,4 +300,25 @@ int Parser::SyntaxNode::CalcSize() const
 		count += childNode->CalcSize();
 
 	return count;
+}
+
+void Parser::SyntaxNode::Print(std::ostream& stream, int tabCount /*= 0*/) const
+{
+	for (int i = 0; i < tabCount; i++)
+		stream << "\t";
+
+	stream << *this->text << "\n";
+
+	for (const SyntaxNode* childNode : *this->childList)
+		childNode->Print(stream, tabCount + 1);
+}
+
+Parser::SyntaxNode* Parser::SyntaxNode::Clone() const
+{
+	SyntaxNode* syntaxNode = new SyntaxNode(*this->text, this->fileLocation);
+
+	for (const SyntaxNode* childNode : *this->childList)
+		syntaxNode->childList->push_back(childNode->Clone());
+
+	return syntaxNode;
 }

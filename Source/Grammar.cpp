@@ -10,6 +10,7 @@ Grammar::Grammar()
 	this->ruleMap = new RuleMap();
 	this->initialRule = new std::string();
 	this->algorithmName = new std::string();
+	this->flags = 0;
 }
 
 /*virtual*/ Grammar::~Grammar()
@@ -95,6 +96,10 @@ bool Grammar::ReadFile(const std::string& grammarFile, std::string& error)
 
 		*this->algorithmName = jsonAlgorithm->GetValue();
 
+		JsonObject* jsonFlags = dynamic_cast<JsonObject*>(jsonObject->GetValue("flags"));
+		if (!this->ReadFlags(jsonFlags))
+			break;
+
 		JsonObject* jsonRuleMap = dynamic_cast<JsonObject*>(jsonObject->GetValue("rules"));
 		if (!jsonRuleMap)
 		{
@@ -138,6 +143,24 @@ bool Grammar::ReadFile(const std::string& grammarFile, std::string& error)
 bool Grammar::WriteFile(const std::string& grammarFile) const
 {
 	return false;
+}
+
+bool Grammar::ReadFlags(const JsonObject* jsonFlags)
+{
+	this->flags = 0;
+
+	if (jsonFlags)
+	{
+		const JsonBool* jsonFlatten = dynamic_cast<const JsonBool*>(jsonFlags->GetValue("flatten"));
+		if (jsonFlatten && jsonFlatten->GetValue())
+			this->flags |= PARSE_PARTY_GRAMMAR_FLAG_FLATTEN_AST;
+
+		const JsonBool* jsonDeleteStructureTokens = dynamic_cast<const JsonBool*>(jsonFlags->GetValue("delete_structure_tokens"));
+		if (jsonDeleteStructureTokens && jsonDeleteStructureTokens->GetValue())
+			this->flags |= PARSE_PARTY_GRAMMAR_FLAG_DELETE_STRUCTURE_TOKENS;
+	}
+
+	return true;
 }
 
 //------------------------------- Grammar::Token -------------------------------

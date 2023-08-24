@@ -15,32 +15,9 @@ using namespace ParseParty;
 
 //------------------------------- Lexer -------------------------------
 
-Lexer::Lexer(const std::string& hint /*= ""*/)
+Lexer::Lexer()
 {
 	this->tokenGeneratorList = new std::list<TokenGenerator*>();
-
-	if (hint == "for_json")
-	{
-		// Don't include the token generators for operators and identifiers.
-		this->tokenGeneratorList->push_back(new ParanTokenGenerator());
-		this->tokenGeneratorList->push_back(new DelimeterTokenGenerator());
-		this->tokenGeneratorList->push_back(new StringTokenGenerator());
-		this->tokenGeneratorList->push_back(new NumberTokenGenerator());
-		this->tokenGeneratorList->push_back(new CommentTokenGenerator());
-	}
-	else
-	{
-		// Here's the list of typical token generators.  Note that the order is significant in
-		// the case of, e.g., "-1".  This parses as two tokens, not one, which is not desirable
-		// in the JSON case.  Why two tokens?  Because we want "1 - 1" to tokenize correctly.
-		this->tokenGeneratorList->push_back(new ParanTokenGenerator());
-		this->tokenGeneratorList->push_back(new DelimeterTokenGenerator());
-		this->tokenGeneratorList->push_back(new StringTokenGenerator());
-		this->tokenGeneratorList->push_back(new OperatorTokenGenerator());
-		this->tokenGeneratorList->push_back(new NumberTokenGenerator());
-		this->tokenGeneratorList->push_back(new IdentifierTokenGenerator());
-		this->tokenGeneratorList->push_back(new CommentTokenGenerator());
-	}
 }
 
 /*virtual*/ Lexer::~Lexer()

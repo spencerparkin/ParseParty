@@ -4,11 +4,10 @@
 
 namespace ParseParty
 {
-	// TODO: Customization of the lexer would involve letting the user populate the token-generator list themselves.
 	class PARSE_PARTY_API Lexer
 	{
 	public:
-		Lexer(const std::string& hint = "");
+		Lexer();
 		virtual ~Lexer();
 
 		struct FileLocation

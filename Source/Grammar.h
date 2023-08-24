@@ -4,6 +4,9 @@
 #include "Lexer.h"
 #include "JsonValue.h"
 
+#define PARSE_PARTY_GRAMMAR_FLAG_FLATTEN_AST				0x00000001
+#define PARSE_PARTY_GRAMMAR_FLAG_DELETE_STRUCTURE_TOKENS	0x00000002
+
 namespace ParseParty
 {
 	class PARSE_PARTY_API Grammar
@@ -95,10 +98,13 @@ namespace ParseParty
 			std::string* name;
 		};
 
+		bool ReadFlags(const JsonObject* jsonFlags);
+
 		typedef std::map<std::string, Rule*> RuleMap;
 		RuleMap* ruleMap;
 
 		std::string* initialRule;
 		std::string* algorithmName;
+		int flags;
 	};
 }

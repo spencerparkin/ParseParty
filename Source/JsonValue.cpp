@@ -14,9 +14,14 @@ JsonValue::JsonValue()
 
 /*static*/ JsonValue* JsonValue::ParseJson(const std::string& jsonString, std::string& parseError)
 {
-	std::vector<Lexer::Token*> tokenArray;
+	Lexer lexer;
+	lexer.tokenGeneratorList->push_back(new Lexer::ParanTokenGenerator());
+	lexer.tokenGeneratorList->push_back(new Lexer::DelimeterTokenGenerator());
+	lexer.tokenGeneratorList->push_back(new Lexer::StringTokenGenerator());
+	lexer.tokenGeneratorList->push_back(new Lexer::NumberTokenGenerator());
+	lexer.tokenGeneratorList->push_back(new Lexer::CommentTokenGenerator());
 
-	Lexer lexer("for_json");
+	std::vector<Lexer::Token*> tokenArray;
 	if (!lexer.Tokenize(jsonString, tokenArray))
 		return nullptr;
 
