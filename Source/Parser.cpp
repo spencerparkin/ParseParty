@@ -33,7 +33,12 @@ Parser::SyntaxNode* Parser::Parse(const std::string& codeText, const Grammar& gr
 	std::vector<Lexer::Token*> tokenArray;
 
 	if (!this->lexer.Tokenize(codeText, tokenArray))
+	{
+		if (error)
+			*error = "Tokenization failed.";
+
 		return nullptr;
+	}
 
 	SyntaxNode* rootNode = this->Parse(tokenArray, grammar, error);
 
@@ -53,7 +58,12 @@ Parser::SyntaxNode* Parser::Parse(const std::vector<Lexer::Token*>& tokenArray, 
 		algorithm = new SlowParseAlgorithm(&tokenArray, &grammar);
 
 	if (!algorithm)
+	{
+		if (error)
+			*error = (grammar.algorithmName->length() > 0) ? std::format("Unrecognized parse algorithm: {}", grammar.algorithmName->c_str()) : "No parse algorithm specified.";
+
 		return nullptr;
+	}
 
 	SyntaxNode* rootNode = algorithm->Parse();
 

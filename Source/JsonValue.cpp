@@ -20,16 +20,25 @@ JsonValue::JsonValue()
 	lexer.tokenGeneratorList->push_back(new Lexer::StringTokenGenerator());
 	lexer.tokenGeneratorList->push_back(new Lexer::NumberTokenGenerator());
 	lexer.tokenGeneratorList->push_back(new Lexer::CommentTokenGenerator());
+	lexer.tokenGeneratorList->push_back(new Lexer::IdentifierTokenGenerator());
 
 	std::vector<Lexer::Token*> tokenArray;
 	if (!lexer.Tokenize(jsonString, tokenArray))
+	{
+		parseError = "Failed to tokenize.";
 		return nullptr;
+	}
 
 	if (tokenArray.size() == 0)
+	{
+		parseError = "Token sequence is size zero.";
 		return nullptr;
+	}
 
 	JsonValue* jsonValue = ValueFactory(*tokenArray[0]);
-	if (jsonValue)
+	if (!jsonValue)
+		parseError = "Could not decypher initial token.";
+	else
 	{
 		int parsePosition = 0;
 		if (!jsonValue->ParseTokens(tokenArray, parsePosition, parseError))
