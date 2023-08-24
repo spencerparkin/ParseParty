@@ -1,4 +1,5 @@
 #include "Lexer.h"
+#include "JsonValue.h"
 
 namespace ParseParty
 {
@@ -22,10 +23,131 @@ Lexer::Lexer()
 
 /*virtual*/ Lexer::~Lexer()
 {
+	this->Clear();
+
+	delete this->tokenGeneratorList;
+}
+
+void Lexer::Clear()
+{
 	for (TokenGenerator* tokenGenerator : *this->tokenGeneratorList)
 		delete tokenGenerator;
 
-	delete this->tokenGeneratorList;
+	this->tokenGeneratorList->clear();
+}
+
+bool Lexer::ReadFile(const std::string& lexiconFile, std::string& error)
+{
+	bool success = false;
+	JsonValue* jsonRootValue = nullptr;
+
+	while (true)
+	{
+		std::ifstream fileStream;
+		fileStream.open(lexiconFile.c_str(), std::ios::in);
+		if (!fileStream.is_open())
+		{
+			error = "Failed to open file: " + lexiconFile;
+			break;
+		}
+
+		std::stringstream stringStream;
+		stringStream << fileStream.rdbuf();
+		std::string jsonString = stringStream.str();
+		std::string parseError;
+		jsonRootValue = JsonValue::ParseJson(jsonString, parseError);
+		if (!jsonRootValue)
+		{
+			error = parseError;
+			break;
+		}
+
+		const JsonObject* jsonObject = dynamic_cast<JsonObject*>(jsonRootValue);
+		if (!jsonObject)
+		{
+			error = "Expected root-level JSON object.";
+			break;
+		}
+
+		const JsonArray* jsonTokenGeneratorArray = dynamic_cast<const JsonArray*>(jsonObject->GetValue("token_generators"));
+		if (!jsonTokenGeneratorArray)
+		{
+			error = "Expected to find \"token_generators\" key as an array.";
+			break;
+		}
+
+		this->Clear();
+
+		for (int i = 0; i < (signed)jsonTokenGeneratorArray->GetSize(); i++)
+		{
+			const JsonObject* jsonTokenGenerator = dynamic_cast<const JsonObject*>(jsonTokenGeneratorArray->GetValue(i));
+			if (!jsonTokenGenerator)
+			{
+				error = "Each token generator should be an object.";
+				break;
+			}
+
+			const JsonString* jsonGeneratorName = dynamic_cast<const JsonString*>(jsonTokenGenerator->GetValue("name"));
+			if (!jsonGeneratorName)
+			{
+				error = "No name found for token generator.";
+				break;
+			}
+
+			const JsonObject* jsonGeneratorConfig = dynamic_cast<const JsonObject*>(jsonTokenGenerator->GetValue("config"));
+			if (!jsonGeneratorConfig)
+			{
+				error = "No config found for token generator \"" + jsonGeneratorName->GetValue() + "\".";
+				break;
+			}
+
+			TokenGenerator* tokenGenerator = nullptr;
+
+			if (jsonGeneratorName->GetValue() == "ParanTokenGenerator")
+				tokenGenerator = new ParanTokenGenerator();
+			else if (jsonGeneratorName->GetValue() == "DelimeterTokenGenerator")
+				tokenGenerator = new DelimeterTokenGenerator();
+			else if (jsonGeneratorName->GetValue() == "NumberTokenGenerator")
+				tokenGenerator = new NumberTokenGenerator();
+			else if (jsonGeneratorName->GetValue() == "StringTokenGenerator")
+				tokenGenerator = new StringTokenGenerator();
+			else if (jsonGeneratorName->GetValue() == "OperatorTokenGenerator")
+				tokenGenerator = new OperatorTokenGenerator();
+			else if (jsonGeneratorName->GetValue() == "IdentifierTokenGenerator")
+				tokenGenerator = new IdentifierTokenGenerator();
+			else if (jsonGeneratorName->GetValue() == "CommentTokenGenerator")
+				tokenGenerator = new CommentTokenGenerator();
+
+			if (!tokenGenerator)
+			{
+				error = "Unrecognized token generator: " + jsonGeneratorName->GetValue();
+				break;
+			}
+
+			if (!tokenGenerator->ReadConfig(jsonGeneratorConfig, error))
+			{
+				delete tokenGenerator;
+				break;
+			}
+
+			this->tokenGeneratorList->push_back(tokenGenerator);
+		}
+
+		if (this->tokenGeneratorList->size() != jsonTokenGeneratorArray->GetSize())
+			break;
+
+		success = true;
+		break;
+	}
+
+	delete jsonRootValue;
+
+	return success;
+}
+
+bool Lexer::WriteFile(const std::string& lexiconFile) const
+{
+	return false;
 }
 
 bool Lexer::Tokenize(const std::string& codeText, std::vector<Token*>& tokenArray)
@@ -177,6 +299,16 @@ Lexer::ParanTokenGenerator::ParanTokenGenerator()
 	return token;
 }
 
+/*virtual*/ bool Lexer::ParanTokenGenerator::ReadConfig(const JsonObject* jsonConfig, std::string& error)
+{
+	return true;
+}
+
+/*virtual*/ bool Lexer::ParanTokenGenerator::WriteConfig(JsonObject* jsonConfig) const
+{
+	return false;
+}
+
 //-------------------------------- Lexer::DelimeterTokenGenerator --------------------------------
 
 Lexer::DelimeterTokenGenerator::DelimeterTokenGenerator()
@@ -213,6 +345,16 @@ Lexer::DelimeterTokenGenerator::DelimeterTokenGenerator()
 	return token;
 }
 
+/*virtual*/ bool Lexer::DelimeterTokenGenerator::ReadConfig(const JsonObject* jsonConfig, std::string& error)
+{
+	return true;
+}
+
+/*virtual*/ bool Lexer::DelimeterTokenGenerator::WriteConfig(JsonObject* jsonConfig) const
+{
+	return false;
+}
+
 //-------------------------------- Lexer::StringTokenGenerator --------------------------------
 
 Lexer::StringTokenGenerator::StringTokenGenerator()
@@ -245,6 +387,17 @@ Lexer::StringTokenGenerator::StringTokenGenerator()
 	}
 
 	return token;
+}
+
+/*virtual*/ bool Lexer::StringTokenGenerator::ReadConfig(const JsonObject* jsonConfig, std::string& error)
+{
+	// TODO: Maybe register escape sequences here?
+	return true;
+}
+
+/*virtual*/ bool Lexer::StringTokenGenerator::WriteConfig(JsonObject* jsonConfig) const
+{
+	return false;
 }
 
 //-------------------------------- Lexer::NumberTokenGenerator --------------------------------
@@ -296,33 +449,21 @@ Lexer::NumberTokenGenerator::NumberTokenGenerator()
 	return token;
 }
 
+/*virtual*/ bool Lexer::NumberTokenGenerator::ReadConfig(const JsonObject* jsonConfig, std::string& error)
+{
+	return true;
+}
+
+/*virtual*/ bool Lexer::NumberTokenGenerator::WriteConfig(JsonObject* jsonConfig) const
+{
+	return false;
+}
+
 //-------------------------------- Lexer::OperatorTokenGenerator --------------------------------
 
 Lexer::OperatorTokenGenerator::OperatorTokenGenerator()
 {
 	this->operatorSet = new std::set<std::string>();
-
-	this->operatorSet->insert(".");
-	this->operatorSet->insert("=");
-	this->operatorSet->insert("+=");
-	this->operatorSet->insert("-=");
-	this->operatorSet->insert("*=");
-	this->operatorSet->insert("/=");
-	this->operatorSet->insert("%=");
-	this->operatorSet->insert("==");
-	this->operatorSet->insert("+");
-	this->operatorSet->insert("-");
-	this->operatorSet->insert("*");
-	this->operatorSet->insert("/");
-	this->operatorSet->insert("%");
-	this->operatorSet->insert(":");
-	this->operatorSet->insert("<");
-	this->operatorSet->insert("<=");
-	this->operatorSet->insert(">");
-	this->operatorSet->insert(">=");
-	this->operatorSet->insert("&&");
-	this->operatorSet->insert("||");
-	this->operatorSet->insert("!");
 }
 
 /*virtual*/ Lexer::OperatorTokenGenerator::~OperatorTokenGenerator()
@@ -332,7 +473,7 @@ Lexer::OperatorTokenGenerator::OperatorTokenGenerator()
 
 /*virtual*/ Lexer::Token* Lexer::OperatorTokenGenerator::GenerateToken(const char* codeBuffer, int& i)
 {
-	const char charSet[] = ".=+-*/%:<>&|!";
+	const char charSet[] = ".=+-*/%:<>&|!";		// TODO: Should really glean this from the operator set.
 	if (!this->IsCharFoundIn(codeBuffer[i], charSet))
 		return nullptr;
 
@@ -356,6 +497,34 @@ Lexer::OperatorTokenGenerator::OperatorTokenGenerator()
 	}
 
 	return token;
+}
+
+/*virtual*/ bool Lexer::OperatorTokenGenerator::ReadConfig(const JsonObject* jsonConfig, std::string& error)
+{
+	const JsonArray* jsonOperatorArray = dynamic_cast<const JsonArray*>(jsonConfig->GetValue("operators"));
+	if (jsonOperatorArray)
+	{
+		this->operatorSet->clear();
+
+		for (int i = 0; i < (signed)jsonOperatorArray->GetSize(); i++)
+		{
+			const JsonString* jsonOperatorString = dynamic_cast<const JsonString*>(jsonOperatorArray->GetValue(i));
+			if (!jsonOperatorString)
+			{
+				error = "Expected operator entry to be a string.";
+				return false;
+			}
+
+			this->operatorSet->insert(jsonOperatorString->GetValue());
+		}
+	}
+
+	return true;
+}
+
+/*virtual*/ bool Lexer::OperatorTokenGenerator::WriteConfig(JsonObject* jsonConfig) const
+{
+	return false;
 }
 
 //-------------------------------- Lexer::IdentifierTokenGenerator --------------------------------
@@ -382,6 +551,17 @@ Lexer::IdentifierTokenGenerator::IdentifierTokenGenerator()
 	return token;
 }
 
+/*virtual*/ bool Lexer::IdentifierTokenGenerator::ReadConfig(const JsonObject* jsonConfig, std::string& error)
+{
+	// TODO: Maybe configure which identifiers are keywords?
+	return true;
+}
+
+/*virtual*/ bool Lexer::IdentifierTokenGenerator::WriteConfig(JsonObject* jsonConfig) const
+{
+	return false;
+}
+
 //-------------------------------- Lexer::CommentTokenGenerator --------------------------------
 
 Lexer::CommentTokenGenerator::CommentTokenGenerator()
@@ -404,4 +584,14 @@ Lexer::CommentTokenGenerator::CommentTokenGenerator()
 		*token->text += codeBuffer[i++];
 
 	return token;
+}
+
+/*virtual*/ bool Lexer::CommentTokenGenerator::ReadConfig(const JsonObject* jsonConfig, std::string& error)
+{
+	return true;
+}
+
+/*virtual*/ bool Lexer::CommentTokenGenerator::WriteConfig(JsonObject* jsonConfig) const
+{
+	return false;
 }

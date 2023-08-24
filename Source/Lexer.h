@@ -4,6 +4,8 @@
 
 namespace ParseParty
 {
+	class JsonObject;
+
 	class PARSE_PARTY_API Lexer
 	{
 	public:
@@ -16,6 +18,10 @@ namespace ParseParty
 		};
 
 		class Token;
+
+		void Clear();
+		bool ReadFile(const std::string& lexiconFile, std::string& error);
+		bool WriteFile(const std::string& lexiconFile) const;
 
 		bool Tokenize(const std::string& codeText, std::vector<Token*>& tokenArray);
 
@@ -60,6 +66,8 @@ namespace ParseParty
 			virtual ~TokenGenerator();
 
 			virtual Token* GenerateToken(const char* codeBuffer, int& i) = 0;
+			virtual bool ReadConfig(const JsonObject* jsonConfig, std::string& error) = 0;
+			virtual bool WriteConfig(JsonObject* jsonConfig) const = 0;
 
 			bool IsCharFoundIn(char ch, const char* charSet);
 		};
@@ -71,6 +79,8 @@ namespace ParseParty
 			virtual ~ParanTokenGenerator();
 
 			virtual Token* GenerateToken(const char* codeBuffer, int& i) override;
+			virtual bool ReadConfig(const JsonObject* jsonConfig, std::string& error) override;
+			virtual bool WriteConfig(JsonObject* jsonConfig) const override;
 		};
 
 		class PARSE_PARTY_API DelimeterTokenGenerator : public TokenGenerator
@@ -80,6 +90,8 @@ namespace ParseParty
 			virtual ~DelimeterTokenGenerator();
 
 			virtual Token* GenerateToken(const char* codeBuffer, int& i) override;
+			virtual bool ReadConfig(const JsonObject* jsonConfig, std::string& error) override;
+			virtual bool WriteConfig(JsonObject* jsonConfig) const override;
 		};
 
 		class PARSE_PARTY_API StringTokenGenerator : public TokenGenerator
@@ -89,6 +101,8 @@ namespace ParseParty
 			virtual ~StringTokenGenerator();
 
 			virtual Token* GenerateToken(const char* codeBuffer, int& i) override;
+			virtual bool ReadConfig(const JsonObject* jsonConfig, std::string& error) override;
+			virtual bool WriteConfig(JsonObject* jsonConfig) const override;
 		};
 
 		class PARSE_PARTY_API NumberTokenGenerator : public TokenGenerator
@@ -98,6 +112,8 @@ namespace ParseParty
 			virtual ~NumberTokenGenerator();
 
 			virtual Token* GenerateToken(const char* codeBuffer, int& i) override;
+			virtual bool ReadConfig(const JsonObject* jsonConfig, std::string& error) override;
+			virtual bool WriteConfig(JsonObject* jsonConfig) const override;
 		};
 
 		class PARSE_PARTY_API OperatorTokenGenerator : public TokenGenerator
@@ -107,6 +123,8 @@ namespace ParseParty
 			virtual ~OperatorTokenGenerator();
 
 			virtual Token* GenerateToken(const char* codeBuffer, int& i) override;
+			virtual bool ReadConfig(const JsonObject* jsonConfig, std::string& error) override;
+			virtual bool WriteConfig(JsonObject* jsonConfig) const override;
 
 			std::set<std::string>* operatorSet;
 		};
@@ -118,6 +136,8 @@ namespace ParseParty
 			virtual ~IdentifierTokenGenerator();
 
 			virtual Token* GenerateToken(const char* codeBuffer, int& i) override;
+			virtual bool ReadConfig(const JsonObject* jsonConfig, std::string& error) override;
+			virtual bool WriteConfig(JsonObject* jsonConfig) const override;
 		};
 
 		class PARSE_PARTY_API CommentTokenGenerator : public TokenGenerator
@@ -127,6 +147,8 @@ namespace ParseParty
 			virtual ~CommentTokenGenerator();
 
 			virtual Token* GenerateToken(const char* codeBuffer, int& i) override;
+			virtual bool ReadConfig(const JsonObject* jsonConfig, std::string& error) override;
+			virtual bool WriteConfig(JsonObject* jsonConfig) const override;
 		};
 
 		std::list<TokenGenerator*>* tokenGeneratorList;

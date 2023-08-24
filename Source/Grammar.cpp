@@ -58,7 +58,10 @@ bool Grammar::ReadFile(const std::string& grammarFile, std::string& error)
 		std::ifstream fileStream;
 		fileStream.open(grammarFile.c_str(), std::ios::in);
 		if (!fileStream.is_open())
+		{
+			error = "Failed to open file: " + grammarFile;
 			break;
+		}
 
 		std::stringstream stringStream;
 		stringStream << fileStream.rdbuf();

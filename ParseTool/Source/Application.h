@@ -18,6 +18,8 @@ public:
 	Frame* frame;
 
 	ParseParty::Grammar grammar;
+	ParseParty::Parser parser;
+
 	ParseParty::Parser::SyntaxNode* rootNode;
 };
 
