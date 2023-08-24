@@ -20,6 +20,8 @@ namespace ParseParty
 
 		void Clear();
 
+		// TODO: Given a lexer, we could generate a random code sequence which should always parse correctly.
+
 		class Rule;
 
 		const Rule* GetInitialRule() const;

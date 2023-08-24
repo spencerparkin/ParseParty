@@ -144,6 +144,16 @@ Parser::SyntaxNode::SyntaxNode(const std::string& text, const Lexer::FileLocatio
 	delete this->childList;
 }
 
+/*static*/ bool Parser::SyntaxNode::ReadFromFile(const std::string& syntaxTreeFile, SyntaxNode*& rootNode)
+{
+	return false;
+}
+
+/*static*/ bool Parser::SyntaxNode::WriteToFile(const std::string& syntaxTreeFile, const SyntaxNode* rootNode)
+{
+	return false;
+}
+
 const Parser::SyntaxNode* Parser::SyntaxNode::FindChild(const std::string& text, int maxRecurseDepth, int depth /*= 1*/) const
 {
 	for (const SyntaxNode* childNode : *this->childList)

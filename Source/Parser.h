@@ -42,6 +42,9 @@ namespace ParseParty
 			SyntaxNode* Clone() const;
 			bool GetChildIterator(std::list<SyntaxNode*>::iterator& iter, int i);
 
+			static bool ReadFromFile(const std::string& syntaxTreeFile, SyntaxNode*& rootNode);
+			static bool WriteToFile(const std::string& syntaxTreeFile, const SyntaxNode* rootNode);
+
 			SyntaxNode* parentNode;
 			std::list<SyntaxNode*>* childList;
 			std::string* text;
