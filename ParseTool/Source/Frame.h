@@ -12,6 +12,7 @@ public:
 	void OnExit(wxCommandEvent& event);
 	void OnGrammarFile(wxCommandEvent& event);
 	void OnLexiconFile(wxCommandEvent& event);
+	void OnSyntaxTreeFile(wxCommandEvent& event);
 	void OnParseFile(wxCommandEvent& event);
 	void OnAbout(wxCommandEvent& event);
 	void OnUpdateUI(wxUpdateUIEvent& event);
@@ -23,6 +24,8 @@ public:
 		ID_WriteGrammarFile,
 		ID_ReadLexiconFile,
 		ID_WriteLexiconFile,
+		ID_ReadSyntaxTreeFile,
+		ID_WriteSyntaxTreeFile,
 		ID_ParseFile,
 		ID_About
 	};

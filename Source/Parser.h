@@ -6,6 +6,8 @@
 
 namespace ParseParty
 {
+	class JsonObject;
+
 	class PARSE_PARTY_API Parser
 	{
 	public:
@@ -41,8 +43,10 @@ namespace ParseParty
 			void Print(std::ostream& stream, int tabCount = 0) const;
 			SyntaxNode* Clone() const;
 			bool GetChildIterator(std::list<SyntaxNode*>::iterator& iter, int i);
+			bool ReadFromJson(const JsonObject* jsonParentNode, std::string& parseError);
+			bool WriteToJson(JsonObject* jsonParentNode) const;
 
-			static bool ReadFromFile(const std::string& syntaxTreeFile, SyntaxNode*& rootNode);
+			static bool ReadFromFile(const std::string& syntaxTreeFile, SyntaxNode*& rootNode, std::string& parseError);
 			static bool WriteToFile(const std::string& syntaxTreeFile, const SyntaxNode* rootNode);
 
 			SyntaxNode* parentNode;

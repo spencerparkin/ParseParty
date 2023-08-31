@@ -16,6 +16,9 @@ Frame::Frame(wxWindow* parent, const wxPoint& pos, const wxSize& size) : wxFrame
 	fileMenu->Append(new wxMenuItem(fileMenu, ID_ReadLexiconFile, "Read Lexicon File", "Read in a lexicon configuration file used during lexical analysis."));
 	fileMenu->Append(new wxMenuItem(fileMenu, ID_WriteLexiconFile, "Write Lexicon File", "Write out the current lexicon configuration to disk."));
 	fileMenu->AppendSeparator();
+	fileMenu->Append(new wxMenuItem(fileMenu, ID_ReadSyntaxTreeFile, "Read Syntax Tree File", "Read in a file containing an entire AST."));
+	fileMenu->Append(new wxMenuItem(fileMenu, ID_WriteSyntaxTreeFile, "Write Syntax Tree File", "Write the currently generated AST to file."));
+	fileMenu->AppendSeparator();
 	fileMenu->Append(new wxMenuItem(fileMenu, ID_ParseFile, "Parse File", "Parse the given file against the current grammar definition."));
 	fileMenu->AppendSeparator();
 	fileMenu->Append(new wxMenuItem(fileMenu, ID_Exit, "Exit", "Get out of here!"));
@@ -36,8 +39,11 @@ Frame::Frame(wxWindow* parent, const wxPoint& pos, const wxSize& size) : wxFrame
 	this->Bind(wxEVT_MENU, &Frame::OnGrammarFile, this, ID_WriteGrammarFile);
 	this->Bind(wxEVT_MENU, &Frame::OnLexiconFile, this, ID_ReadLexiconFile);
 	this->Bind(wxEVT_MENU, &Frame::OnLexiconFile, this, ID_WriteLexiconFile);
+	this->Bind(wxEVT_MENU, &Frame::OnSyntaxTreeFile, this, ID_ReadSyntaxTreeFile);
+	this->Bind(wxEVT_MENU, &Frame::OnSyntaxTreeFile, this, ID_WriteSyntaxTreeFile);
 	this->Bind(wxEVT_MENU, &Frame::OnParseFile, this, ID_ParseFile);
 	this->Bind(wxEVT_UPDATE_UI, &Frame::OnUpdateUI, this, ID_ParseFile);
+	this->Bind(wxEVT_UPDATE_UI, &Frame::OnUpdateUI, this, ID_WriteSyntaxTreeFile);
 
 	this->treeControl = new wxTreeCtrl(this);
 
@@ -128,6 +134,45 @@ void Frame::OnLexiconFile(wxCommandEvent& event)
 	}
 }
 
+void Frame::OnSyntaxTreeFile(wxCommandEvent& event)
+{
+	switch (event.GetId())
+	{
+		case ID_ReadSyntaxTreeFile:
+		{
+			wxFileDialog fileDialog(this, "Open AST File", wxEmptyString, wxEmptyString, "JSON file (*.json)|*.json", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+			if (wxID_OK == fileDialog.ShowModal())
+			{
+				wxBusyCursor busyCursor;
+				wxString syntaxTreeFile = fileDialog.GetPath();
+				std::string error;
+				if (!ParseParty::Parser::SyntaxNode::ReadFromFile((const char*)syntaxTreeFile.c_str(), wxGetApp().rootNode, error))
+					wxMessageBox("Failed to save AST file: " + syntaxTreeFile, "Error!", wxICON_ERROR | wxOK, this);
+				else
+				{
+					wxMessageBox("AST file read!", "Success!", wxICON_INFORMATION | wxOK, this);
+					this->RebuildTreeControl();
+				}
+			}
+			break;
+		}
+		case ID_WriteSyntaxTreeFile:
+		{
+			wxFileDialog fileDialog(this, "Save AST File", wxEmptyString, wxEmptyString, "JSON file (*.json)|*.json", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+			if (wxID_OK == fileDialog.ShowModal())
+			{
+				wxBusyCursor busyCursor;
+				wxString syntaxTreeFile = fileDialog.GetPath();
+				if (!ParseParty::Parser::SyntaxNode::WriteToFile((const char*)syntaxTreeFile.c_str(), wxGetApp().rootNode))
+					wxMessageBox("Failed to save AST file: " + syntaxTreeFile, "Error!", wxICON_ERROR | wxOK, this);
+				else
+					wxMessageBox("AST file written!", "Success!", wxICON_INFORMATION | wxOK, this);
+			}
+			break;
+		}
+	}
+}
+
 void Frame::OnParseFile(wxCommandEvent& event)
 {
 	wxFileDialog fileDialog(this, "Open Code File", wxEmptyString, wxEmptyString, "Any File (*.*)|*.*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
@@ -201,6 +246,11 @@ void Frame::OnUpdateUI(wxUpdateUIEvent& event)
 		case ID_ParseFile:
 		{
 			event.Enable(wxGetApp().grammar.ruleMap->size() > 0);
+			break;
+		}
+		case ID_WriteSyntaxTreeFile:
+		{
+			event.Enable(wxGetApp().rootNode != nullptr);
 			break;
 		}
 	}
