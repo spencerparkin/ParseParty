@@ -103,6 +103,8 @@ namespace ParseParty
 			virtual Token* GenerateToken(const char* codeBuffer, int& i) override;
 			virtual bool ReadConfig(const JsonObject* jsonConfig, std::string& error) override;
 			virtual bool WriteConfig(JsonObject* jsonConfig) const override;
+
+			bool CollapseEscapeSequences(std::string& text);
 		};
 
 		class PARSE_PARTY_API NumberTokenGenerator : public TokenGenerator

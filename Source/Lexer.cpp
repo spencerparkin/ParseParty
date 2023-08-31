@@ -150,6 +150,7 @@ bool Lexer::WriteFile(const std::string& lexiconFile) const
 	return false;
 }
 
+// TODO: We really should have good error reporting here that includes line and column numbers.
 bool Lexer::Tokenize(const std::string& codeText, std::vector<Token*>& tokenArray)
 {
 	if (tokenArray.size() != 0)
@@ -373,12 +374,16 @@ Lexer::StringTokenGenerator::StringTokenGenerator()
 	Token* token = new Token();
 	token->type = Token::Type::STRING_LITERAL;
 
-	// TODO: What about "\""?
 	int j = i + 1;
 	while (codeBuffer[j] != '\0' && codeBuffer[j] != '"')
 		*token->text += codeBuffer[j++];
 
-	if (codeBuffer[j] == '"')
+	if (!this->CollapseEscapeSequences(*token->text))
+	{
+		delete token;
+		token = nullptr;
+	}
+	else if (codeBuffer[j] == '"')
 		i = j + 1;
 	else
 	{
@@ -387,6 +392,47 @@ Lexer::StringTokenGenerator::StringTokenGenerator()
 	}
 
 	return token;
+}
+
+bool Lexer::StringTokenGenerator::CollapseEscapeSequences(std::string& text)
+{
+	std::string modifiedText;
+
+	for (int i = 0; text.c_str()[i] != '\0'; i++)
+	{
+		char ch = text.c_str()[i];
+		if (ch != '\\')
+			modifiedText += ch;
+		else
+		{
+			char nextCh = text.c_str()[++i];
+			if (nextCh == '\0')
+				return false;
+
+			switch (nextCh)
+			{
+			case 't':
+				modifiedText += '\t';
+				break;
+			case 'n':
+				modifiedText += '\n';
+				break;
+			case 'r':
+				modifiedText += '\r';
+				break;
+			case '"':
+				modifiedText += '"';
+				break;
+			case '\\':
+			default:
+				modifiedText += '\\';
+				break;
+			}
+		}
+	}
+
+	text = modifiedText;
+	return true;
 }
 
 /*virtual*/ bool Lexer::StringTokenGenerator::ReadConfig(const JsonObject* jsonConfig, std::string& error)
