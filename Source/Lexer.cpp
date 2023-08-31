@@ -360,6 +360,7 @@ Lexer::DelimeterTokenGenerator::DelimeterTokenGenerator()
 
 Lexer::StringTokenGenerator::StringTokenGenerator()
 {
+	this->processEscapeSequences = false;
 }
 
 /*virtual*/ Lexer::StringTokenGenerator::~StringTokenGenerator()
@@ -378,7 +379,7 @@ Lexer::StringTokenGenerator::StringTokenGenerator()
 	while (codeBuffer[j] != '\0' && codeBuffer[j] != '"')
 		*token->text += codeBuffer[j++];
 
-	if (!this->CollapseEscapeSequences(*token->text))
+	if (this->processEscapeSequences && !this->CollapseEscapeSequences(*token->text))
 	{
 		delete token;
 		token = nullptr;
@@ -424,8 +425,11 @@ bool Lexer::StringTokenGenerator::CollapseEscapeSequences(std::string& text)
 				modifiedText += '"';
 				break;
 			case '\\':
+				modifiedText += '\\';
+				break;
 			default:
 				modifiedText += '\\';
+				i--;
 				break;
 			}
 		}
@@ -437,7 +441,10 @@ bool Lexer::StringTokenGenerator::CollapseEscapeSequences(std::string& text)
 
 /*virtual*/ bool Lexer::StringTokenGenerator::ReadConfig(const JsonObject* jsonConfig, std::string& error)
 {
-	// TODO: Maybe register escape sequences here?
+	const JsonBool* jsonProcessEscapes = dynamic_cast<const JsonBool*>(jsonConfig->GetValue("process_escape_sequences"));
+	if (jsonProcessEscapes)
+		this->processEscapeSequences = jsonProcessEscapes->GetValue();
+
 	return true;
 }
 

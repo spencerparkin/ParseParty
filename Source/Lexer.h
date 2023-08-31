@@ -105,6 +105,8 @@ namespace ParseParty
 			virtual bool WriteConfig(JsonObject* jsonConfig) const override;
 
 			bool CollapseEscapeSequences(std::string& text);
+
+			bool processEscapeSequences;
 		};
 
 		class PARSE_PARTY_API NumberTokenGenerator : public TokenGenerator
