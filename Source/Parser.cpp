@@ -409,7 +409,7 @@ bool Parser::SyntaxNode::GetChildIterator(std::list<SyntaxNode*>::iterator& iter
 	if (0 <= i && i < (signed)this->childList->size())
 	{
 		iter = this->childList->begin();
-		while (--i > 0)
+		while (--i >= 0)
 			iter++;
 
 		return true;
