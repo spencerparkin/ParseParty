@@ -201,9 +201,14 @@ Parser::SyntaxNode* SlowParseAlgorithm::ParseRangeAgainstMatchSequence(const Ran
 		const Grammar::TerminalToken* terminalToken = dynamic_cast<const Grammar::TerminalToken*>(grammarToken);
 		if (terminalToken)
 		{
+			Parser::SyntaxNode* dataNode = new Parser::SyntaxNode();
+			dataNode->fileLocation = (*this->tokenArray)[subRange.min]->fileLocation;
+			*dataNode->text = *(*this->tokenArray)[subRange.min]->text;
 			childNode = new Parser::SyntaxNode();
-			childNode->fileLocation = (*this->tokenArray)[subRange.min]->fileLocation;
-			*childNode->text = *(*this->tokenArray)[subRange.min]->text;
+			childNode->fileLocation = dataNode->fileLocation;
+			*childNode->text = *terminalToken->text;
+			childNode->childList->push_back(dataNode);
+			dataNode->parentNode = childNode;
 		}
 
 		const Grammar::NonTerminalToken* nonTerminalToken = dynamic_cast<const Grammar::NonTerminalToken*>(grammarToken);
