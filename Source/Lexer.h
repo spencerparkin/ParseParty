@@ -68,8 +68,6 @@ namespace ParseParty
 			virtual Token* GenerateToken(const char* codeBuffer, int& i) = 0;
 			virtual bool ReadConfig(const JsonObject* jsonConfig, std::string& error) = 0;
 			virtual bool WriteConfig(JsonObject* jsonConfig) const = 0;
-
-			bool IsCharFoundIn(char ch, const char* charSet);
 		};
 
 		class PARSE_PARTY_API ParanTokenGenerator : public TokenGenerator
@@ -131,6 +129,7 @@ namespace ParseParty
 			virtual bool WriteConfig(JsonObject* jsonConfig) const override;
 
 			std::set<std::string>* operatorSet;
+			std::set<char>* operatorCharSet;
 		};
 
 		class PARSE_PARTY_API IdentifierTokenGenerator : public TokenGenerator

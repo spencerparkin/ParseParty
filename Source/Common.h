@@ -20,3 +20,4 @@
 #include <format>
 #include <ranges>
 #include <iomanip>
+#include <algorithm>

@@ -239,16 +239,6 @@ Lexer::TokenGenerator::TokenGenerator()
 {
 }
 
-bool Lexer::TokenGenerator::IsCharFoundIn(char ch, const char* charSet)
-{
-	int i = 0;
-	while (charSet[i] != '\0')
-		if (ch == charSet[i++])
-			return true;
-
-	return false;
-}
-
 //-------------------------------- Lexer::ParanTokenGenerator --------------------------------
 
 Lexer::ParanTokenGenerator::ParanTokenGenerator()
@@ -517,37 +507,53 @@ Lexer::NumberTokenGenerator::NumberTokenGenerator()
 Lexer::OperatorTokenGenerator::OperatorTokenGenerator()
 {
 	this->operatorSet = new std::set<std::string>();
+	this->operatorCharSet = nullptr;
 }
 
 /*virtual*/ Lexer::OperatorTokenGenerator::~OperatorTokenGenerator()
 {
 	delete this->operatorSet;
+	delete this->operatorCharSet;
 }
 
 /*virtual*/ Lexer::Token* Lexer::OperatorTokenGenerator::GenerateToken(const char* codeBuffer, int& i)
 {
-	const char charSet[] = ".=+-*/%:<>&|!";		// TODO: Should really glean this from the operator set.
-	if (!this->IsCharFoundIn(codeBuffer[i], charSet))
+	if (!this->operatorCharSet)
+	{
+		this->operatorCharSet = new std::set<char>();
+		for (const std::string& operatorText : *this->operatorSet)
+			for (int i = 0; operatorText.c_str()[i] != '\0'; i++)
+				if (this->operatorCharSet->find(operatorText.c_str()[i]) == this->operatorCharSet->end())
+					this->operatorCharSet->insert(operatorText.c_str()[i]);
+	}
+
+	if (this->operatorCharSet->find(codeBuffer[i]) == this->operatorCharSet->end())
 		return nullptr;
+
+	std::string operatorText;
+	std::vector<std::string> operatorTextArray;
+
+	int j = i;
+	while (this->operatorCharSet->find(codeBuffer[j]) != this->operatorCharSet->end())
+	{
+		operatorText += codeBuffer[j++];
+		if (this->operatorSet->find(operatorText) != this->operatorSet->end())
+			operatorTextArray.push_back(operatorText);
+	}
+
+	if (operatorTextArray.size() == 0)
+		return nullptr;
+
+	std::sort(operatorTextArray.begin(), operatorTextArray.end(), [](const std::string& operatorTextA, const std::string& operatorTextB) -> bool
+		{
+			return operatorTextA.length() > operatorTextB.length();
+		});
 
 	Token* token = new Token();
 	token->type = Token::Type::OPERATOR;
+	*token->text = operatorTextArray[0];
 
-	int j = i;
-	while (this->IsCharFoundIn(codeBuffer[j], charSet))
-	{
-		*token->text += codeBuffer[j++];
-		if (this->operatorSet->find(*token->text) != this->operatorSet->end())
-			break;
-	}
-
-	if (this->operatorSet->find(*token->text) != this->operatorSet->end())
-		i = j;
-	else
-	{
-		delete token;
-		token = nullptr;
-	}
+	i += token->text->size();
 
 	return token;
 }
