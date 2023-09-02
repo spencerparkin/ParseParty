@@ -531,27 +531,22 @@ Lexer::OperatorTokenGenerator::OperatorTokenGenerator()
 		return nullptr;
 
 	std::string operatorText;
-	std::vector<std::string> operatorTextArray;
+	std::string chosenOperatorText;
 
 	int j = i;
 	while (this->operatorCharSet->find(codeBuffer[j]) != this->operatorCharSet->end())
 	{
 		operatorText += codeBuffer[j++];
 		if (this->operatorSet->find(operatorText) != this->operatorSet->end())
-			operatorTextArray.push_back(operatorText);
+			chosenOperatorText = operatorText;
 	}
 
-	if (operatorTextArray.size() == 0)
+	if (chosenOperatorText.length() == 0)
 		return nullptr;
-
-	std::sort(operatorTextArray.begin(), operatorTextArray.end(), [](const std::string& operatorTextA, const std::string& operatorTextB) -> bool
-		{
-			return operatorTextA.length() > operatorTextB.length();
-		});
 
 	Token* token = new Token();
 	token->type = Token::Type::OPERATOR;
-	*token->text = operatorTextArray[0];
+	*token->text = chosenOperatorText;
 
 	i += token->text->size();
 
