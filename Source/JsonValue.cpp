@@ -23,11 +23,8 @@ JsonValue::JsonValue()
 	lexer.tokenGeneratorList->push_back(new Lexer::IdentifierTokenGenerator());
 
 	std::vector<Lexer::Token*> tokenArray;
-	if (!lexer.Tokenize(jsonString, tokenArray))
-	{
-		parseError = "Failed to tokenize.";
+	if (!lexer.Tokenize(jsonString, tokenArray, parseError))
 		return nullptr;
-	}
 
 	if (tokenArray.size() == 0)
 	{

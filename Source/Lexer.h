@@ -23,7 +23,7 @@ namespace ParseParty
 		bool ReadFile(const std::string& lexiconFile, std::string& error);
 		bool WriteFile(const std::string& lexiconFile) const;
 
-		bool Tokenize(const std::string& codeText, std::vector<Token*>& tokenArray);
+		bool Tokenize(const std::string& codeText, std::vector<Token*>& tokenArray, std::string& error);
 
 		class PARSE_PARTY_API Token
 		{

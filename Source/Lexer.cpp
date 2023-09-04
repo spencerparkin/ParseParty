@@ -150,8 +150,7 @@ bool Lexer::WriteFile(const std::string& lexiconFile) const
 	return false;
 }
 
-// TODO: We really should have good error reporting here that includes line and column numbers.
-bool Lexer::Tokenize(const std::string& codeText, std::vector<Token*>& tokenArray)
+bool Lexer::Tokenize(const std::string& codeText, std::vector<Token*>& tokenArray, std::string& error)
 {
 	if (tokenArray.size() != 0)
 		return false;
@@ -198,7 +197,10 @@ bool Lexer::Tokenize(const std::string& codeText, std::vector<Token*>& tokenArra
 		}
 
 		if (i == j)
+		{
+			error = std::format("Failed to tokenize at line {}, column {}.", fileLocation.line, fileLocation.column);
 			return false;
+		}
 	}
 
 	return true;

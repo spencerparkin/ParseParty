@@ -32,10 +32,11 @@ Parser::SyntaxNode* Parser::Parse(const std::string& codeText, const Grammar& gr
 {
 	std::vector<Lexer::Token*> tokenArray;
 
-	if (!this->lexer.Tokenize(codeText, tokenArray))
+	std::string lexerError;
+	if (!this->lexer.Tokenize(codeText, tokenArray, lexerError))
 	{
 		if (error)
-			*error = "Tokenization failed.";
+			*error = lexerError;
 
 		return nullptr;
 	}
