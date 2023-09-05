@@ -368,20 +368,22 @@ Lexer::StringTokenGenerator::StringTokenGenerator()
 	token->type = Token::Type::STRING_LITERAL;
 
 	int j = i + 1;
-	while (codeBuffer[j] != '\0' && codeBuffer[j] != '"')
-		*token->text += codeBuffer[j++];
+	while (codeBuffer[j] != '\0')
+	{
+		if (codeBuffer[j] == '"' && (!this->processEscapeSequences || codeBuffer[j - 1] != '\\'))
+			break;
 
-	if (this->processEscapeSequences && !this->CollapseEscapeSequences(*token->text))
+		*token->text += codeBuffer[j++];
+	}
+
+	if (codeBuffer[j] == '\0' || (this->processEscapeSequences && !this->CollapseEscapeSequences(*token->text)))
 	{
 		delete token;
 		token = nullptr;
 	}
-	else if (codeBuffer[j] == '"')
-		i = j + 1;
 	else
 	{
-		delete token;
-		token = nullptr;
+		i = j + 1;
 	}
 
 	return token;
