@@ -1,5 +1,6 @@
 #include "Lexer.h"
 #include "JsonValue.h"
+#include "StringTransformer.h"
 
 namespace ParseParty
 {
@@ -350,9 +351,9 @@ Lexer::DelimeterTokenGenerator::DelimeterTokenGenerator()
 
 //-------------------------------- Lexer::StringTokenGenerator --------------------------------
 
-Lexer::StringTokenGenerator::StringTokenGenerator()
+Lexer::StringTokenGenerator::StringTokenGenerator(bool processEscapeSequences /*= false*/)
 {
-	this->processEscapeSequences = false;
+	this->processEscapeSequences = processEscapeSequences;
 }
 
 /*virtual*/ Lexer::StringTokenGenerator::~StringTokenGenerator()
@@ -391,43 +392,11 @@ Lexer::StringTokenGenerator::StringTokenGenerator()
 
 bool Lexer::StringTokenGenerator::CollapseEscapeSequences(std::string& text)
 {
+	EspaceSequenceEncoder encoder;
+
 	std::string modifiedText;
-
-	for (int i = 0; text.c_str()[i] != '\0'; i++)
-	{
-		char ch = text.c_str()[i];
-		if (ch != '\\')
-			modifiedText += ch;
-		else
-		{
-			char nextCh = text.c_str()[++i];
-			if (nextCh == '\0')
-				return false;
-
-			switch (nextCh)
-			{
-			case 't':
-				modifiedText += '\t';
-				break;
-			case 'n':
-				modifiedText += '\n';
-				break;
-			case 'r':
-				modifiedText += '\r';
-				break;
-			case '"':
-				modifiedText += '"';
-				break;
-			case '\\':
-				modifiedText += '\\';
-				break;
-			default:
-				modifiedText += '\\';
-				i--;
-				break;
-			}
-		}
-	}
+	if (!encoder.Transform(text, modifiedText))
+		return false;
 
 	text = modifiedText;
 	return true;

@@ -1,4 +1,5 @@
 #include "JsonValue.h"
+#include "StringTransformer.h"
 
 using namespace ParseParty;
 
@@ -17,7 +18,7 @@ JsonValue::JsonValue()
 	Lexer lexer;
 	lexer.tokenGeneratorList->push_back(new Lexer::ParanTokenGenerator());
 	lexer.tokenGeneratorList->push_back(new Lexer::DelimeterTokenGenerator());
-	lexer.tokenGeneratorList->push_back(new Lexer::StringTokenGenerator());
+	lexer.tokenGeneratorList->push_back(new Lexer::StringTokenGenerator(true));
 	lexer.tokenGeneratorList->push_back(new Lexer::NumberTokenGenerator());
 	lexer.tokenGeneratorList->push_back(new Lexer::CommentTokenGenerator());
 	lexer.tokenGeneratorList->push_back(new Lexer::IdentifierTokenGenerator());
@@ -109,7 +110,13 @@ JsonString::JsonString(const std::string& value)
 
 /*virtual*/ bool JsonString::PrintJson(std::string& jsonString, int tabLevel /*= 0*/) const
 {
-	jsonString += "\"" + *this->value + "\"";
+	EspaceSequenceDecoder decoder;
+
+	std::string stringContents;
+	if (!decoder.Transform(*this->value, stringContents))
+		return false;
+
+	jsonString += "\"" + stringContents + "\"";
 	return true;
 }
 

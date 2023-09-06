@@ -95,7 +95,7 @@ namespace ParseParty
 		class PARSE_PARTY_API StringTokenGenerator : public TokenGenerator
 		{
 		public:
-			StringTokenGenerator();
+			StringTokenGenerator(bool processEscapeSequences = false);
 			virtual ~StringTokenGenerator();
 
 			virtual Token* GenerateToken(const char* codeBuffer, int& i) override;

@@ -147,7 +147,7 @@ void Frame::OnSyntaxTreeFile(wxCommandEvent& event)
 				wxString syntaxTreeFile = fileDialog.GetPath();
 				std::string error;
 				if (!ParseParty::Parser::SyntaxNode::ReadFromFile((const char*)syntaxTreeFile.c_str(), wxGetApp().rootNode, error))
-					wxMessageBox("Failed to save AST file: " + syntaxTreeFile, "Error!", wxICON_ERROR | wxOK, this);
+					wxMessageBox("Failed to read AST file: " + syntaxTreeFile + "\n\n" + error, "Error!", wxICON_ERROR | wxOK, this);
 				else
 				{
 					wxMessageBox("AST file read!", "Success!", wxICON_INFORMATION | wxOK, this);
@@ -164,7 +164,7 @@ void Frame::OnSyntaxTreeFile(wxCommandEvent& event)
 				wxBusyCursor busyCursor;
 				wxString syntaxTreeFile = fileDialog.GetPath();
 				if (!ParseParty::Parser::SyntaxNode::WriteToFile((const char*)syntaxTreeFile.c_str(), wxGetApp().rootNode))
-					wxMessageBox("Failed to save AST file: " + syntaxTreeFile, "Error!", wxICON_ERROR | wxOK, this);
+					wxMessageBox("Failed to write AST file: " + syntaxTreeFile, "Error!", wxICON_ERROR | wxOK, this);
 				else
 					wxMessageBox("AST file written!", "Success!", wxICON_INFORMATION | wxOK, this);
 			}

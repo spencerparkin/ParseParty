@@ -28,6 +28,9 @@
     <ClInclude Include="Source\SlowParseAlgorithm.h">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="Source\StringTransformer.h">
+      <Filter>Source</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Lexer.cpp">
@@ -46,6 +49,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\SlowParseAlgorithm.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\StringTransformer.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
