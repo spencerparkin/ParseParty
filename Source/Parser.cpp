@@ -177,7 +177,7 @@ bool Parser::SyntaxNode::ReadFromJson(const JsonObject* jsonParentNode, std::str
 
 	*this->text = jsonText->GetValue();
 	this->fileLocation.line = (int)jsonLine->GetValue();
-	this->fileLocation.column = (int)jsonLine->GetValue();
+	this->fileLocation.column = (int)jsonColumn->GetValue();
 
 	this->WipeChildren();
 
