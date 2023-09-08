@@ -15,6 +15,11 @@ namespace ParseParty
 		struct FileLocation
 		{
 			int line, column;
+
+			operator std::string() const
+			{
+				return std::format("Line {}, column {}: ", this->line, this->column);
+			}
 		};
 
 		class Token;
