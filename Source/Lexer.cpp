@@ -20,6 +20,7 @@ using namespace ParseParty;
 Lexer::Lexer()
 {
 	this->tokenGeneratorList = new std::list<TokenGenerator*>();
+	this->tabSize = 4;
 }
 
 /*virtual*/ Lexer::~Lexer()
@@ -170,13 +171,20 @@ bool Lexer::Tokenize(const std::string& codeText, std::vector<Token*>& tokenArra
 
 		while (j < i)
 		{
-			if (codeBuffer[j++] != '\n')
-				fileLocation.column++;
+			if (codeBuffer[j] != '\n')
+			{
+				if (codeBuffer[j] == '\t')
+					fileLocation.column += this->tabSize;
+				else
+					fileLocation.column++;
+			}
 			else
 			{
 				fileLocation.line++;
 				fileLocation.column = 1;
 			}
+
+			j++;
 		}
 
 		Token* token = nullptr;
