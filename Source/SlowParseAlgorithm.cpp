@@ -112,6 +112,7 @@ Parser::SyntaxNode* SlowParseAlgorithm::ParseRangeAgainstMatchSequence(const Ran
 		}
 	}
 
+	int j = -1;
 	for (int i = i_start; i != i_stop; i += i_delta)
 	{
 		const Grammar::Token* grammarToken = (*matchSequence->tokenSequence)[i];
@@ -122,8 +123,16 @@ Parser::SyntaxNode* SlowParseAlgorithm::ParseRangeAgainstMatchSequence(const Ran
 		if (!this->ScanForTokenMatch(grammarToken, tokenPosition, i_delta, range))
 			return nullptr;
 
+		if (tokenPosition == j)
+		{
+			tokenPosition += i_delta;
+			if (!this->ScanForTokenMatch(grammarToken, tokenPosition, i_delta, range))
+				return nullptr;
+		}
+
 		Range terminalRange{ tokenPosition, tokenPosition };
 		subRangeMap.insert(std::pair<int, Range>(i, terminalRange));
+		j = tokenPosition;
 	}
 	
 	for (int i = 0; i < (signed)matchSequence->tokenSequence->size(); i++)
