@@ -28,7 +28,7 @@ namespace ParseParty
 		bool ReadFile(const std::string& lexiconFile, std::string& error);
 		bool WriteFile(const std::string& lexiconFile) const;
 
-		bool Tokenize(const std::string& codeText, std::vector<Token*>& tokenArray, std::string& error);
+		bool Tokenize(const std::string& codeText, std::vector<Token*>& tokenArray, std::string& error, bool keepComments = false, FileLocation initialFileLocation = FileLocation{ 1, 1 });
 
 		class PARSE_PARTY_API Token
 		{
@@ -44,7 +44,8 @@ namespace ParseParty
 				DELIMETER_COLON,
 				DELIMETER_SEMI_COLON,
 				OPERATOR,
-				IDENTIFIER,		// These could be variable names or keywords.
+				IDENTIFIER,
+				IDENTIFIER_KEYWORD,
 				STRING_LITERAL,
 				NUMBER_LITERAL_FLOAT,
 				NUMBER_LITERAL_INT,
@@ -146,6 +147,8 @@ namespace ParseParty
 			virtual Token* GenerateToken(const char* codeBuffer, int& i) override;
 			virtual bool ReadConfig(const JsonObject* jsonConfig, std::string& error) override;
 			virtual bool WriteConfig(JsonObject* jsonConfig) const override;
+
+			std::set<std::string>* keywordSet;
 		};
 
 		class PARSE_PARTY_API CommentTokenGenerator : public TokenGenerator

@@ -152,13 +152,13 @@ bool Lexer::WriteFile(const std::string& lexiconFile) const
 	return false;
 }
 
-bool Lexer::Tokenize(const std::string& codeText, std::vector<Token*>& tokenArray, std::string& error)
+bool Lexer::Tokenize(const std::string& codeText, std::vector<Token*>& tokenArray, std::string& error, bool keepComments /*= false*/, FileLocation initialFileLocation /*= FileLocation{ 1, 1 }*/)
 {
 	if (tokenArray.size() != 0)
 		return false;
 
 	const char* codeBuffer = codeText.c_str();
-	FileLocation fileLocation{ 1, 1 };
+	FileLocation fileLocation = initialFileLocation;
 
 	int i = 0, j = 0;
 	while (i < (signed)codeText.length())
@@ -196,7 +196,7 @@ bool Lexer::Tokenize(const std::string& codeText, std::vector<Token*>& tokenArra
 			{
 				token->fileLocation = fileLocation;
 
-				if (token->type == Token::Type::COMMENT)	// TODO: Would we ever care to keep these?
+				if (token->type == Token::Type::COMMENT && !keepComments)
 					delete token;
 				else
 					tokenArray.push_back(token);
@@ -566,10 +566,12 @@ Lexer::OperatorTokenGenerator::OperatorTokenGenerator()
 
 Lexer::IdentifierTokenGenerator::IdentifierTokenGenerator()
 {
+	this->keywordSet = new std::set<std::string>();
 }
 
 /*virtual*/ Lexer::IdentifierTokenGenerator::~IdentifierTokenGenerator()
 {
+	delete this->keywordSet;
 }
 
 /*virtual*/ Lexer::Token* Lexer::IdentifierTokenGenerator::GenerateToken(const char* codeBuffer, int& i)
@@ -583,12 +585,32 @@ Lexer::IdentifierTokenGenerator::IdentifierTokenGenerator()
 	while (::isalpha(codeBuffer[i]) || ::isdigit(codeBuffer[i]) || codeBuffer[i] == '_')
 		*token->text += codeBuffer[i++];
 
+	if (this->keywordSet->find(*token->text) != this->keywordSet->end())
+		token->type = Token::Type::IDENTIFIER_KEYWORD;
+
 	return token;
 }
 
 /*virtual*/ bool Lexer::IdentifierTokenGenerator::ReadConfig(const JsonObject* jsonConfig, std::string& error)
 {
-	// TODO: Maybe configure which identifiers are keywords?
+	this->keywordSet->clear();
+
+	const JsonArray* jsonKeywordArray = dynamic_cast<const JsonArray*>(jsonConfig->GetValue("keywords"));
+	if (jsonKeywordArray)
+	{
+		for (int i = 0; i < (signed)jsonKeywordArray->GetSize(); i++)
+		{
+			const JsonString* jsonKeywordString = dynamic_cast<const JsonString*>(jsonKeywordArray->GetValue(i));
+			if (jsonKeywordString)
+				this->keywordSet->insert(jsonKeywordString->GetValue());
+			else
+			{
+				error = "Encountered keyword entry that is not a string.";
+				return false;
+			}
+		}
+	}
+
 	return true;
 }
 
@@ -615,7 +637,7 @@ Lexer::CommentTokenGenerator::CommentTokenGenerator()
 	Token* token = new Token();
 	token->type = Token::Type::COMMENT;
 
-	while (codeBuffer[i] != '\n')
+	while (codeBuffer[i] != '\0' && codeBuffer[i] != '\n')
 		*token->text += codeBuffer[i++];
 
 	return token;
