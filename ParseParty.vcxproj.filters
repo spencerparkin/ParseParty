@@ -5,6 +5,9 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Source\Algorithms">
+      <UniqueIdentifier>{9f20364e-3c06-4d0b-97d8-189704614e05}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Common.h">
@@ -22,17 +25,17 @@
     <ClInclude Include="Source\JsonValue.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="Source\QuickParseAlgorithm.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\SlowParseAlgorithm.h">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="Source\StringTransformer.h">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\GeneralParseAlgorithm.h">
-      <Filter>Source</Filter>
+      <Filter>Source\Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\QuickParseAlgorithm.h">
+      <Filter>Source\Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\SlowParseAlgorithm.h">
+      <Filter>Source\Algorithms</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -48,17 +51,17 @@
     <ClCompile Include="Source\JsonValue.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\QuickParseAlgorithm.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\SlowParseAlgorithm.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="Source\StringTransformer.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\GeneralParseAlgorithm.cpp">
-      <Filter>Source</Filter>
+      <Filter>Source\Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\QuickParseAlgorithm.cpp">
+      <Filter>Source\Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\SlowParseAlgorithm.cpp">
+      <Filter>Source\Algorithms</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
