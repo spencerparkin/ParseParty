@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Common.h" />
+    <ClInclude Include="Source\GeneralParseAlgorithm.h" />
     <ClInclude Include="Source\Grammar.h" />
     <ClInclude Include="Source\JsonValue.h" />
     <ClInclude Include="Source\Lexer.h" />
@@ -29,6 +30,7 @@
     <ClInclude Include="Source\StringTransformer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\GeneralParseAlgorithm.cpp" />
     <ClCompile Include="Source\Grammar.cpp" />
     <ClCompile Include="Source\JsonValue.cpp" />
     <ClCompile Include="Source\Lexer.cpp" />

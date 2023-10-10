@@ -1,6 +1,7 @@
 #include "Parser.h"
 #include "QuickParseAlgorithm.h"
 #include "SlowParseAlgorithm.h"
+#include "GeneralParseAlgorithm.h"
 
 using namespace ParseParty;
 
@@ -57,6 +58,8 @@ Parser::SyntaxNode* Parser::Parse(const std::vector<Lexer::Token*>& tokenArray, 
 		algorithm = new QuickParseAlgorithm(&tokenArray, &grammar);
 	else if (*grammar.algorithmName == "slow")
 		algorithm = new SlowParseAlgorithm(&tokenArray, &grammar);
+	else if (*grammar.algorithmName == "general")
+		algorithm = new GeneralParseAlgorithm(&tokenArray, &grammar);
 
 	if (!algorithm)
 	{
