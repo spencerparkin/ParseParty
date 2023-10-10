@@ -38,7 +38,7 @@ namespace ParseParty
 		Parser::SyntaxNode* ParseRangeAgainstMatchSequence(const Range& range, const Grammar::MatchSequence* matchSequence, const std::string& ruleName);
 
 		bool ScanForTokenMatch(const Grammar::Token* grammarToken, int& tokenPosition, int delta, const Range& range);
-
+		bool CalculateSubRangeMap(std::map<int, Range>& subRangeMap, const Range& range, const Grammar::MatchSequence* matchSequence);
 		void ClearCache();
 
 		typedef std::map<ParseCacheKey, Parser::SyntaxNode*> ParseCacheMap;

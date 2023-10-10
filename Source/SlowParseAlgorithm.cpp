@@ -88,111 +88,8 @@ Parser::SyntaxNode* SlowParseAlgorithm::ParseRangeAgainstRule(const Range& range
 Parser::SyntaxNode* SlowParseAlgorithm::ParseRangeAgainstMatchSequence(const Range& range, const Grammar::MatchSequence* matchSequence, const std::string& ruleName)
 {
 	std::map<int, Range> subRangeMap;
-
-	int i_start = -1, i_stop = -1, i_delta = 0;
-	int tokenPosition = -1;
-
-	switch (matchSequence->type)
-	{
-		case Grammar::MatchSequence::Type::LEFT_TO_RIGHT:
-		{
-			i_start = 0;
-			i_stop = matchSequence->tokenSequence->size();
-			i_delta = 1;
-			tokenPosition = range.min;
-			break;
-		}
-		case Grammar::MatchSequence::Type::RIGHT_TO_LEFT:
-		{
-			i_start = matchSequence->tokenSequence->size() - 1;
-			i_stop = -1;
-			i_delta = -1;
-			tokenPosition = range.max;
-			break;
-		}
-	}
-
-	int j = -1;
-	for (int i = i_start; i != i_stop; i += i_delta)
-	{
-		const Grammar::Token* grammarToken = (*matchSequence->tokenSequence)[i];
-		const Grammar::TerminalToken* terminalToken = dynamic_cast<const Grammar::TerminalToken*>(grammarToken);
-		if (!terminalToken)
-			continue;
-
-		if (!this->ScanForTokenMatch(grammarToken, tokenPosition, i_delta, range))
-			return nullptr;
-
-		if (tokenPosition == j)
-		{
-			tokenPosition += i_delta;
-			if (!this->ScanForTokenMatch(grammarToken, tokenPosition, i_delta, range))
-				return nullptr;
-		}
-
-		Range terminalRange{ tokenPosition, tokenPosition };
-		subRangeMap.insert(std::pair<int, Range>(i, terminalRange));
-		j = tokenPosition;
-	}
-	
-	for (int i = 0; i < (signed)matchSequence->tokenSequence->size(); i++)
-	{
-		const Grammar::Token* grammarToken = (*matchSequence->tokenSequence)[i];
-		const Grammar::NonTerminalToken* nonTerminalToken = dynamic_cast<const Grammar::NonTerminalToken*>(grammarToken);
-		if (!nonTerminalToken)
-			continue;
-
-		Range nonTerminalRange;
-
-		if (i == 0)
-			nonTerminalRange.min = range.min;
-		else
-		{
-			std::map<int, Range>::iterator iter = subRangeMap.find(i - 1);
-			if (iter == subRangeMap.end())
-				return nullptr;
-
-			nonTerminalRange.min = iter->second.max + 1;
-		}
-
-		if (i == matchSequence->tokenSequence->size() - 1)
-			nonTerminalRange.max = range.max;
-		else
-		{
-			std::map<int, Range>::iterator iter = subRangeMap.find(i + 1);
-			if (iter == subRangeMap.end())
-				return nullptr;
-
-			nonTerminalRange.max = iter->second.min - 1;
-		}
-
-		subRangeMap.insert(std::pair<int, Range>(i, nonTerminalRange));
-	}
-
-	int totalSize = 0;
-	for (std::pair<int, Range> pair : subRangeMap)
-	{
-		const Range& subRange = pair.second;
-		if (!subRange.IsValid())
-			return nullptr;
-
-		totalSize += subRange.Size();
-	}
-
-	if (totalSize != range.Size())
+	if (!this->CalculateSubRangeMap(subRangeMap, range, matchSequence))
 		return nullptr;
-
-	for (int i = 0; i < (signed)matchSequence->tokenSequence->size() - 1; i++)
-	{
-		std::map<int, Range>::iterator iterA = subRangeMap.find(i);
-		std::map<int, Range>::iterator iterB = subRangeMap.find(i + 1);
-
-		const Range& subRangeA = iterA->second;
-		const Range& subRangeB = iterB->second;
-
-		if (subRangeA.max - subRangeB.min != -1)
-			return nullptr;
-	}
 
 	Parser::SyntaxNode* parentNode = new Parser::SyntaxNode();
 	parentNode->fileLocation = (*this->tokenArray)[range.min]->fileLocation;
@@ -280,6 +177,116 @@ Parser::SyntaxNode* SlowParseAlgorithm::ParseRangeAgainstMatchSequence(const Ran
 	}
 
 	return parentNode;
+}
+
+bool SlowParseAlgorithm::CalculateSubRangeMap(std::map<int, Range>& subRangeMap, const Range& range, const Grammar::MatchSequence* matchSequence)
+{
+	int i_start = -1, i_stop = -1, i_delta = 0;
+	int tokenPosition = -1;
+
+	switch (matchSequence->type)
+	{
+	case Grammar::MatchSequence::Type::LEFT_TO_RIGHT:
+	{
+		i_start = 0;
+		i_stop = matchSequence->tokenSequence->size();
+		i_delta = 1;
+		tokenPosition = range.min;
+		break;
+	}
+	case Grammar::MatchSequence::Type::RIGHT_TO_LEFT:
+	{
+		i_start = matchSequence->tokenSequence->size() - 1;
+		i_stop = -1;
+		i_delta = -1;
+		tokenPosition = range.max;
+		break;
+	}
+	}
+
+	int j = -1;
+	for (int i = i_start; i != i_stop; i += i_delta)
+	{
+		const Grammar::Token* grammarToken = (*matchSequence->tokenSequence)[i];
+		const Grammar::TerminalToken* terminalToken = dynamic_cast<const Grammar::TerminalToken*>(grammarToken);
+		if (!terminalToken)
+			continue;
+
+		if (!this->ScanForTokenMatch(grammarToken, tokenPosition, i_delta, range))
+			return false;
+
+		if (tokenPosition == j)
+		{
+			tokenPosition += i_delta;
+			if (!this->ScanForTokenMatch(grammarToken, tokenPosition, i_delta, range))
+				return false;
+		}
+
+		Range terminalRange{ tokenPosition, tokenPosition };
+		subRangeMap.insert(std::pair<int, Range>(i, terminalRange));
+		j = tokenPosition;
+	}
+
+	for (int i = 0; i < (signed)matchSequence->tokenSequence->size(); i++)
+	{
+		const Grammar::Token* grammarToken = (*matchSequence->tokenSequence)[i];
+		const Grammar::NonTerminalToken* nonTerminalToken = dynamic_cast<const Grammar::NonTerminalToken*>(grammarToken);
+		if (!nonTerminalToken)
+			continue;
+
+		Range nonTerminalRange;
+
+		if (i == 0)
+			nonTerminalRange.min = range.min;
+		else
+		{
+			std::map<int, Range>::iterator iter = subRangeMap.find(i - 1);
+			if (iter == subRangeMap.end())
+				return false;
+
+			nonTerminalRange.min = iter->second.max + 1;
+		}
+
+		if (i == matchSequence->tokenSequence->size() - 1)
+			nonTerminalRange.max = range.max;
+		else
+		{
+			std::map<int, Range>::iterator iter = subRangeMap.find(i + 1);
+			if (iter == subRangeMap.end())
+				return false;
+
+			nonTerminalRange.max = iter->second.min - 1;
+		}
+
+		subRangeMap.insert(std::pair<int, Range>(i, nonTerminalRange));
+	}
+
+	int totalSize = 0;
+	for (std::pair<int, Range> pair : subRangeMap)
+	{
+		const Range& subRange = pair.second;
+		if (!subRange.IsValid())
+			return false;
+
+		totalSize += subRange.Size();
+	}
+
+	if (totalSize != range.Size())
+		return false;
+
+	for (int i = 0; i < (signed)matchSequence->tokenSequence->size() - 1; i++)
+	{
+		std::map<int, Range>::iterator iterA = subRangeMap.find(i);
+		std::map<int, Range>::iterator iterB = subRangeMap.find(i + 1);
+
+		const Range& subRangeA = iterA->second;
+		const Range& subRangeB = iterB->second;
+
+		if (subRangeA.max - subRangeB.min != -1)
+			return false;
+	}
+
+	return true;
 }
 
 bool SlowParseAlgorithm::ScanForTokenMatch(const Grammar::Token* grammarToken, int& tokenPosition, int delta, const Range& range)

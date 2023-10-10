@@ -176,7 +176,7 @@ Grammar::Token::Token()
 {
 }
 
-//------------------------------- Grammar::TermionalToken -------------------------------
+//------------------------------- Grammar::TerminalToken -------------------------------
 
 Grammar::TerminalToken::TerminalToken()
 {
@@ -214,6 +214,11 @@ Grammar::TerminalToken::TerminalToken(const std::string& givenText)
 	return (*this->text == *token.text) ? MatchResult::YES : MatchResult::NO;
 }
 
+/*virtual*/ std::string Grammar::TerminalToken::GetText() const
+{
+	return *this->text;
+}
+
 //------------------------------- Grammar::NonTerminalToken -------------------------------
 
 Grammar::NonTerminalToken::NonTerminalToken()
@@ -238,6 +243,11 @@ Grammar::NonTerminalToken::NonTerminalToken(const std::string& givenRuleName)
 		*ruleName = *this->ruleName;
 
 	return MatchResult::MAYBE;
+}
+
+/*virtual*/ std::string Grammar::NonTerminalToken::GetText() const
+{
+	return *this->ruleName;
 }
 
 //------------------------------- Grammar::Rule -------------------------------
