@@ -15,24 +15,5 @@ namespace ParseParty
 		virtual ~GeneralParseAlgorithm();
 
 		virtual Parser::SyntaxNode* Parse() override;
-
-	protected:
-
-		struct Range
-		{
-			int min, max;
-		};
-
-		class GeneralSyntaxNode : public Parser::SyntaxNode
-		{
-		public:
-			GeneralSyntaxNode();
-			virtual ~GeneralSyntaxNode();
-
-			Range range;
-		};
-
-		bool GenerateChildrenForNode(GeneralSyntaxNode* parentNode);
-		bool GenerateChildrenForNodeWithMatchSequence(GeneralSyntaxNode* parentNode, const Grammar::MatchSequence* matchSequence);
 	};
 }
