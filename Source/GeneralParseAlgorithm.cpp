@@ -107,6 +107,10 @@ bool GeneralParseAlgorithm::GenerateChildrenForNodeWithMatchSequence(GeneralSynt
 	//       requires some sophisticated back-tracking.  Some boundaries have to remain unknown (min/max = -1) until they can be clarified
 	//       down the road.  The general grammar problem is much harder to solve than some of its subclasses.
 
+	// TODO: It's hard to reserach in the literature on this subject, because it's super technical and I don't understand most of it, but
+	//       I wonder if the problem I'm trying to solve here is actually undecidable; meaning, no algorithm exists which could solve it
+	//       in a finite amount of time.  More than likely, I'm just not smart enough to figure it out.
+
 	return false;
 }
 
