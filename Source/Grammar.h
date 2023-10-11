@@ -77,6 +77,7 @@ namespace ParseParty
 			virtual ~MatchSequence();
 
 			void Clear();
+			bool HasTwoAdjacentNonTermainls() const;
 
 			enum class Type
 			{

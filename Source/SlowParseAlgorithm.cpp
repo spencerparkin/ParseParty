@@ -181,27 +181,31 @@ Parser::SyntaxNode* SlowParseAlgorithm::ParseRangeAgainstMatchSequence(const Ran
 
 bool SlowParseAlgorithm::CalculateSubRangeMap(std::map<int, Range>& subRangeMap, const Range& range, const Grammar::MatchSequence* matchSequence)
 {
+	// Verify an assumption we're making here before we go bumbling forward.
+	if (matchSequence->HasTwoAdjacentNonTermainls())
+		return false;
+
 	int i_start = -1, i_stop = -1, i_delta = 0;
 	int tokenPosition = -1;
 
 	switch (matchSequence->type)
 	{
-	case Grammar::MatchSequence::Type::LEFT_TO_RIGHT:
-	{
-		i_start = 0;
-		i_stop = matchSequence->tokenSequence->size();
-		i_delta = 1;
-		tokenPosition = range.min;
-		break;
-	}
-	case Grammar::MatchSequence::Type::RIGHT_TO_LEFT:
-	{
-		i_start = matchSequence->tokenSequence->size() - 1;
-		i_stop = -1;
-		i_delta = -1;
-		tokenPosition = range.max;
-		break;
-	}
+		case Grammar::MatchSequence::Type::LEFT_TO_RIGHT:
+		{
+			i_start = 0;
+			i_stop = matchSequence->tokenSequence->size();
+			i_delta = 1;
+			tokenPosition = range.min;
+			break;
+		}
+		case Grammar::MatchSequence::Type::RIGHT_TO_LEFT:
+		{
+			i_start = matchSequence->tokenSequence->size() - 1;
+			i_stop = -1;
+			i_delta = -1;
+			tokenPosition = range.max;
+			break;
+		}
 	}
 
 	int j = -1;
@@ -262,7 +266,7 @@ bool SlowParseAlgorithm::CalculateSubRangeMap(std::map<int, Range>& subRangeMap,
 	}
 
 	int totalSize = 0;
-	for (std::pair<int, Range> pair : subRangeMap)
+	for (const std::pair<int, Range>& pair : subRangeMap)
 	{
 		const Range& subRange = pair.second;
 		if (!subRange.IsValid())

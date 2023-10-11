@@ -347,3 +347,17 @@ void Grammar::MatchSequence::Clear()
 
 	this->tokenSequence->clear();
 }
+
+bool Grammar::MatchSequence::HasTwoAdjacentNonTermainls() const
+{
+	for (int i = 0; i < (signed)this->tokenSequence->size() - 1; i++)
+	{
+		const Token* tokenA = (*this->tokenSequence)[i];
+		const Token* tokenB = (*this->tokenSequence)[i + 1];
+
+		if (dynamic_cast<const NonTerminalToken*>(tokenA) && dynamic_cast<const NonTerminalToken*>(tokenB))
+			return true;
+	}
+
+	return false;
+}

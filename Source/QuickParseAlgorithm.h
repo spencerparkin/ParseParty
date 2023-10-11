@@ -29,7 +29,8 @@ namespace ParseParty
 	// cached for potential re-use if it is to be discarded during the parsing process.  Note that
 	// some grammars fail to parse or fail to parse correctly, but that does not mean there doesn't
 	// exist some other grammar generating the same language that will correctly parse using this
-	// parsing algorithm!
+	// parsing algorithm!  Also note that there is no restriction here that there be no two adjacent
+	// non-terminal tokens in the given grammar.
 	class QuickParseAlgorithm : public Parser::Algorithm
 	{
 	public:
