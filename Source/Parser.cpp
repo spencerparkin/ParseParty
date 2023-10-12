@@ -31,18 +31,14 @@ Parser::SyntaxNode* Parser::ParseFile(const std::string& codeFile, const Grammar
 
 Parser::SyntaxNode* Parser::Parse(const std::string& codeText, const Grammar& grammar, std::string* error /*= nullptr*/)
 {
+	SyntaxNode* rootNode = nullptr;
 	std::vector<Lexer::Token*> tokenArray;
 
 	std::string lexerError;
-	if (!this->lexer.Tokenize(codeText, tokenArray, lexerError))
-	{
-		if (error)
-			*error = lexerError;
-
-		return nullptr;
-	}
-
-	SyntaxNode* rootNode = this->Parse(tokenArray, grammar, error);
+	if (this->lexer.Tokenize(codeText, tokenArray, lexerError))
+		rootNode = this->Parse(tokenArray, grammar, error);
+	else if (error)
+		*error = lexerError;
 
 	for (Lexer::Token* token : tokenArray)
 		delete token;
