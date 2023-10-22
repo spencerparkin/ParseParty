@@ -529,7 +529,7 @@ Lexer::OperatorTokenGenerator::OperatorTokenGenerator()
 	token->type = Token::Type::OPERATOR;
 	*token->text = chosenOperatorText;
 
-	i += token->text->size();
+	i += (int)token->text->size();
 
 	return token;
 }

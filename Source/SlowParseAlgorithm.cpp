@@ -193,14 +193,14 @@ bool SlowParseAlgorithm::CalculateSubRangeMap(std::map<int, Range>& subRangeMap,
 		case Grammar::MatchSequence::Type::LEFT_TO_RIGHT:
 		{
 			i_start = 0;
-			i_stop = matchSequence->tokenSequence->size();
+			i_stop = (int)matchSequence->tokenSequence->size();
 			i_delta = 1;
 			tokenPosition = range.min;
 			break;
 		}
 		case Grammar::MatchSequence::Type::RIGHT_TO_LEFT:
 		{
-			i_start = matchSequence->tokenSequence->size() - 1;
+			i_start = (int)matchSequence->tokenSequence->size() - 1;
 			i_stop = -1;
 			i_delta = -1;
 			tokenPosition = range.max;

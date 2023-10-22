@@ -416,7 +416,7 @@ void JsonObject::Clear()
 
 unsigned int JsonObject::GetSize() const
 {
-	return this->valueMap->size();
+	return (int)this->valueMap->size();
 }
 
 const JsonValue* JsonObject::GetValue(const std::string& key) const
@@ -585,7 +585,7 @@ void JsonArray::Clear()
 
 unsigned int JsonArray::GetSize() const
 {
-	return this->valueArray->size();
+	return (int)this->valueArray->size();
 }
 
 const JsonValue* JsonArray::GetValue(unsigned int i) const
