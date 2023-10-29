@@ -24,6 +24,7 @@
     <ClInclude Include="Source\Grammar.h" />
     <ClInclude Include="Source\JsonValue.h" />
     <ClInclude Include="Source\Lexer.h" />
+    <ClInclude Include="Source\LookAheadParseAlgorithm.h" />
     <ClInclude Include="Source\Parser.h" />
     <ClInclude Include="Source\QuickParseAlgorithm.h" />
     <ClInclude Include="Source\SlowParseAlgorithm.h" />
@@ -34,6 +35,7 @@
     <ClCompile Include="Source\Grammar.cpp" />
     <ClCompile Include="Source\JsonValue.cpp" />
     <ClCompile Include="Source\Lexer.cpp" />
+    <ClCompile Include="Source\LookAheadParseAlgorithm.cpp" />
     <ClCompile Include="Source\Parser.cpp" />
     <ClCompile Include="Source\QuickParseAlgorithm.cpp" />
     <ClCompile Include="Source\SlowParseAlgorithm.cpp" />

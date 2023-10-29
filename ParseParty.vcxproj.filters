@@ -37,6 +37,9 @@
     <ClInclude Include="Source\SlowParseAlgorithm.h">
       <Filter>Source\Algorithms</Filter>
     </ClInclude>
+    <ClInclude Include="Source\LookAheadParseAlgorithm.h">
+      <Filter>Source\Algorithms</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Lexer.cpp">
@@ -61,6 +64,9 @@
       <Filter>Source\Algorithms</Filter>
     </ClCompile>
     <ClCompile Include="Source\SlowParseAlgorithm.cpp">
+      <Filter>Source\Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\LookAheadParseAlgorithm.cpp">
       <Filter>Source\Algorithms</Filter>
     </ClCompile>
   </ItemGroup>
