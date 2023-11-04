@@ -8,7 +8,10 @@ namespace ParseParty
 	// It makes only one assumption as additional information alongside the given token array and grammar, and
 	// it is that all parenthesis, curly braces and square brackets are meant to be balanced.  Lastly, there is
 	// just one constraint here that we put on the given grammar, and it is that no two non-terminals be adjacent
-	// to one another in any match sequence.  Terminals may be adjacent, but not non-terminals.
+	// to one another in any match sequence.  Terminals may be adjacent, but not non-terminals.  Ah, but there is
+	// just one more constraint on the grammar rules.  All terminals in a match rule must exist at the same nesting
+	// level.  This isn't a terrible constraint, though, because you can still parse what you want by adding another
+	// rule for any nested terminals.
 	class SlowParseAlgorithm : public Parser::Algorithm
 	{
 	public:
