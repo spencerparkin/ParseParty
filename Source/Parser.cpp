@@ -60,7 +60,7 @@ Parser::SyntaxNode* Parser::Parse(const std::vector<Lexer::Token*>& tokenArray, 
 	if (!algorithm)
 	{
 		if (error)
-			*error = (grammar.algorithmName->length() > 0) ? std::format("Unrecognized parse algorithm: {}", grammar.algorithmName->c_str()) : "No parse algorithm specified.";
+			*error = (grammar.algorithmName->length() > 0) ? FormatString("Unrecognized parse algorithm: %s", grammar.algorithmName->c_str()) : "No parse algorithm specified.";
 
 		return nullptr;
 	}
@@ -185,7 +185,7 @@ bool Parser::SyntaxNode::ReadFromJson(const JsonObject* jsonParentNode, std::str
 		const JsonObject* jsonChildNode = dynamic_cast<const JsonObject*>(jsonChildArray->GetValue(i));
 		if (!jsonChildNode)
 		{
-			parseError = std::format("Expected child entry {} to be an object.", i);
+			parseError = FormatString("Expected child entry %d to be an object.", i);
 			return false;
 		}
 

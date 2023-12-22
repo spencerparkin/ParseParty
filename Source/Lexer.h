@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Common.h"
+#include "FormatString.h"
 
 namespace ParseParty
 {
@@ -18,7 +19,7 @@ namespace ParseParty
 
 			operator std::string() const
 			{
-				return std::format("Line {}, column {}: ", this->line, this->column);
+				return FormatString("Line %d, column %d: ", this->line, this->column);
 			}
 		};
 

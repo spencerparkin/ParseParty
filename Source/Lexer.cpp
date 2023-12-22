@@ -207,7 +207,7 @@ bool Lexer::Tokenize(const std::string& codeText, std::vector<Token*>& tokenArra
 
 		if (i == j)
 		{
-			error = std::format("Failed to tokenize at line {}, column {}.", fileLocation.line, fileLocation.column);
+			error = FormatString("Failed to tokenize at line %d, column %d.", fileLocation.line, fileLocation.column);
 			return false;
 		}
 	}

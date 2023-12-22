@@ -85,7 +85,7 @@ JsonValue::JsonValue()
 	if (0 <= parsePosition && parsePosition < (signed)tokenArray.size())
 	{
 		const Lexer::FileLocation& fileLocation = tokenArray[parsePosition]->fileLocation;
-		errorPrefix += std::format("Line {}, column {}: ", fileLocation.line, fileLocation.column);
+		errorPrefix += FormatString("Line %d, column %d: ", fileLocation.line, fileLocation.column);
 	}
 
 	return errorPrefix + errorMsg;

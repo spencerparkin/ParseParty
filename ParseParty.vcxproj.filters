@@ -40,6 +40,9 @@
     <ClInclude Include="Source\LookAheadParseAlgorithm.h">
       <Filter>Source\Algorithms</Filter>
     </ClInclude>
+    <ClInclude Include="Source\FormatString.h">
+      <Filter>Source</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Lexer.cpp">
@@ -68,6 +71,9 @@
     </ClCompile>
     <ClCompile Include="Source\LookAheadParseAlgorithm.cpp">
       <Filter>Source\Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\FormatString.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

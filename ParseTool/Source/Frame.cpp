@@ -1,5 +1,6 @@
 #include "Frame.h"
 #include "Application.h"
+#include "FormatString.h"
 #include <wx/menu.h>
 #include <wx/aboutdlg.h>
 #include <wx/filedlg.h>
@@ -229,7 +230,7 @@ void Frame::RebuildTreeControl()
 
 			for (const ParseParty::Parser::SyntaxNode* childNode : *node.parentNode->childList)
 			{
-				std::string text = std::format("{} -- (line {}, column {})", childNode->text->c_str(), childNode->fileLocation.line, childNode->fileLocation.column);
+				std::string text = ParseParty::FormatString("%s -- (line %d, column %d)", childNode->text->c_str(), childNode->fileLocation.line, childNode->fileLocation.column);
 				wxTreeItemId childItemId = this->treeControl->AppendItem(node.parentItemId, text.c_str());
 				nodeQueue.push_back(Node{ childItemId, childNode });
 			}

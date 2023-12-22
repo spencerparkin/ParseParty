@@ -143,9 +143,9 @@ Parser::SyntaxNode* SlowParseAlgorithm::ParseRangeAgainstMatchSequence(const Ran
 			this->maxErrorLocation = fileLocationMin;
 			const Lexer::FileLocation& fileLocationMax = (*this->tokenArray)[range.max]->fileLocation;
 			if (fileLocationMin.line == fileLocationMax.line)
-				*this->error = std::format("Failed to parse line {}, columns {} to {}.", fileLocationMin.line, fileLocationMin.column, fileLocationMax.column);
+				*this->error = FormatString("Failed to parse line %d, columns %d to %d.", fileLocationMin.line, fileLocationMin.column, fileLocationMax.column);
 			else
-				*this->error = std::format("Failed to parse from line {} (column {}) to line {} (column {}).", fileLocationMin.line, fileLocationMin.column, fileLocationMax.line, fileLocationMax.column);
+				*this->error = FormatString("Failed to parse from line %d (column %d) to line %d (column %d).", fileLocationMin.line, fileLocationMin.column, fileLocationMax.line, fileLocationMax.column);
 		}
 
 		if (this->parseCacheMapEnabled)

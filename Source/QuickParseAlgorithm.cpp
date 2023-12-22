@@ -168,7 +168,7 @@ Parser::SyntaxNode* QuickParseAlgorithm::MatchTokensAgainstRule(int& parsePositi
 		{
 			this->maxParsePositionWithError = parsePosition;
 			const Lexer::Token* token = (*this->tokenArray)[parsePosition];
-			*this->error = std::format("Failed to parse at line {}, column {}.", token->fileLocation.line, token->fileLocation.column);
+			*this->error = FormatString("Failed to parse at line %d, column %d.", token->fileLocation.line, token->fileLocation.column);
 		}
 	}
 
