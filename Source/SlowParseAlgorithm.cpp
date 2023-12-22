@@ -321,7 +321,7 @@ bool SlowParseAlgorithm::ScanForTokenMatch(const Grammar::Token* grammarToken, i
 
 void SlowParseAlgorithm::Range::MakeKey(char* keyBuf, int keyBufSize) const
 {
-	sprintf_s(keyBuf, keyBufSize, "%d-%d", this->min, this->max);
+	sprintf(keyBuf, "%d-%d", this->min, this->max);
 }
 
 int SlowParseAlgorithm::Range::Size() const

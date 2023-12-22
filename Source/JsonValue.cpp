@@ -170,7 +170,7 @@ JsonFloat::JsonFloat(double value)
 /*virtual*/ bool JsonFloat::PrintJson(std::string& jsonString, int tabLevel /*= 0*/) const
 {
 	char buffer[128];
-	sprintf_s(buffer, sizeof(buffer), "%f", this->value);
+	sprintf(buffer, "%f", this->value);
 	jsonString += buffer;
 	return true;
 }
@@ -225,7 +225,7 @@ JsonInt::JsonInt(long value)
 /*virtual*/ bool JsonInt::PrintJson(std::string& jsonString, int tabLevel /*= 0*/) const
 {
 	char buffer[128];
-	sprintf_s(buffer, sizeof(buffer), "%d", this->value);
+	sprintf(buffer, "%d", this->value);
 	jsonString += buffer;
 	return true;
 }
