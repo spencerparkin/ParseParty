@@ -126,6 +126,10 @@ Parser::SyntaxNode* QuickParseAlgorithm::MatchTokensAgainstRule(int& parsePositi
 
 					break;
 				}
+                default:
+                {
+                    break;
+                }
 			}
 
 			if (!tokenMatched)

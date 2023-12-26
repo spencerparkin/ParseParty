@@ -67,6 +67,10 @@ Parser::SyntaxNode* LookAheadParseAlgorithm::GenerateTree(const Grammar::Rule* g
 				}
 				break;
 			}
+            default:
+            {
+                break;
+            }
 		}
 
 		if (!tokenMatched)
@@ -125,6 +129,10 @@ bool LookAheadParseAlgorithm::TryMatchSequence(const Grammar::MatchSequence* mat
 
 				break;
 			}
+            default:
+            {
+                break;
+            }
 		}
 	}
 

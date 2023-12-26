@@ -225,7 +225,7 @@ JsonInt::JsonInt(long value)
 /*virtual*/ bool JsonInt::PrintJson(std::string& jsonString, int tabLevel /*= 0*/) const
 {
 	char buffer[128];
-	sprintf(buffer, "%d", this->value);
+	sprintf(buffer, "%ld", this->value);
 	jsonString += buffer;
 	return true;
 }
