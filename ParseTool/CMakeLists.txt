@@ -23,7 +23,7 @@ target_compile_definitions(ParseTool PRIVATE
 )
 
 # Change this to wherever you have wxWidgets installed and built.
-set(WX_WIDGETS_ROOT "E:/wxWidgets")
+set(WX_WIDGETS_ROOT "C:/wxWidgets")
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     target_link_directories(ParseTool PRIVATE
