@@ -1,4 +1,5 @@
 #include "SlowParseAlgorithm.h"
+#include <cstring>
 
 namespace ParseParty
 {
