@@ -1,4 +1,5 @@
 #include "QuickParseAlgorithm.h"
+#include <cstring>
 
 namespace ParseParty
 {
