@@ -10,6 +10,8 @@ set(PARSE_LIBRARY_SOURCES
     Source/Grammar.h
     Source/JsonValue.cpp
     Source/JsonValue.h
+    Source/VDFValue.cpp
+    Source/VDFValue.h
     Source/Lexer.cpp
     Source/Lexer.h
     Source/LookAheadParseAlgorithm.cpp
