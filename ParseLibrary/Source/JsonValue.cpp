@@ -443,20 +443,25 @@ JsonValue* JsonObject::GetValue(const std::string& key)
 	return iter->second;
 }
 
-bool JsonObject::SetValue(const std::string& key, JsonValue* value)
+bool JsonObject::SetValue(const std::string& key, JsonValue* value, bool freeMemory /*= true*/)
 {
-	this->DeleteValue(key);
+	if (!value)
+		return false;
+
+	this->DeleteValue(key, freeMemory);
 	this->valueMap->insert(std::pair<std::string, JsonValue*>(key, value));
 	return true;
 }
 
-bool JsonObject::DeleteValue(const std::string& key)
+bool JsonObject::DeleteValue(const std::string& key, bool freeMemory /*= true*/)
 {
 	JsonValueMap::iterator iter = this->valueMap->find(key);
 	if (iter == this->valueMap->end())
 		return false;
 
-	delete iter->second;
+	if (freeMemory)
+		delete iter->second;
+
 	this->valueMap->erase(iter);
 	return true;
 }
@@ -613,16 +618,19 @@ JsonValue* JsonArray::GetValue(unsigned int i)
 
 bool JsonArray::SetValue(unsigned int i, JsonValue* value)
 {
+	// STPTODO: Write this.
 	return false;
 }
 
 bool JsonArray::RemoveValue(unsigned int i)
 {
+	// STPTODO: Write this.
 	return false;
 }
 
 bool JsonArray::InsertValue(unsigned int i, JsonValue* value)
 {
+	// STPTODO: Write this.
 	return false;
 }
 

@@ -5,6 +5,9 @@
 
 namespace ParseParty
 {
+	// In hind-sight, I should have used std::shared_ptr<> here, but I didn't.
+	// I now have so much code that uses these classes that I'm afraid to change it.
+
 	class PARSE_PARTY_API JsonValue
 	{
 	public:
@@ -86,8 +89,8 @@ namespace ParseParty
 		unsigned int GetSize() const;
 		const JsonValue* GetValue(const std::string& key) const;
 		JsonValue* GetValue(const std::string& key);
-		bool SetValue(const std::string& key, JsonValue* value);
-		bool DeleteValue(const std::string& key);
+		bool SetValue(const std::string& key, JsonValue* value, bool freeMemory = true);
+		bool DeleteValue(const std::string& key, bool freeMemory = true);
 
 		typedef std::map<std::string, JsonValue*> JsonValueMap;
 
