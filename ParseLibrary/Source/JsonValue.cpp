@@ -13,7 +13,7 @@ JsonValue::JsonValue()
 {
 }
 
-/*static*/ JsonValue* JsonValue::ParseJson(const std::string& jsonString, std::string& parseError)
+/*static*/ std::shared_ptr<JsonValue> JsonValue::ParseJson(const std::string& jsonString, std::string& parseError)
 {
 	Lexer lexer;
 	lexer.tokenGeneratorList->push_back(new Lexer::ParanTokenGenerator());
@@ -34,7 +34,7 @@ JsonValue::JsonValue()
 		return nullptr;
 	}
 
-	JsonValue* jsonValue = ValueFactory(*tokenArray[0]);
+	std::shared_ptr<JsonValue> jsonValue = ValueFactory(*tokenArray[0]);
 	if (!jsonValue)
 	{
 		parseError = "Could not decypher initial token.";
@@ -44,28 +44,27 @@ JsonValue::JsonValue()
 	int parsePosition = 0;
 	if (!jsonValue->ParseTokens(tokenArray, parsePosition, parseError))
 	{
-		delete jsonValue;
-		jsonValue = nullptr;
+		jsonValue.reset();
 		return nullptr;
 	}
 
 	return jsonValue;
 }
 
-/*static*/ JsonValue* JsonValue::ValueFactory(const Lexer::Token& token)
+/*static*/ std::shared_ptr<JsonValue> JsonValue::ValueFactory(const Lexer::Token& token)
 {
 	if (token.type == Lexer::Token::Type::OPEN_SQUARE_BRACKET)
-		return new JsonArray();
+		return std::make_shared<JsonArray>();
 	else if (token.type == Lexer::Token::Type::OPEN_CURLY_BRACE)
-		return new JsonObject();
+		return std::make_shared<JsonObject>();
 	else if (token.type == Lexer::Token::Type::STRING_LITERAL)
-		return new JsonString();
+		return std::make_shared<JsonString>();
 	else if (token.type == Lexer::Token::Type::NUMBER_LITERAL_FLOAT)
-		return new JsonFloat();
+		return std::make_shared<JsonFloat>();
 	else if (token.type == Lexer::Token::Type::NUMBER_LITERAL_INT)
-		return new JsonInt();
+		return std::make_shared<JsonInt>();
 	else if (token.type == Lexer::Token::Type::IDENTIFIER)
-		return new JsonBool();
+		return std::make_shared<JsonBool>();
 
 	return nullptr;
 }
@@ -270,8 +269,6 @@ JsonObject::JsonObject()
 
 /*virtual*/ JsonObject::~JsonObject()
 {
-	this->Clear();
-
 	delete this->valueMap;
 }
 
@@ -281,14 +278,14 @@ JsonObject::JsonObject()
 	
 	int i = 0;
 
-	for (std::pair<std::string, JsonValue*> pair : *this->valueMap)
+	for (std::pair<std::string, std::shared_ptr<JsonValue>> pair : *this->valueMap)
 	{
 		if (i++ > 0)
 			jsonString += ",\n";
 
 		jsonString += MakeTabs(tabLevel + 1) + "\"" + pair.first + "\":";
 		
-		if (dynamic_cast<JsonArray*>(pair.second) || dynamic_cast<JsonObject*>(pair.second))
+		if (dynamic_cast<JsonArray*>(pair.second.get()) || dynamic_cast<JsonObject*>(pair.second.get()))
 			jsonString += "\n";
 		else
 			jsonString += " ";
@@ -365,7 +362,7 @@ JsonObject::JsonObject()
 		}
 
 		token = tokenArray[parsePosition].get();
-		JsonValue* jsonValue = ValueFactory(*token);
+		std::shared_ptr<JsonValue> jsonValue = ValueFactory(*token);
 		if (!jsonValue)
 		{
 			parseError = MakeError(tokenArray, parsePosition, "Could not decypher JSON value type.");
@@ -375,7 +372,6 @@ JsonObject::JsonObject()
 		if (!this->SetValue(key, jsonValue))
 		{
 			parseError = "Internal error!";
-			delete jsonValue;
 			return false;
 		}
 
@@ -408,9 +404,6 @@ JsonObject::JsonObject()
 
 void JsonObject::Clear()
 {
-	for (std::pair<std::string, JsonValue*> pair : *this->valueMap)
-		delete pair.second;
-
 	this->valueMap->clear();
 }
 
@@ -421,10 +414,10 @@ unsigned int JsonObject::GetSize() const
 
 const JsonValue* JsonObject::GetValue(const std::string& key) const
 {
-	return const_cast<JsonObject*>(this)->GetValue(key);
+	return const_cast<JsonObject*>(this)->GetValue(key).get();
 }
 
-JsonValue* JsonObject::GetValue(const std::string& key)
+std::shared_ptr<JsonValue> JsonObject::GetValue(const std::string& key)
 {
 	JsonValueMap::iterator iter = this->valueMap->find(key);
 	if (iter == this->valueMap->end())
@@ -433,24 +426,21 @@ JsonValue* JsonObject::GetValue(const std::string& key)
 	return iter->second;
 }
 
-bool JsonObject::SetValue(const std::string& key, JsonValue* value, bool freeMemory /*= true*/)
+bool JsonObject::SetValue(const std::string& key, std::shared_ptr<JsonValue> value)
 {
 	if (!value)
 		return false;
 
-	this->DeleteValue(key, freeMemory);
-	this->valueMap->insert(std::pair<std::string, JsonValue*>(key, value));
+	this->DeleteValue(key);
+	this->valueMap->insert(std::pair<std::string, std::shared_ptr<JsonValue>>(key, value));
 	return true;
 }
 
-bool JsonObject::DeleteValue(const std::string& key, bool freeMemory /*= true*/)
+bool JsonObject::DeleteValue(const std::string& key)
 {
 	JsonValueMap::iterator iter = this->valueMap->find(key);
 	if (iter == this->valueMap->end())
 		return false;
-
-	if (freeMemory)
-		delete iter->second;
 
 	this->valueMap->erase(iter);
 	return true;
@@ -468,7 +458,7 @@ JsonArray::JsonArray(const std::vector<double>& floatArray)
 	this->valueArray = new JsonValueArray();
 
 	for (double value : floatArray)
-		this->valueArray->push_back(new JsonFloat(value));
+		this->valueArray->push_back(std::make_shared<JsonFloat>(value));
 }
 
 JsonArray::JsonArray(const std::vector<int>& intArray)
@@ -476,13 +466,11 @@ JsonArray::JsonArray(const std::vector<int>& intArray)
 	this->valueArray = new JsonValueArray();
 
 	for (int value : intArray)
-		this->valueArray->push_back(new JsonInt(value));
+		this->valueArray->push_back(std::make_shared<JsonInt>(value));
 }
 
 /*virtual*/ JsonArray::~JsonArray()
 {
-	this->Clear();
-
 	delete this->valueArray;
 }
 
@@ -495,7 +483,7 @@ JsonArray::JsonArray(const std::vector<int>& intArray)
 		if (i > 0)
 			jsonString += ",\n";
 
-		const JsonValue* jsonValue = (*this->valueArray)[i];
+		const JsonValue* jsonValue = (*this->valueArray)[i].get();
 		
 		if (!(dynamic_cast<const JsonArray*>(jsonValue) || dynamic_cast<const JsonObject*>(jsonValue)))
 			jsonString += MakeTabs(tabLevel + 1);
@@ -544,7 +532,7 @@ JsonArray::JsonArray(const std::vector<int>& intArray)
 	while (true)
 	{
 		token = tokenArray[parsePosition].get();
-		JsonValue* jsonValue = ValueFactory(*token);
+		std::shared_ptr<JsonValue> jsonValue = ValueFactory(*token);
 		if (!jsonValue)
 		{
 			parseError = MakeError(tokenArray, parsePosition, "Could not decypher JSON value type.");
@@ -582,9 +570,6 @@ JsonArray::JsonArray(const std::vector<int>& intArray)
 
 void JsonArray::Clear()
 {
-	for (JsonValue* value : *this->valueArray)
-		delete value;
-
 	this->valueArray->clear();
 }
 
@@ -595,10 +580,10 @@ unsigned int JsonArray::GetSize() const
 
 const JsonValue* JsonArray::GetValue(unsigned int i) const
 {
-	return const_cast<JsonArray*>(this)->GetValue(i);
+	return const_cast<JsonArray*>(this)->GetValue(i).get();
 }
 
-JsonValue* JsonArray::GetValue(unsigned int i)
+std::shared_ptr<JsonValue> JsonArray::GetValue(unsigned int i)
 {
 	if (i >= this->valueArray->size())
 		return nullptr;
@@ -606,7 +591,7 @@ JsonValue* JsonArray::GetValue(unsigned int i)
 	return (*this->valueArray)[i];
 }
 
-bool JsonArray::SetValue(unsigned int i, JsonValue* value)
+bool JsonArray::SetValue(unsigned int i, std::shared_ptr<JsonValue> value)
 {
 	// STPTODO: Write this.
 	return false;
@@ -618,23 +603,23 @@ bool JsonArray::RemoveValue(unsigned int i)
 	return false;
 }
 
-bool JsonArray::InsertValue(unsigned int i, JsonValue* value)
+bool JsonArray::InsertValue(unsigned int i, std::shared_ptr<JsonValue> value)
 {
 	// STPTODO: Write this.
 	return false;
 }
 
-void JsonArray::PushValue(JsonValue* value)
+void JsonArray::PushValue(std::shared_ptr<JsonValue> value)
 {
 	this->valueArray->push_back(value);
 }
 
-JsonValue* JsonArray::PopValue()
+std::shared_ptr<JsonValue> JsonArray::PopValue()
 {
 	if (this->valueArray->size() == 0)
 		return nullptr;
 
-	JsonValue* jsonValue = this->valueArray->back();
+	std::shared_ptr<JsonValue> jsonValue = this->valueArray->back();
 	this->valueArray->pop_back();
 	return jsonValue;
 }

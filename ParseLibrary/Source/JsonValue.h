@@ -5,9 +5,6 @@
 
 namespace ParseParty
 {
-	// In hind-sight, I should have used std::shared_ptr<> here, but I didn't.
-	// I now have so much code that uses these classes that I'm afraid to change it.
-
 	class PARSE_PARTY_API JsonValue
 	{
 	public:
@@ -19,8 +16,8 @@ namespace ParseParty
 		virtual bool PrintJson(std::string& jsonString, int tabLevel = 0) const = 0;
 		virtual bool ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError) = 0;
 
-		static JsonValue* ParseJson(const std::string& jsonString, std::string& parseError);
-		static JsonValue* ValueFactory(const Lexer::Token& token);
+		static std::shared_ptr<JsonValue> ParseJson(const std::string& jsonString, std::string& parseError);
+		static std::shared_ptr<JsonValue> ValueFactory(const Lexer::Token& token);
 		static std::string MakeTabs(int tabCount);
 		static std::string MakeError(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int parsePosition, const std::string& errorMsg);
 	};
@@ -88,11 +85,11 @@ namespace ParseParty
 		void Clear();
 		unsigned int GetSize() const;
 		const JsonValue* GetValue(const std::string& key) const;
-		JsonValue* GetValue(const std::string& key);
-		bool SetValue(const std::string& key, JsonValue* value, bool freeMemory = true);
-		bool DeleteValue(const std::string& key, bool freeMemory = true);
+		std::shared_ptr<JsonValue> GetValue(const std::string& key);
+		bool SetValue(const std::string& key, std::shared_ptr<JsonValue> value);
+		bool DeleteValue(const std::string& key);
 
-		typedef std::map<std::string, JsonValue*> JsonValueMap;
+		typedef std::map<std::string, std::shared_ptr<JsonValue>> JsonValueMap;
 
 		JsonValueMap::iterator begin() { return this->valueMap->begin(); }
 		JsonValueMap::const_iterator begin() const { return this->valueMap->begin(); }
@@ -117,15 +114,15 @@ namespace ParseParty
 		void Clear();
 		unsigned int GetSize() const;
 		const JsonValue* GetValue(unsigned int i) const;
-		JsonValue* GetValue(unsigned int i);
-		bool SetValue(unsigned int i, JsonValue* value);
+		std::shared_ptr<JsonValue> GetValue(unsigned int i);
+		bool SetValue(unsigned int i, std::shared_ptr<JsonValue> value);
 		bool RemoveValue(unsigned int i);
-		bool InsertValue(unsigned int i, JsonValue* value);
-		void PushValue(JsonValue* value);
-		JsonValue* PopValue();
+		bool InsertValue(unsigned int i, std::shared_ptr<JsonValue> value);
+		void PushValue(std::shared_ptr<JsonValue> value);
+		std::shared_ptr<JsonValue> PopValue();
 
 	private:
-		typedef std::vector<JsonValue*> JsonValueArray;
+		typedef std::vector<std::shared_ptr<JsonValue>> JsonValueArray;
 		JsonValueArray* valueArray;
 	};
 

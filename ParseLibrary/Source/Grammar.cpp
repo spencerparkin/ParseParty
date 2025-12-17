@@ -48,99 +48,91 @@ const Grammar::Rule* Grammar::LookupRule(const std::string& ruleName) const
 
 bool Grammar::ReadFile(const std::string& grammarFile, std::string& error)
 {
-	bool success = false;
-	JsonValue* jsonRootValue = nullptr;
+	std::shared_ptr<JsonValue> jsonRootValue;
 
 	this->Clear();
 
-	while (true)
+	std::ifstream fileStream;
+	fileStream.open(grammarFile.c_str(), std::ios::in);
+	if (!fileStream.is_open())
 	{
-		std::ifstream fileStream;
-		fileStream.open(grammarFile.c_str(), std::ios::in);
-		if (!fileStream.is_open())
-		{
-			error = "Failed to open file: " + grammarFile;
-			break;
-		}
-
-		std::stringstream stringStream;
-		stringStream << fileStream.rdbuf();
-		std::string jsonString = stringStream.str();
-		std::string parseError;
-		jsonRootValue = JsonValue::ParseJson(jsonString, parseError);
-		if (!jsonRootValue)
-		{
-			error = parseError;
-			break;
-		}
-
-		JsonObject* jsonObject = dynamic_cast<JsonObject*>(jsonRootValue);
-		if (!jsonObject)
-		{
-			error = "Expected root-level JSON object.";
-			break;
-		}
-
-		JsonString* jsonInitialRule = dynamic_cast<JsonString*>(jsonObject->GetValue("initial_rule"));
-		if (!jsonInitialRule)
-		{
-			error = "No \"initial_rule\" key found or it's not a string.";
-			break;
-		}
-
-		*this->initialRule = jsonInitialRule->GetValue();
-
-		JsonString* jsonAlgorithm = dynamic_cast<JsonString*>(jsonObject->GetValue("algorithm"));
-		if (!jsonAlgorithm)
-		{
-			error = "No \"algorithm\" key found or it's not a string.";
-			break;
-		}
-
-		*this->algorithmName = jsonAlgorithm->GetValue();
-
-		JsonObject* jsonFlags = dynamic_cast<JsonObject*>(jsonObject->GetValue("flags"));
-		if (!this->ReadFlags(jsonFlags))
-			break;
-
-		JsonObject* jsonRuleMap = dynamic_cast<JsonObject*>(jsonObject->GetValue("rules"));
-		if (!jsonRuleMap)
-		{
-			error = "No \"rules\" key found or it's not an object.";
-			break;
-		}
-
-		for (std::pair<std::string, JsonValue*> pair : *jsonRuleMap)
-		{
-			JsonArray* jsonRuleValue = dynamic_cast<JsonArray*>(pair.second);
-			if (!jsonRuleValue)
-			{
-				error = "Each rule entry should be an array.";
-				break;
-			}
-
-			Rule* rule = new Rule();
-			*rule->name = pair.first;
-
-			if (!rule->Read(jsonRuleValue, jsonRuleMap))
-			{
-				error = "Failed to read rule: " + *rule->name;
-				delete rule;
-				break;
-			}
-
-			this->ruleMap->insert(std::pair<std::string, Rule*>(*rule->name, rule));
-		}
-
-		if (this->ruleMap->size() != jsonRuleMap->GetSize())
-			break;
-
-		success = true;
-		break;
+		error = "Failed to open file: " + grammarFile;
+		return false;
 	}
 
-	delete jsonRootValue;
-	return success;
+	std::stringstream stringStream;
+	stringStream << fileStream.rdbuf();
+	std::string jsonString = stringStream.str();
+	std::string parseError;
+	jsonRootValue = JsonValue::ParseJson(jsonString, parseError);
+	if (!jsonRootValue)
+	{
+		error = parseError;
+		return false;
+	}
+
+	JsonObject* jsonObject = dynamic_cast<JsonObject*>(jsonRootValue.get());
+	if (!jsonObject)
+	{
+		error = "Expected root-level JSON object.";
+		return false;
+	}
+
+	JsonString* jsonInitialRule = dynamic_cast<JsonString*>(jsonObject->GetValue("initial_rule").get());
+	if (!jsonInitialRule)
+	{
+		error = "No \"initial_rule\" key found or it's not a string.";
+		return false;
+	}
+
+	*this->initialRule = jsonInitialRule->GetValue();
+
+	JsonString* jsonAlgorithm = dynamic_cast<JsonString*>(jsonObject->GetValue("algorithm").get());
+	if (!jsonAlgorithm)
+	{
+		error = "No \"algorithm\" key found or it's not a string.";
+		return false;
+	}
+
+	*this->algorithmName = jsonAlgorithm->GetValue();
+
+	JsonObject* jsonFlags = dynamic_cast<JsonObject*>(jsonObject->GetValue("flags").get());
+	if (!this->ReadFlags(jsonFlags))
+		return false;
+
+	JsonObject* jsonRuleMap = dynamic_cast<JsonObject*>(jsonObject->GetValue("rules").get());
+	if (!jsonRuleMap)
+	{
+		error = "No \"rules\" key found or it's not an object.";
+		return false;
+	}
+
+	for (std::pair<std::string, std::shared_ptr<JsonValue>> pair : *jsonRuleMap)
+	{
+		JsonArray* jsonRuleValue = dynamic_cast<JsonArray*>(pair.second.get());
+		if (!jsonRuleValue)
+		{
+			error = "Each rule entry should be an array.";
+			return false;
+		}
+
+		Rule* rule = new Rule();
+		*rule->name = pair.first;
+
+		if (!rule->Read(jsonRuleValue, jsonRuleMap))
+		{
+			error = "Failed to read rule: " + *rule->name;
+			delete rule;
+			return false;
+		}
+
+		this->ruleMap->insert(std::pair<std::string, Rule*>(*rule->name, rule));
+	}
+
+	if (this->ruleMap->size() != jsonRuleMap->GetSize())
+		return false;
+
+	return true;
 }
 
 bool Grammar::WriteFile(const std::string& grammarFile) const

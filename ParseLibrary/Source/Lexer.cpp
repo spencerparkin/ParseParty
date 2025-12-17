@@ -40,111 +40,100 @@ void Lexer::Clear()
 
 bool Lexer::ReadFile(const std::string& lexiconFile, std::string& error)
 {
-	bool success = false;
-	JsonValue* jsonRootValue = nullptr;
-
-	while (true)
+	std::ifstream fileStream;
+	fileStream.open(lexiconFile.c_str(), std::ios::in);
+	if (!fileStream.is_open())
 	{
-		std::ifstream fileStream;
-		fileStream.open(lexiconFile.c_str(), std::ios::in);
-		if (!fileStream.is_open())
-		{
-			error = "Failed to open file: " + lexiconFile;
-			break;
-		}
-
-		std::stringstream stringStream;
-		stringStream << fileStream.rdbuf();
-		std::string jsonString = stringStream.str();
-		std::string parseError;
-		jsonRootValue = JsonValue::ParseJson(jsonString, parseError);
-		if (!jsonRootValue)
-		{
-			error = parseError;
-			break;
-		}
-
-		const JsonObject* jsonObject = dynamic_cast<JsonObject*>(jsonRootValue);
-		if (!jsonObject)
-		{
-			error = "Expected root-level JSON object.";
-			break;
-		}
-
-		const JsonArray* jsonTokenGeneratorArray = dynamic_cast<const JsonArray*>(jsonObject->GetValue("token_generators"));
-		if (!jsonTokenGeneratorArray)
-		{
-			error = "Expected to find \"token_generators\" key as an array.";
-			break;
-		}
-
-		this->Clear();
-
-		for (int i = 0; i < (signed)jsonTokenGeneratorArray->GetSize(); i++)
-		{
-			const JsonObject* jsonTokenGenerator = dynamic_cast<const JsonObject*>(jsonTokenGeneratorArray->GetValue(i));
-			if (!jsonTokenGenerator)
-			{
-				error = "Each token generator should be an object.";
-				break;
-			}
-
-			const JsonString* jsonGeneratorName = dynamic_cast<const JsonString*>(jsonTokenGenerator->GetValue("name"));
-			if (!jsonGeneratorName)
-			{
-				error = "No name found for token generator.";
-				break;
-			}
-
-			const JsonObject* jsonGeneratorConfig = dynamic_cast<const JsonObject*>(jsonTokenGenerator->GetValue("config"));
-			if (!jsonGeneratorConfig)
-			{
-				error = "No config found for token generator \"" + jsonGeneratorName->GetValue() + "\".";
-				break;
-			}
-
-			TokenGenerator* tokenGenerator = nullptr;
-
-			if (jsonGeneratorName->GetValue() == "ParanTokenGenerator")
-				tokenGenerator = new ParanTokenGenerator();
-			else if (jsonGeneratorName->GetValue() == "DelimeterTokenGenerator")
-				tokenGenerator = new DelimeterTokenGenerator();
-			else if (jsonGeneratorName->GetValue() == "NumberTokenGenerator")
-				tokenGenerator = new NumberTokenGenerator();
-			else if (jsonGeneratorName->GetValue() == "StringTokenGenerator")
-				tokenGenerator = new StringTokenGenerator();
-			else if (jsonGeneratorName->GetValue() == "OperatorTokenGenerator")
-				tokenGenerator = new OperatorTokenGenerator();
-			else if (jsonGeneratorName->GetValue() == "IdentifierTokenGenerator")
-				tokenGenerator = new IdentifierTokenGenerator();
-			else if (jsonGeneratorName->GetValue() == "CommentTokenGenerator")
-				tokenGenerator = new CommentTokenGenerator();
-
-			if (!tokenGenerator)
-			{
-				error = "Unrecognized token generator: " + jsonGeneratorName->GetValue();
-				break;
-			}
-
-			if (!tokenGenerator->ReadConfig(jsonGeneratorConfig, error))
-			{
-				delete tokenGenerator;
-				break;
-			}
-
-			this->tokenGeneratorList->push_back(tokenGenerator);
-		}
-
-		if (this->tokenGeneratorList->size() != jsonTokenGeneratorArray->GetSize())
-			break;
-
-		success = true;
-		break;
+		error = "Failed to open file: " + lexiconFile;
+		return false;
 	}
 
-	delete jsonRootValue;
+	std::stringstream stringStream;
+	stringStream << fileStream.rdbuf();
+	std::string jsonString = stringStream.str();
+	std::string parseError;
+	std::shared_ptr<JsonValue> jsonRootValue = JsonValue::ParseJson(jsonString, parseError);
+	if (!jsonRootValue)
+	{
+		error = parseError;
+		return false;
+	}
 
-	return success;
+	const JsonObject* jsonObject = dynamic_cast<JsonObject*>(jsonRootValue.get());
+	if (!jsonObject)
+	{
+		error = "Expected root-level JSON object.";
+		return false;
+	}
+
+	const JsonArray* jsonTokenGeneratorArray = dynamic_cast<const JsonArray*>(jsonObject->GetValue("token_generators"));
+	if (!jsonTokenGeneratorArray)
+	{
+		error = "Expected to find \"token_generators\" key as an array.";
+		return false;
+	}
+
+	this->Clear();
+
+	for (int i = 0; i < (signed)jsonTokenGeneratorArray->GetSize(); i++)
+	{
+		const JsonObject* jsonTokenGenerator = dynamic_cast<const JsonObject*>(jsonTokenGeneratorArray->GetValue(i));
+		if (!jsonTokenGenerator)
+		{
+			error = "Each token generator should be an object.";
+			return false;
+		}
+
+		const JsonString* jsonGeneratorName = dynamic_cast<const JsonString*>(jsonTokenGenerator->GetValue("name"));
+		if (!jsonGeneratorName)
+		{
+			error = "No name found for token generator.";
+			return false;
+		}
+
+		const JsonObject* jsonGeneratorConfig = dynamic_cast<const JsonObject*>(jsonTokenGenerator->GetValue("config"));
+		if (!jsonGeneratorConfig)
+		{
+			error = "No config found for token generator \"" + jsonGeneratorName->GetValue() + "\".";
+			return false;
+		}
+
+		TokenGenerator* tokenGenerator = nullptr;
+
+		if (jsonGeneratorName->GetValue() == "ParanTokenGenerator")
+			tokenGenerator = new ParanTokenGenerator();
+		else if (jsonGeneratorName->GetValue() == "DelimeterTokenGenerator")
+			tokenGenerator = new DelimeterTokenGenerator();
+		else if (jsonGeneratorName->GetValue() == "NumberTokenGenerator")
+			tokenGenerator = new NumberTokenGenerator();
+		else if (jsonGeneratorName->GetValue() == "StringTokenGenerator")
+			tokenGenerator = new StringTokenGenerator();
+		else if (jsonGeneratorName->GetValue() == "OperatorTokenGenerator")
+			tokenGenerator = new OperatorTokenGenerator();
+		else if (jsonGeneratorName->GetValue() == "IdentifierTokenGenerator")
+			tokenGenerator = new IdentifierTokenGenerator();
+		else if (jsonGeneratorName->GetValue() == "CommentTokenGenerator")
+			tokenGenerator = new CommentTokenGenerator();
+
+		if (!tokenGenerator)
+		{
+			error = "Unrecognized token generator: " + jsonGeneratorName->GetValue();
+			return false;
+		}
+
+		if (!tokenGenerator->ReadConfig(jsonGeneratorConfig, error))
+		{
+			delete tokenGenerator;
+			return false;
+		}
+
+		this->tokenGeneratorList->push_back(tokenGenerator);
+	}
+
+	if (this->tokenGeneratorList->size() != jsonTokenGeneratorArray->GetSize())
+		return false;
+
+	return true;
 }
 
 bool Lexer::WriteFile(const std::string& lexiconFile) const

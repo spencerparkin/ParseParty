@@ -198,18 +198,18 @@ bool Parser::SyntaxNode::ReadFromJson(const JsonObject* jsonParentNode, std::str
 
 bool Parser::SyntaxNode::WriteToJson(JsonObject* jsonParentNode) const
 {
-	jsonParentNode->SetValue("text", new JsonString(*this->text));
-	jsonParentNode->SetValue("line", new JsonInt(this->fileLocation.line));
-	jsonParentNode->SetValue("column", new JsonInt(this->fileLocation.column));
+	jsonParentNode->SetValue("text", std::make_shared<JsonString>(*this->text));
+	jsonParentNode->SetValue("line", std::make_shared<JsonInt>(this->fileLocation.line));
+	jsonParentNode->SetValue("column", std::make_shared<JsonInt>(this->fileLocation.column));
 
-	JsonArray* jsonChildArray = new JsonArray();
+	std::shared_ptr<JsonArray> jsonChildArray = std::make_shared<JsonArray>();
 	jsonParentNode->SetValue("children", jsonChildArray);
 
 	for (const SyntaxNode* childNode : *this->childList)
 	{
-		JsonObject* jsonChildNode = new JsonObject();
+		std::shared_ptr<JsonObject> jsonChildNode = std::make_shared<JsonObject>();
 		jsonChildArray->PushValue(jsonChildNode);
-		if (!childNode->WriteToJson(jsonChildNode))
+		if (!childNode->WriteToJson(jsonChildNode.get()))
 			return false;
 	}
 
@@ -218,102 +218,81 @@ bool Parser::SyntaxNode::WriteToJson(JsonObject* jsonParentNode) const
 
 /*static*/ bool Parser::SyntaxNode::ReadFromFile(const std::string& syntaxTreeFile, SyntaxNode*& rootNode, std::string& parseError)
 {
-	bool success = false;
-	JsonValue* jsonValue = nullptr;
-	
 	if (rootNode)
 	{
 		delete rootNode;
 		rootNode = nullptr;
 	}
 
-	do
+	std::ifstream fileStream(syntaxTreeFile, std::ios::in);
+	if (!fileStream.is_open())
+		return false;
+
+	std::stringstream stringStream;
+	stringStream << fileStream.rdbuf();
+	std::string jsonString = stringStream.str();
+	fileStream.close();
+
+	std::shared_ptr<JsonValue> jsonValue = JsonValue::ParseJson(jsonString, parseError);
+	if (!jsonValue)
+		return false;
+
+	JsonObject* jsonObject = dynamic_cast<JsonObject*>(jsonValue.get());
+	if (!jsonObject)
 	{
-		std::ifstream fileStream(syntaxTreeFile, std::ios::in);
-		if (!fileStream.is_open())
-			break;
+		parseError = "Expected root-level value to be an object.";
+		return false;
+	}
 
-		std::stringstream stringStream;
-		stringStream << fileStream.rdbuf();
-		std::string jsonString = stringStream.str();
-		fileStream.close();
+	const JsonObject* jsonRootNode = dynamic_cast<JsonObject*>(jsonObject->GetValue("root").get());
+	if (!jsonRootNode)
+	{
+		parseError = "Expected \"root\" entry.";
+		return false;
+	}
 
-		jsonValue = JsonValue::ParseJson(jsonString, parseError);
-		if (!jsonValue)
-			break;
-
-		JsonObject* jsonObject = dynamic_cast<JsonObject*>(jsonValue);
-		if (!jsonObject)
-		{
-			parseError = "Expected root-level value to be an object.";
-			break;
-		}
-
-		const JsonObject* jsonRootNode = dynamic_cast<JsonObject*>(jsonObject->GetValue("root"));
-		if (!jsonRootNode)
-		{
-			parseError = "Expected \"root\" entry.";
-			break;
-		}
-
-		rootNode = new SyntaxNode();
-		if (!rootNode->ReadFromJson(jsonRootNode, parseError))
-			break;
-
-		success = true;
-	} while (false);
-
-	if (!success)
+	rootNode = new SyntaxNode();
+	if (!rootNode->ReadFromJson(jsonRootNode, parseError))
 	{
 		delete rootNode;
 		rootNode = nullptr;
+		return false;
 	}
 
-	delete jsonValue;
-	return success;
+	return true;
 }
 
 /*static*/ bool Parser::SyntaxNode::WriteToFile(const std::string& syntaxTreeFile, const SyntaxNode* rootNode)
 {
-	bool success = false;
-	JsonObject* jsonValue = nullptr;
+	if (!rootNode)
+		return false;
 
-	do
-	{
-		if (!rootNode)
-			break;
+	std::shared_ptr<JsonObject> jsonValue = std::make_shared<JsonObject>();
+	if (!jsonValue)
+		return false;
 
-		jsonValue = new JsonObject();
-		if (!jsonValue)
-			break;
+	time_t timeValue = std::time(nullptr);
+	std::tm* localTimeValue = std::localtime(&timeValue);
+	std::ostringstream timeStringStream;
+	timeStringStream << std::put_time(localTimeValue, "Generated on %m/%d/%Y at %H:%M:%S by Parse-Party!  It's a party, brah!");
+	jsonValue->SetValue("comment", std::make_shared<JsonString>(timeStringStream.str()));
 
-		time_t timeValue = std::time(nullptr);
-		std::tm* localTimeValue = std::localtime(&timeValue);
-		std::ostringstream timeStringStream;
-		timeStringStream << std::put_time(localTimeValue, "Generated on %m/%d/%Y at %H:%M:%S by Parse-Party!  It's a party, brah!");
-		jsonValue->SetValue("comment", new JsonString(timeStringStream.str()));
+	std::shared_ptr<JsonObject> jsonRootNode = std::make_shared<JsonObject>();
+	jsonValue->SetValue("root", jsonRootNode);
+	if (!rootNode->WriteToJson(jsonRootNode.get()))
+		return false;
 
-		JsonObject* jsonRootNode = new JsonObject();
-		jsonValue->SetValue("root", jsonRootNode);
-		if (!rootNode->WriteToJson(jsonRootNode))
-			break;
+	std::ofstream fileStream(syntaxTreeFile, std::ios::out);
+	if (!fileStream.is_open())
+		return false;
 
-		std::ofstream fileStream(syntaxTreeFile, std::ios::out);
-		if (!fileStream.is_open())
-			break;
+	std::string jsonString;
+	if (!jsonValue->PrintJson(jsonString))
+		return false;
 
-		std::string jsonString;
-		if (!jsonValue->PrintJson(jsonString))
-			break;
-
-		fileStream << jsonString;
-		fileStream.close();
-
-		success = true;
-	} while (false);
-
-	delete jsonValue;
-	return success;
+	fileStream << jsonString;
+	fileStream.close();
+	return true;
 }
 
 const Parser::SyntaxNode* Parser::SyntaxNode::FindChild(const std::string& text, int maxRecurseDepth, int depth /*= 1*/) const
