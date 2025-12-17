@@ -32,7 +32,7 @@ Parser::SyntaxNode* Parser::ParseFile(const std::string& codeFile, const Grammar
 Parser::SyntaxNode* Parser::Parse(const std::string& codeText, const Grammar& grammar, std::string* error /*= nullptr*/)
 {
 	SyntaxNode* rootNode = nullptr;
-	std::vector<Lexer::Token*> tokenArray;
+	std::vector<std::shared_ptr<Lexer::Token>> tokenArray;
 
 	std::string lexerError;
 	if (this->lexer.Tokenize(codeText, tokenArray, lexerError))
@@ -40,13 +40,10 @@ Parser::SyntaxNode* Parser::Parse(const std::string& codeText, const Grammar& gr
 	else if (error)
 		*error = lexerError;
 
-	for (Lexer::Token* token : tokenArray)
-		delete token;
-
 	return rootNode;
 }
 
-Parser::SyntaxNode* Parser::Parse(const std::vector<Lexer::Token*>& tokenArray, const Grammar& grammar, std::string* error /*= nullptr*/)
+Parser::SyntaxNode* Parser::Parse(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, const Grammar& grammar, std::string* error /*= nullptr*/)
 {
 	Algorithm* algorithm = nullptr;
 
@@ -105,7 +102,7 @@ Parser::SyntaxNode* Parser::Parse(const std::vector<Lexer::Token*>& tokenArray, 
 
 //------------------------------- Parser::Algorithm -------------------------------
 
-Parser::Algorithm::Algorithm(const std::vector<Lexer::Token*>* tokenArray, const Grammar* grammar)
+Parser::Algorithm::Algorithm(const std::vector<std::shared_ptr<Lexer::Token>>* tokenArray, const Grammar* grammar)
 {
 	this->tokenArray = tokenArray;
 	this->grammar = grammar;

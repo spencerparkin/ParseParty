@@ -2,7 +2,7 @@
 
 using namespace ParseParty;
 
-LookAheadParseAlgorithm::LookAheadParseAlgorithm(const std::vector<Lexer::Token*>* tokenArray, const Grammar* grammar) : Algorithm(tokenArray, grammar)
+LookAheadParseAlgorithm::LookAheadParseAlgorithm(const std::vector<std::shared_ptr<Lexer::Token>>* tokenArray, const Grammar* grammar) : Algorithm(tokenArray, grammar)
 {
 	this->lookAheadCount = 5;
 	this->maxRecursionDepth = 16;
@@ -36,7 +36,7 @@ Parser::SyntaxNode* LookAheadParseAlgorithm::GenerateTree(const Grammar::Rule* g
 
 	for (Grammar::Token* grammarToken : *matchSequence->tokenSequence)
 	{
-		const Lexer::Token* token = (*this->tokenArray)[parsePosition];
+		const Lexer::Token* token = (*this->tokenArray)[parsePosition].get();
 
 		std::string grammarRuleName;
 		bool tokenMatched = false;
@@ -107,7 +107,7 @@ bool LookAheadParseAlgorithm::TryMatchSequence(const Grammar::MatchSequence* mat
 		if (lookAheadPosition == this->lookAheadCount || matchPosition == (signed)this->tokenArray->size())
 			return true;
 
-		const Lexer::Token* token = (*this->tokenArray)[matchPosition];
+		const Lexer::Token* token = (*this->tokenArray)[matchPosition].get();
 		const Grammar::Token* grammarToken = (*matchSequence->tokenSequence)[i];
 		std::string ruleName;
 

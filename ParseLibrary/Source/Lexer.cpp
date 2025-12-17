@@ -152,7 +152,7 @@ bool Lexer::WriteFile(const std::string& lexiconFile) const
 	return false;
 }
 
-bool Lexer::Tokenize(const std::string& codeText, std::vector<Token*>& tokenArray, std::string& error, bool keepComments /*= false*/, FileLocation initialFileLocation /*= FileLocation{ 1, 1 }*/)
+bool Lexer::Tokenize(const std::string& codeText, std::vector<std::shared_ptr<Token>>& tokenArray, std::string& error, bool keepComments /*= false*/, FileLocation initialFileLocation /*= FileLocation{ 1, 1 }*/)
 {
 	if (tokenArray.size() != 0)
 		return false;
@@ -187,7 +187,7 @@ bool Lexer::Tokenize(const std::string& codeText, std::vector<Token*>& tokenArra
 			j++;
 		}
 
-		Token* token = nullptr;
+		std::shared_ptr<Token> token;
 
 		for (TokenGenerator* tokenGenerator : *this->tokenGeneratorList)
 		{
@@ -196,9 +196,7 @@ bool Lexer::Tokenize(const std::string& codeText, std::vector<Token*>& tokenArra
 			{
 				token->fileLocation = fileLocation;
 
-				if (token->type == Token::Type::COMMENT && !keepComments)
-					delete token;
-				else
+				if (token->type != Token::Type::COMMENT || keepComments)
 					tokenArray.push_back(token);
 
 				break;
@@ -260,42 +258,42 @@ Lexer::ParanTokenGenerator::ParanTokenGenerator()
 {
 }
 
-/*virtual*/ Lexer::Token* Lexer::ParanTokenGenerator::GenerateToken(const char* codeBuffer, int& i)
+/*virtual*/ std::shared_ptr<Lexer::Token> Lexer::ParanTokenGenerator::GenerateToken(const char* codeBuffer, int& i)
 {
-	Token* token = nullptr;
+	std::shared_ptr<Token> token;
 
 	if (codeBuffer[i] == '(')
 	{
-		token = new Token();
+		token = std::make_shared<Token>();
 		token->type = Token::Type::OPEN_PARAN;
 	}
 	else if (codeBuffer[i] == ')')
 	{
-		token = new Token();
+		token = std::make_shared<Token>();
 		token->type = Token::Type::CLOSE_PARAN;
 	}
 	else if (codeBuffer[i] == '[')
 	{
-		token = new Token();
+		token = std::make_shared<Token>();
 		token->type = Token::Type::OPEN_SQUARE_BRACKET;
 	}
 	else if (codeBuffer[i] == ']')
 	{
-		token = new Token();
+		token = std::make_shared<Token>();
 		token->type = Token::Type::CLOSE_SQUARE_BRACKET;
 	}
 	else if (codeBuffer[i] == '{')
 	{
-		token = new Token();
+		token = std::make_shared<Token>();
 		token->type = Token::Type::OPEN_CURLY_BRACE;
 	}
 	else if(codeBuffer[i] == '}')
 	{
-		token = new Token();
+		token = std::make_shared<Token>();
 		token->type = Token::Type::CLOSE_CURLY_BRACE;
 	}
 
-	if (token)
+	if (token.get())
 		*token->text = codeBuffer[i++];
 
 	return token;
@@ -321,27 +319,27 @@ Lexer::DelimeterTokenGenerator::DelimeterTokenGenerator()
 {
 }
 
-/*virtual*/ Lexer::Token* Lexer::DelimeterTokenGenerator::GenerateToken(const char* codeBuffer, int& i)
+/*virtual*/ std::shared_ptr<Lexer::Token> Lexer::DelimeterTokenGenerator::GenerateToken(const char* codeBuffer, int& i)
 {
-	Token* token = nullptr;
+	std::shared_ptr<Token> token;
 
 	if (codeBuffer[i] == ',')
 	{
-		token = new Token();
+		token = std::make_shared<Token>();
 		token->type = Token::Type::DELIMETER_COMMA;
 	}
 	else if (codeBuffer[i] == ';')
 	{
-		token = new Token();
+		token = std::make_shared<Token>();
 		token->type = Token::Type::DELIMETER_SEMI_COLON;
 	}
 	else if (codeBuffer[i] == ':')
 	{
-		token = new Token();
+		token = std::make_shared<Token>();
 		token->type = Token::Type::DELIMETER_COLON;
 	}
 
-	if (token)
+	if (token.get())
 		*token->text = codeBuffer[i++];
 
 	return token;
@@ -368,12 +366,12 @@ Lexer::StringTokenGenerator::StringTokenGenerator(bool processEscapeSequences /*
 {
 }
 
-/*virtual*/ Lexer::Token* Lexer::StringTokenGenerator::GenerateToken(const char* codeBuffer, int& i)
+/*virtual*/ std::shared_ptr<Lexer::Token> Lexer::StringTokenGenerator::GenerateToken(const char* codeBuffer, int& i)
 {
 	if (codeBuffer[i] != '"')
 		return nullptr;
 
-	Token* token = new Token();
+	std::shared_ptr<Token> token = std::make_shared<Token>();
 	token->type = Token::Type::STRING_LITERAL;
 
 	int j = i + 1;
@@ -386,10 +384,7 @@ Lexer::StringTokenGenerator::StringTokenGenerator(bool processEscapeSequences /*
 	}
 
 	if (codeBuffer[j] == '\0' || (this->processEscapeSequences && !this->CollapseEscapeSequences(*token->text)))
-	{
-		delete token;
-		token = nullptr;
-	}
+		token.reset();
 	else
 	{
 		i = j + 1;
@@ -434,13 +429,13 @@ Lexer::NumberTokenGenerator::NumberTokenGenerator()
 {
 }
 
-/*virtual*/ Lexer::Token* Lexer::NumberTokenGenerator::GenerateToken(const char* codeBuffer, int& i)
+/*virtual*/ std::shared_ptr<Lexer::Token> Lexer::NumberTokenGenerator::GenerateToken(const char* codeBuffer, int& i)
 {
-	Token* token = nullptr;
+	std::shared_ptr<Token> token;
 
 	if (codeBuffer[i] == '-' || ::isdigit(codeBuffer[i]))
 	{
-		token = new Token();
+		token = std::make_shared<Token>();
 		token->type = Token::Type::NUMBER_LITERAL_INT;
 
 		int j = i;
@@ -462,10 +457,7 @@ Lexer::NumberTokenGenerator::NumberTokenGenerator()
 		}
 
 		if (*token->text == "-")
-		{
-			delete token;
-			token = nullptr;
-		}
+			token.reset();
 		else
 			i = j;
 	}
@@ -497,7 +489,7 @@ Lexer::OperatorTokenGenerator::OperatorTokenGenerator()
 	delete this->operatorCharSet;
 }
 
-/*virtual*/ Lexer::Token* Lexer::OperatorTokenGenerator::GenerateToken(const char* codeBuffer, int& i)
+/*virtual*/ std::shared_ptr<Lexer::Token> Lexer::OperatorTokenGenerator::GenerateToken(const char* codeBuffer, int& i)
 {
 	if (!this->operatorCharSet)
 	{
@@ -509,7 +501,7 @@ Lexer::OperatorTokenGenerator::OperatorTokenGenerator()
 	}
 
 	if (this->operatorCharSet->find(codeBuffer[i]) == this->operatorCharSet->end())
-		return nullptr;
+		return std::shared_ptr<Token>();
 
 	std::string operatorText;
 	std::string chosenOperatorText;
@@ -523,9 +515,9 @@ Lexer::OperatorTokenGenerator::OperatorTokenGenerator()
 	}
 
 	if (chosenOperatorText.length() == 0)
-		return nullptr;
+		return std::shared_ptr<Token>();
 
-	Token* token = new Token();
+	std::shared_ptr<Token> token = std::make_shared<Token>();
 	token->type = Token::Type::OPERATOR;
 	*token->text = chosenOperatorText;
 
@@ -574,12 +566,12 @@ Lexer::IdentifierTokenGenerator::IdentifierTokenGenerator()
 	delete this->keywordSet;
 }
 
-/*virtual*/ Lexer::Token* Lexer::IdentifierTokenGenerator::GenerateToken(const char* codeBuffer, int& i)
+/*virtual*/ std::shared_ptr<Lexer::Token> Lexer::IdentifierTokenGenerator::GenerateToken(const char* codeBuffer, int& i)
 {
 	if (!::isalpha(codeBuffer[i]))
 		return nullptr;
 
-	Token* token = new Token();
+	std::shared_ptr<Token> token = std::make_shared<Token>();
 	token->type = Token::Type::IDENTIFIER;
 
 	while (::isalpha(codeBuffer[i]) || ::isdigit(codeBuffer[i]) || codeBuffer[i] == '_')
@@ -629,12 +621,12 @@ Lexer::CommentTokenGenerator::CommentTokenGenerator()
 {
 }
 
-/*virtual*/ Lexer::Token* Lexer::CommentTokenGenerator::GenerateToken(const char* codeBuffer, int& i)
+/*virtual*/ std::shared_ptr<Lexer::Token> Lexer::CommentTokenGenerator::GenerateToken(const char* codeBuffer, int& i)
 {
 	if (codeBuffer[i] != '#')
-		return nullptr;
+		return std::shared_ptr<Token>();
 
-	Token* token = new Token();
+	std::shared_ptr<Token> token = std::make_shared<Token>();
 	token->type = Token::Type::COMMENT;
 
 	while (codeBuffer[i] != '\0' && codeBuffer[i] != '\n')

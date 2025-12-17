@@ -34,7 +34,7 @@ namespace ParseParty
 	class QuickParseAlgorithm : public Parser::Algorithm
 	{
 	public:
-		QuickParseAlgorithm(const std::vector<Lexer::Token*>* tokenArray, const Grammar* grammar);
+		QuickParseAlgorithm(const std::vector<std::shared_ptr<Lexer::Token>>* tokenArray, const Grammar* grammar);
 		virtual ~QuickParseAlgorithm();
 
 		virtual Parser::SyntaxNode* Parse() override;

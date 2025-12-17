@@ -15,7 +15,7 @@ namespace ParseParty
 	class SlowParseAlgorithm : public Parser::Algorithm
 	{
 	public:
-		SlowParseAlgorithm(const std::vector<Lexer::Token*>* tokenArray, const Grammar* grammar);
+		SlowParseAlgorithm(const std::vector<std::shared_ptr<Lexer::Token>>* tokenArray, const Grammar* grammar);
 		virtual ~SlowParseAlgorithm();
 
 		virtual Parser::SyntaxNode* Parse() override;

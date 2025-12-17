@@ -11,7 +11,7 @@ namespace ParseParty
 	class GeneralParseAlgorithm : public Parser::Algorithm
 	{
 	public:
-		GeneralParseAlgorithm(const std::vector<Lexer::Token*>* tokenArray, const Grammar* grammar);
+		GeneralParseAlgorithm(const std::vector<std::shared_ptr<Lexer::Token>>* tokenArray, const Grammar* grammar);
 		virtual ~GeneralParseAlgorithm();
 
 		virtual Parser::SyntaxNode* Parse() override;

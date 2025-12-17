@@ -16,7 +16,7 @@ using namespace ParseParty;
 
 //------------------------------- QuickParseAlgorithm -------------------------------
 
-QuickParseAlgorithm::QuickParseAlgorithm(const std::vector<Lexer::Token*>* tokenArray, const Grammar* grammar) : Algorithm(tokenArray, grammar)
+QuickParseAlgorithm::QuickParseAlgorithm(const std::vector<std::shared_ptr<Lexer::Token>>* tokenArray, const Grammar* grammar) : Algorithm(tokenArray, grammar)
 {
 	this->parseCacheEnabled = true;
 	this->parseAttemptStack = new std::list<QuickParseAttempt>();
@@ -91,7 +91,7 @@ Parser::SyntaxNode* QuickParseAlgorithm::MatchTokensAgainstRule(int& parsePositi
 			if (parsePosition >= (signed)this->tokenArray->size())
 				break;
 
-			const Lexer::Token* token = (*this->tokenArray)[parsePosition];
+			const Lexer::Token* token = (*this->tokenArray)[parsePosition].get();
 
 			std::string ruleName;
 			bool tokenMatched = false;
@@ -172,7 +172,7 @@ Parser::SyntaxNode* QuickParseAlgorithm::MatchTokensAgainstRule(int& parsePositi
 		if (this->maxParsePositionWithError < parsePosition)
 		{
 			this->maxParsePositionWithError = parsePosition;
-			const Lexer::Token* token = (*this->tokenArray)[parsePosition];
+			const Lexer::Token* token = (*this->tokenArray)[parsePosition].get();
 			*this->error = FormatString("Failed to parse at line %d, column %d.", token->fileLocation.line, token->fileLocation.column);
 		}
 	}

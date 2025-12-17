@@ -23,41 +23,31 @@ JsonValue::JsonValue()
 	lexer.tokenGeneratorList->push_back(new Lexer::CommentTokenGenerator());
 	lexer.tokenGeneratorList->push_back(new Lexer::IdentifierTokenGenerator());
 
-	bool success = false;
-	JsonValue* jsonValue = nullptr;
-	std::vector<Lexer::Token*> tokenArray;
+	std::vector<std::shared_ptr<Lexer::Token>> tokenArray;
 
-	do
+	if (!lexer.Tokenize(jsonString, tokenArray, parseError))
+		return nullptr;
+
+	if (tokenArray.size() == 0)
 	{
-		if (!lexer.Tokenize(jsonString, tokenArray, parseError))
-			break;
+		parseError = "Token sequence is size zero.";
+		return nullptr;
+	}
 
-		if (tokenArray.size() == 0)
-		{
-			parseError = "Token sequence is size zero.";
-			break;
-		}
+	JsonValue* jsonValue = ValueFactory(*tokenArray[0]);
+	if (!jsonValue)
+	{
+		parseError = "Could not decypher initial token.";
+		return nullptr;
+	}
 
-		jsonValue = ValueFactory(*tokenArray[0]);
-		if (!jsonValue)
-		{
-			parseError = "Could not decypher initial token.";
-			break;
-		}
-		
-		int parsePosition = 0;
-		if (!jsonValue->ParseTokens(tokenArray, parsePosition, parseError))
-		{
-			delete jsonValue;
-			jsonValue = nullptr;
-			break;
-		}
-
-		success = true;
-	} while (false);
-
-	for (Lexer::Token* token : tokenArray)
-		delete token;
+	int parsePosition = 0;
+	if (!jsonValue->ParseTokens(tokenArray, parsePosition, parseError))
+	{
+		delete jsonValue;
+		jsonValue = nullptr;
+		return nullptr;
+	}
 
 	return jsonValue;
 }
@@ -88,7 +78,7 @@ JsonValue::JsonValue()
 	return tabString;
 }
 
-/*static*/ std::string JsonValue::MakeError(const std::vector<Lexer::Token*>& tokenArray, int parsePosition, const std::string& errorMsg)
+/*static*/ std::string JsonValue::MakeError(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int parsePosition, const std::string& errorMsg)
 {
 	std::string errorPrefix = "Error: ";
 	
@@ -130,7 +120,7 @@ JsonString::JsonString(const std::string& value)
 	return true;
 }
 
-/*virtual*/ bool JsonString::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError)
+/*virtual*/ bool JsonString::ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError)
 {
 	if (parsePosition < 0 || parsePosition >= (signed)tokenArray.size())
 	{
@@ -138,7 +128,7 @@ JsonString::JsonString(const std::string& value)
 		return false;
 	}
 
-	const Lexer::Token* token = tokenArray[parsePosition];
+	const Lexer::Token* token = tokenArray[parsePosition].get();
 
 	if (token->type != Lexer::Token::Type::STRING_LITERAL)
 	{
@@ -185,7 +175,7 @@ JsonFloat::JsonFloat(double value)
 	return true;
 }
 
-/*virtual*/ bool JsonFloat::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError)
+/*virtual*/ bool JsonFloat::ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError)
 {
 	if (parsePosition < 0 || parsePosition >= (signed)tokenArray.size())
 	{
@@ -193,7 +183,7 @@ JsonFloat::JsonFloat(double value)
 		return false;
 	}
 
-	const Lexer::Token* token = tokenArray[parsePosition];
+	const Lexer::Token* token = tokenArray[parsePosition].get();
 
 	if (token->type != Lexer::Token::Type::NUMBER_LITERAL_FLOAT)
 	{
@@ -240,7 +230,7 @@ JsonInt::JsonInt(long value)
 	return true;
 }
 
-/*virtual*/ bool JsonInt::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError)
+/*virtual*/ bool JsonInt::ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError)
 {
 	if (parsePosition < 0 || parsePosition >= (signed)tokenArray.size())
 	{
@@ -248,7 +238,7 @@ JsonInt::JsonInt(long value)
 		return false;
 	}
 
-	const Lexer::Token* token = tokenArray[parsePosition];
+	const Lexer::Token* token = tokenArray[parsePosition].get();
 
 	if (token->type != Lexer::Token::Type::NUMBER_LITERAL_INT)
 	{
@@ -312,7 +302,7 @@ JsonObject::JsonObject()
 	return true;
 }
 
-/*virtual*/ bool JsonObject::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError)
+/*virtual*/ bool JsonObject::ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError)
 {
 	if (parsePosition < 0 || parsePosition >= (signed)tokenArray.size())
 	{
@@ -320,7 +310,7 @@ JsonObject::JsonObject()
 		return false;
 	}
 
-	const Lexer::Token* token = tokenArray[parsePosition];
+	const Lexer::Token* token = tokenArray[parsePosition].get();
 	if (token->type != Lexer::Token::Type::OPEN_CURLY_BRACE)
 	{
 		parseError = MakeError(tokenArray, parsePosition, "Expected open curly brace.");
@@ -337,7 +327,7 @@ JsonObject::JsonObject()
 		return false;
 	}
 
-	token = tokenArray[parsePosition];
+	token = tokenArray[parsePosition].get();
 	if (token->type == Lexer::Token::Type::CLOSE_CURLY_BRACE)
 	{
 		parsePosition++;
@@ -346,7 +336,7 @@ JsonObject::JsonObject()
 
 	while (true)
 	{
-		token = tokenArray[parsePosition];
+		token = tokenArray[parsePosition].get();
 		if (token->type != Lexer::Token::Type::STRING_LITERAL)
 		{
 			parseError = MakeError(tokenArray, parsePosition, "Expected string key.");
@@ -361,7 +351,7 @@ JsonObject::JsonObject()
 			return false;
 		}
 
-		token = tokenArray[parsePosition];
+		token = tokenArray[parsePosition].get();
 		if (token->type != Lexer::Token::Type::DELIMETER_COLON)
 		{
 			parseError = MakeError(tokenArray, parsePosition, "Expected colon after key.");
@@ -374,7 +364,7 @@ JsonObject::JsonObject()
 			return false;
 		}
 
-		token = tokenArray[parsePosition];
+		token = tokenArray[parsePosition].get();
 		JsonValue* jsonValue = ValueFactory(*token);
 		if (!jsonValue)
 		{
@@ -398,7 +388,7 @@ JsonObject::JsonObject()
 			return false;
 		}
 
-		token = tokenArray[parsePosition];
+		token = tokenArray[parsePosition].get();
 		if (token->type == Lexer::Token::Type::DELIMETER_COMMA)
 			parsePosition++;
 		else if (token->type == Lexer::Token::Type::CLOSE_CURLY_BRACE)
@@ -519,7 +509,7 @@ JsonArray::JsonArray(const std::vector<int>& intArray)
 	return true;
 }
 
-/*virtual*/ bool JsonArray::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError)
+/*virtual*/ bool JsonArray::ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError)
 {
 	if (parsePosition < 0 || parsePosition >= (signed)tokenArray.size())
 	{
@@ -527,7 +517,7 @@ JsonArray::JsonArray(const std::vector<int>& intArray)
 		return false;
 	}
 
-	const Lexer::Token* token = tokenArray[parsePosition];
+	const Lexer::Token* token = tokenArray[parsePosition].get();
 	if (token->type != Lexer::Token::Type::OPEN_SQUARE_BRACKET)
 	{
 		parseError = MakeError(tokenArray, parsePosition, "Expected open square bracket.");
@@ -544,7 +534,7 @@ JsonArray::JsonArray(const std::vector<int>& intArray)
 		return false;
 	}
 
-	token = tokenArray[parsePosition];
+	token = tokenArray[parsePosition].get();
 	if (token->type == Lexer::Token::Type::CLOSE_SQUARE_BRACKET)
 	{
 		parsePosition++;
@@ -553,7 +543,7 @@ JsonArray::JsonArray(const std::vector<int>& intArray)
 
 	while (true)
 	{
-		token = tokenArray[parsePosition];
+		token = tokenArray[parsePosition].get();
 		JsonValue* jsonValue = ValueFactory(*token);
 		if (!jsonValue)
 		{
@@ -572,7 +562,7 @@ JsonArray::JsonArray(const std::vector<int>& intArray)
 			return false;
 		}
 
-		token = tokenArray[parsePosition];
+		token = tokenArray[parsePosition].get();
 		if (token->type == Lexer::Token::Type::DELIMETER_COMMA)
 			parsePosition++;
 		else if (token->type == Lexer::Token::Type::CLOSE_SQUARE_BRACKET)
@@ -671,7 +661,7 @@ JsonBool::JsonBool(bool value)
 	return true;
 }
 
-/*virtual*/ bool JsonBool::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError)
+/*virtual*/ bool JsonBool::ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError)
 {
 	if (parsePosition < 0 || parsePosition >= (signed)tokenArray.size())
 	{
@@ -679,7 +669,7 @@ JsonBool::JsonBool(bool value)
 		return false;
 	}
 
-	const Lexer::Token* token = tokenArray[parsePosition];
+	const Lexer::Token* token = tokenArray[parsePosition].get();
 	if (token->type != Lexer::Token::Type::IDENTIFIER)
 	{
 		parseError = MakeError(tokenArray, parsePosition, "Expected identifier.");
@@ -726,7 +716,7 @@ JsonNull::JsonNull()
 	return true;
 }
 
-/*virtual*/ bool JsonNull::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError)
+/*virtual*/ bool JsonNull::ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError)
 {
 	if (parsePosition < 0 || parsePosition >= (signed)tokenArray.size())
 	{
@@ -734,7 +724,7 @@ JsonNull::JsonNull()
 		return false;
 	}
 
-	const Lexer::Token* token = tokenArray[parsePosition];
+	const Lexer::Token* token = tokenArray[parsePosition].get();
 	if (token->type != Lexer::Token::Type::IDENTIFIER)
 	{
 		parseError = MakeError(tokenArray, parsePosition, "Expected identifier");

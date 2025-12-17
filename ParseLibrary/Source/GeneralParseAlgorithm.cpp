@@ -2,7 +2,7 @@
 
 using namespace ParseParty;
 
-GeneralParseAlgorithm::GeneralParseAlgorithm(const std::vector<Lexer::Token*>* tokenArray, const Grammar* grammar) : Parser::Algorithm(tokenArray, grammar)
+GeneralParseAlgorithm::GeneralParseAlgorithm(const std::vector<std::shared_ptr<Lexer::Token>>* tokenArray, const Grammar* grammar) : Parser::Algorithm(tokenArray, grammar)
 {
 }
 

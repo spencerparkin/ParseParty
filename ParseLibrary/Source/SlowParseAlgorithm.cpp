@@ -22,7 +22,7 @@ namespace ParseParty
 
 using namespace ParseParty;
 
-SlowParseAlgorithm::SlowParseAlgorithm(const std::vector<Lexer::Token*>* tokenArray, const Grammar* grammar) : Parser::Algorithm(tokenArray, grammar)
+SlowParseAlgorithm::SlowParseAlgorithm(const std::vector<std::shared_ptr<Lexer::Token>>* tokenArray, const Grammar* grammar) : Parser::Algorithm(tokenArray, grammar)
 {
 	this->parseCacheMap = new ParseCacheMap();
 	this->parseCacheMapEnabled = true;
@@ -300,7 +300,7 @@ bool SlowParseAlgorithm::ScanForTokenMatch(const Grammar::Token* grammarToken, i
 
 	while (range.Contains(tokenPosition))
 	{
-		const Lexer::Token* token = (*this->tokenArray)[tokenPosition];
+		const Lexer::Token* token = (*this->tokenArray)[tokenPosition].get();
 
 		if ((delta > 0 && token->IsCloser()) || (delta < 0 && token->IsOpener()))
 			level = (level > 0) ? (level - 1) : 0;

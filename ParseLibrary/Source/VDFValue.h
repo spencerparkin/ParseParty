@@ -2,7 +2,6 @@
 
 #include "Common.h"
 #include "Lexer.h"
-#include <memory>
 
 namespace ParseParty
 {
@@ -16,10 +15,10 @@ namespace ParseParty
 		virtual ~VDFValue();
 
 		virtual void PrintVDF(std::string& vdfString, int tabLevel = 0) const = 0;
-		virtual bool ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError) = 0;
+		virtual bool ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError) = 0;
 
 		static std::shared_ptr<VDFValue> ParseVDF(const std::string& vdfString, std::string& parseError);
-		static std::string MakeError(const std::vector<Lexer::Token*>& tokenArray, int parsePosition, const std::string& errorMsg);
+		static std::string MakeError(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int parsePosition, const std::string& errorMsg);
 		static std::string MakeTabs(int tabCount);
 	};
 
@@ -33,7 +32,7 @@ namespace ParseParty
 		virtual ~VDFStringValue();
 
 		virtual void PrintVDF(std::string& vdfString, int tabLevel = 0) const override;
-		virtual bool ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError) override;
+		virtual bool ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError) override;
 
 		void SetValue(const std::string& value);
 		const std::string& GetValue() const;
@@ -52,7 +51,7 @@ namespace ParseParty
 		virtual ~VDFBlockValue();
 
 		virtual void PrintVDF(std::string& vdfString, int tabLevel = 0) const override;
-		virtual bool ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError) override;
+		virtual bool ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError) override;
 
 		struct Pair
 		{

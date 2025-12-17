@@ -17,12 +17,12 @@ namespace ParseParty
 		virtual ~JsonValue();
 
 		virtual bool PrintJson(std::string& jsonString, int tabLevel = 0) const = 0;
-		virtual bool ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError) = 0;
+		virtual bool ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError) = 0;
 
 		static JsonValue* ParseJson(const std::string& jsonString, std::string& parseError);
 		static JsonValue* ValueFactory(const Lexer::Token& token);
 		static std::string MakeTabs(int tabCount);
-		static std::string MakeError(const std::vector<Lexer::Token*>& tokenArray, int parsePosition, const std::string& errorMsg);
+		static std::string MakeError(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int parsePosition, const std::string& errorMsg);
 	};
 
 	class PARSE_PARTY_API JsonString : public JsonValue
@@ -33,7 +33,7 @@ namespace ParseParty
 		virtual ~JsonString();
 
 		virtual bool PrintJson(std::string& jsonString, int tabLevel = 0) const override;
-		virtual bool ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError) override;
+		virtual bool ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError) override;
 
 		const std::string& GetValue() const;
 		void SetValue(const std::string& value);
@@ -50,7 +50,7 @@ namespace ParseParty
 		virtual ~JsonFloat();
 
 		virtual bool PrintJson(std::string& jsonString, int tabLevel = 0) const override;
-		virtual bool ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError) override;
+		virtual bool ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError) override;
 
 		double GetValue() const;
 		void SetValue(double value);
@@ -67,7 +67,7 @@ namespace ParseParty
 		virtual ~JsonInt();
 
 		virtual bool PrintJson(std::string& jsonString, int tabLevel = 0) const override;
-		virtual bool ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError) override;
+		virtual bool ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError) override;
 
 		long GetValue() const;
 		void SetValue(long value);
@@ -83,7 +83,7 @@ namespace ParseParty
 		virtual ~JsonObject();
 
 		virtual bool PrintJson(std::string& jsonString, int tabLevel = 0) const override;
-		virtual bool ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError) override;
+		virtual bool ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError) override;
 
 		void Clear();
 		unsigned int GetSize() const;
@@ -112,7 +112,7 @@ namespace ParseParty
 		virtual ~JsonArray();
 
 		virtual bool PrintJson(std::string& jsonString, int tabLevel = 0) const override;
-		virtual bool ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError) override;
+		virtual bool ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError) override;
 
 		void Clear();
 		unsigned int GetSize() const;
@@ -137,7 +137,7 @@ namespace ParseParty
 		virtual ~JsonBool();
 
 		virtual bool PrintJson(std::string& jsonString, int tabLevel = 0) const override;
-		virtual bool ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError) override;
+		virtual bool ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError) override;
 
 		bool GetValue() const;
 		void SetValue(bool value);
@@ -153,6 +153,6 @@ namespace ParseParty
 		virtual ~JsonNull();
 
 		virtual bool PrintJson(std::string& jsonString, int tabLevel = 0) const override;
-		virtual bool ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError) override;
+		virtual bool ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError) override;
 	};
 }

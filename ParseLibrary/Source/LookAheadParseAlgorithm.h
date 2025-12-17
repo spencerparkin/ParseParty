@@ -10,7 +10,7 @@ namespace ParseParty
 	class LookAheadParseAlgorithm : public Parser::Algorithm
 	{
 	public:
-		LookAheadParseAlgorithm(const std::vector<Lexer::Token*>* tokenArray, const Grammar* grammar);
+		LookAheadParseAlgorithm(const std::vector<std::shared_ptr<Lexer::Token>>* tokenArray, const Grammar* grammar);
 		virtual ~LookAheadParseAlgorithm();
 
 		virtual Parser::SyntaxNode* Parse() override;

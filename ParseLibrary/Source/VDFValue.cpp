@@ -18,7 +18,7 @@ VDFValue::VDFValue()
 	lexer.tokenGeneratorList->push_back(new Lexer::ParanTokenGenerator());
 	lexer.tokenGeneratorList->push_back(new Lexer::StringTokenGenerator());
 
-	std::vector<Lexer::Token*> tokenArray;
+	std::vector<std::shared_ptr<Lexer::Token>> tokenArray;
 	if (!lexer.Tokenize(vdfString, tokenArray, parseError))
 		return std::shared_ptr<VDFValue>();
 
@@ -33,13 +33,10 @@ VDFValue::VDFValue()
 	if (!vdfValue->ParseTokens(tokenArray, parsePosition, parseError))
 		vdfValue.reset();
 
-	for (Lexer::Token* token : tokenArray)
-		delete token;
-
 	return vdfValue;
 }
 
-/*static*/ std::string VDFValue::MakeError(const std::vector<Lexer::Token*>& tokenArray, int parsePosition, const std::string& errorMsg)
+/*static*/ std::string VDFValue::MakeError(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int parsePosition, const std::string& errorMsg)
 {
 	std::string errorPrefix = "Error: ";
 
@@ -77,7 +74,7 @@ VDFStringValue::VDFStringValue()
 	vdfString += " \"" + *this->value + "\"\n";
 }
 
-/*virtual*/ bool VDFStringValue::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError)
+/*virtual*/ bool VDFStringValue::ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError)
 {
 	if (parsePosition < 0 || parsePosition >= (signed)tokenArray.size())
 	{
@@ -85,7 +82,7 @@ VDFStringValue::VDFStringValue()
 		return false;
 	}
 
-	const Lexer::Token* token = tokenArray[parsePosition];
+	const Lexer::Token* token = tokenArray[parsePosition].get();
 
 	if (token->type != Lexer::Token::Type::STRING_LITERAL)
 	{
@@ -144,7 +141,7 @@ VDFBlockValue::VDFBlockValue()
 	}
 }
 
-/*virtual*/ bool VDFBlockValue::ParseTokens(const std::vector<Lexer::Token*>& tokenArray, int& parsePosition, std::string& parseError)
+/*virtual*/ bool VDFBlockValue::ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError)
 {
 	if (parsePosition < 0)
 	{
@@ -157,7 +154,7 @@ VDFBlockValue::VDFBlockValue()
 
 	while (parsePosition < (signed)tokenArray.size())
 	{
-		const Lexer::Token* token = tokenArray[parsePosition];
+		const Lexer::Token* token = tokenArray[parsePosition].get();
 
 		if (token->type == Lexer::Token::Type::OPEN_CURLY_BRACE)
 		{
@@ -188,7 +185,7 @@ VDFBlockValue::VDFBlockValue()
 			return false;
 		}
 
-		token = tokenArray[parsePosition];
+		token = tokenArray[parsePosition].get();
 
 		if (token->type == Lexer::Token::Type::STRING_LITERAL)
 		{

@@ -18,7 +18,7 @@ namespace ParseParty
 
 		SyntaxNode* ParseFile(const std::string& codeFile, const Grammar& grammar, std::string* error = nullptr);
 		SyntaxNode* Parse(const std::string& codeText, const Grammar& grammar, std::string* error = nullptr);
-		SyntaxNode* Parse(const std::vector<Lexer::Token*>& tokenArray, const Grammar& grammar, std::string* error = nullptr);
+		SyntaxNode* Parse(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, const Grammar& grammar, std::string* error = nullptr);
 
 		class PARSE_PARTY_API SyntaxNode
 		{
@@ -59,12 +59,12 @@ namespace ParseParty
 		class PARSE_PARTY_API Algorithm
 		{
 		public:
-			Algorithm(const std::vector<Lexer::Token*>* tokenArray, const Grammar* grammar);
+			Algorithm(const std::vector<std::shared_ptr<Lexer::Token>>* tokenArray, const Grammar* grammar);
 			virtual ~Algorithm();
 
 			virtual SyntaxNode* Parse() = 0;
 
-			const std::vector<Lexer::Token*>* tokenArray;
+			const std::vector<std::shared_ptr<Lexer::Token>>* tokenArray;
 			const Grammar* grammar;
 
 			std::string* error;
