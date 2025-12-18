@@ -140,6 +140,11 @@ JsonString::JsonString(const std::string& value)
 	return true;
 }
 
+/*virtual*/ std::shared_ptr<JsonValue> JsonString::Clone() const
+{
+	return std::make_shared<JsonString>(*this->value);
+}
+
 const std::string& JsonString::GetValue() const
 {
 	return *this->value;
@@ -195,6 +200,11 @@ JsonFloat::JsonFloat(double value)
 	return true;
 }
 
+/*virtual*/ std::shared_ptr<JsonValue> JsonFloat::Clone() const
+{
+	return std::make_shared<JsonFloat>(this->value);
+}
+
 double JsonFloat::GetValue() const
 {
 	return value;
@@ -248,6 +258,11 @@ JsonInt::JsonInt(long value)
 	this->SetValue(::atoi(token->text->c_str()));
 	parsePosition++;
 	return true;
+}
+
+/*virtual*/ std::shared_ptr<JsonValue> JsonInt::Clone() const
+{
+	return std::make_shared<JsonInt>(this->value);
 }
 
 long JsonInt::GetValue() const
@@ -400,6 +415,16 @@ JsonObject::JsonObject()
 	}
 
 	return true;
+}
+
+/*virtual*/ std::shared_ptr<JsonValue> JsonObject::Clone() const
+{
+	std::shared_ptr<JsonObject> jsonObject = std::make_shared<JsonObject>();
+
+	for (std::pair<std::string, std::shared_ptr<JsonValue>> pair : *this->valueMap)
+		jsonObject->SetValue(pair.first, pair.second->Clone());
+
+	return jsonObject;
 }
 
 void JsonObject::Clear()
@@ -568,6 +593,16 @@ JsonArray::JsonArray(const std::vector<int>& intArray)
 	return true;
 }
 
+/*virtual*/ std::shared_ptr<JsonValue> JsonArray::Clone() const
+{
+	std::shared_ptr<JsonArray> jsonArray = std::make_shared<JsonArray>();
+
+	for (int i = 0; i < (int)this->valueArray->size(); i++)
+		jsonArray->PushValue((*this->valueArray)[i]->Clone());
+
+	return jsonArray;
+}
+
 void JsonArray::Clear()
 {
 	this->valueArray->clear();
@@ -675,6 +710,11 @@ JsonBool::JsonBool(bool value)
 	return true;
 }
 
+/*virtual*/ std::shared_ptr<JsonValue> JsonBool::Clone() const
+{
+	return std::make_shared<JsonBool>(this->value);
+}
+
 bool JsonBool::GetValue() const
 {
 	return this->value;
@@ -724,4 +764,9 @@ JsonNull::JsonNull()
 
 	parsePosition++;
 	return true;
+}
+
+/*virtual*/ std::shared_ptr<JsonValue> JsonNull::Clone() const
+{
+	return std::make_shared<JsonNull>();
 }

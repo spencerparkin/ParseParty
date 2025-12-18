@@ -15,6 +15,7 @@ namespace ParseParty
 
 		virtual bool PrintJson(std::string& jsonString, int tabLevel = 0) const = 0;
 		virtual bool ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError) = 0;
+		virtual std::shared_ptr<JsonValue> Clone() const = 0;
 
 		static std::shared_ptr<JsonValue> ParseJson(const std::string& jsonString, std::string& parseError);
 		static std::shared_ptr<JsonValue> ValueFactory(const Lexer::Token& token);
@@ -31,6 +32,7 @@ namespace ParseParty
 
 		virtual bool PrintJson(std::string& jsonString, int tabLevel = 0) const override;
 		virtual bool ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError) override;
+		virtual std::shared_ptr<JsonValue> Clone() const override;
 
 		const std::string& GetValue() const;
 		void SetValue(const std::string& value);
@@ -48,6 +50,7 @@ namespace ParseParty
 
 		virtual bool PrintJson(std::string& jsonString, int tabLevel = 0) const override;
 		virtual bool ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError) override;
+		virtual std::shared_ptr<JsonValue> Clone() const override;
 
 		double GetValue() const;
 		void SetValue(double value);
@@ -65,6 +68,7 @@ namespace ParseParty
 
 		virtual bool PrintJson(std::string& jsonString, int tabLevel = 0) const override;
 		virtual bool ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError) override;
+		virtual std::shared_ptr<JsonValue> Clone() const override;
 
 		long GetValue() const;
 		void SetValue(long value);
@@ -81,6 +85,7 @@ namespace ParseParty
 
 		virtual bool PrintJson(std::string& jsonString, int tabLevel = 0) const override;
 		virtual bool ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError) override;
+		virtual std::shared_ptr<JsonValue> Clone() const override;
 
 		void Clear();
 		unsigned int GetSize() const;
@@ -110,6 +115,7 @@ namespace ParseParty
 
 		virtual bool PrintJson(std::string& jsonString, int tabLevel = 0) const override;
 		virtual bool ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError) override;
+		virtual std::shared_ptr<JsonValue> Clone() const override;
 
 		void Clear();
 		unsigned int GetSize() const;
@@ -135,6 +141,7 @@ namespace ParseParty
 
 		virtual bool PrintJson(std::string& jsonString, int tabLevel = 0) const override;
 		virtual bool ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError) override;
+		virtual std::shared_ptr<JsonValue> Clone() const override;
 
 		bool GetValue() const;
 		void SetValue(bool value);
@@ -151,5 +158,6 @@ namespace ParseParty
 
 		virtual bool PrintJson(std::string& jsonString, int tabLevel = 0) const override;
 		virtual bool ParseTokens(const std::vector<std::shared_ptr<Lexer::Token>>& tokenArray, int& parsePosition, std::string& parseError) override;
+		virtual std::shared_ptr<JsonValue> Clone() const override;
 	};
 }
