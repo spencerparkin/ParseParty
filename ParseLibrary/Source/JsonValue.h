@@ -5,7 +5,7 @@
 
 namespace ParseParty
 {
-	class PARSE_PARTY_API JsonValue
+	class PARSE_PARTY_API JsonValue : public std::enable_shared_from_this<JsonValue>
 	{
 	public:
 		struct Token;
