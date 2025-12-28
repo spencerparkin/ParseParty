@@ -5,3 +5,4 @@ Release/
 
 # CMake stuff...
 out/
+build/
