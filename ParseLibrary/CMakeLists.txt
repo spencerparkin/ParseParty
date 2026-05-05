@@ -30,6 +30,8 @@ source_group("Sources" TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${PARSE_LIBRARY_SO
 
 add_library(ParseParty STATIC ${PARSE_LIBRARY_SOURCES})
 
+target_include_directories(ParseParty PUBLIC Source)
+
 target_compile_definitions(ParseParty PRIVATE
     _CRT_SECURE_NO_WARNINGS
 )
