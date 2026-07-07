@@ -121,6 +121,16 @@ namespace ParseParty
 			return value;
 		}
 
+		template<typename T>
+		const std::shared_ptr<T> GetValueOrThrow(const std::string& key) const
+		{
+			const std::shared_ptr<T> value = std::dynamic_pointer_cast<T>(this->GetValue(key));
+			if (!value.get())
+				throw JsonException(std::format("Did not find key \"{}\".", key.c_str()));
+
+			return value;
+		}
+
 		typedef std::map<std::string, std::shared_ptr<JsonValue>> JsonValueMap;
 
 		JsonValueMap::iterator begin() { return this->valueMap->begin(); }
@@ -160,6 +170,16 @@ namespace ParseParty
 			std::shared_ptr<T> value = std::dynamic_pointer_cast<T>(this->GetValue(i));
 			if (!value.get())
 				throw JsonException(std::format("Did not find value at offset {}.", i));
+
+			return value;
+		}
+
+		template<typename T>
+		const std::shared_ptr<T> GetValueOrThrow(unsigned int i) const
+		{
+			const std::shared_ptr<T> value = std::dynamic_pointer_cast<T>(this->GetValue(i));
+			if (!value.get())
+				throw JsonException(std::format("Did not find value at offset: {}.", i));
 
 			return value;
 		}
