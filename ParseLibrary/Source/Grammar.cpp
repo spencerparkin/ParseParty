@@ -78,7 +78,7 @@ bool Grammar::ReadFile(const std::string& grammarFile, std::string& error)
 		return false;
 	}
 
-	JsonString* jsonInitialRule = dynamic_cast<JsonString*>(jsonObject->GetValue("initial_rule"));
+	JsonString* jsonInitialRule = dynamic_cast<JsonString*>(jsonObject->GetValue("initial_rule").get());
 	if (!jsonInitialRule)
 	{
 		error = "No \"initial_rule\" key found or it's not a string.";
@@ -87,7 +87,7 @@ bool Grammar::ReadFile(const std::string& grammarFile, std::string& error)
 
 	*this->initialRule = jsonInitialRule->GetValue();
 
-	JsonString* jsonAlgorithm = dynamic_cast<JsonString*>(jsonObject->GetValue("algorithm"));
+	JsonString* jsonAlgorithm = dynamic_cast<JsonString*>(jsonObject->GetValue("algorithm").get());
 	if (!jsonAlgorithm)
 	{
 		error = "No \"algorithm\" key found or it's not a string.";
@@ -96,11 +96,11 @@ bool Grammar::ReadFile(const std::string& grammarFile, std::string& error)
 
 	*this->algorithmName = jsonAlgorithm->GetValue();
 
-	JsonObject* jsonFlags = dynamic_cast<JsonObject*>(jsonObject->GetValue("flags"));
+	JsonObject* jsonFlags = dynamic_cast<JsonObject*>(jsonObject->GetValue("flags").get());
 	if (!this->ReadFlags(jsonFlags))
 		return false;
 
-	JsonObject* jsonRuleMap = dynamic_cast<JsonObject*>(jsonObject->GetValue("rules"));
+	JsonObject* jsonRuleMap = dynamic_cast<JsonObject*>(jsonObject->GetValue("rules").get());
 	if (!jsonRuleMap)
 	{
 		error = "No \"rules\" key found or it's not an object.";
@@ -146,11 +146,11 @@ bool Grammar::ReadFlags(const JsonObject* jsonFlags)
 
 	if (jsonFlags)
 	{
-		const JsonBool* jsonFlatten = dynamic_cast<const JsonBool*>(jsonFlags->GetValue("flatten"));
+		const JsonBool* jsonFlatten = dynamic_cast<const JsonBool*>(jsonFlags->GetValue("flatten").get());
 		if (jsonFlatten && jsonFlatten->GetValue())
 			this->flags |= PARSE_PARTY_GRAMMAR_FLAG_FLATTEN_AST;
 
-		const JsonBool* jsonDeleteStructureTokens = dynamic_cast<const JsonBool*>(jsonFlags->GetValue("delete_structure_tokens"));
+		const JsonBool* jsonDeleteStructureTokens = dynamic_cast<const JsonBool*>(jsonFlags->GetValue("delete_structure_tokens").get());
 		if (jsonDeleteStructureTokens && jsonDeleteStructureTokens->GetValue())
 			this->flags |= PARSE_PARTY_GRAMMAR_FLAG_DELETE_STRUCTURE_TOKENS;
 	}
@@ -278,7 +278,7 @@ bool Grammar::Rule::Read(const JsonArray* jsonRuleArray, const JsonObject* jsonR
 		MatchSequence* matchSequence = new MatchSequence();
 		this->matchSequenceArray->push_back(matchSequence);
 
-		const JsonArray* jsonRuleSequence = dynamic_cast<const JsonArray*>(jsonRuleArray->GetValue(i));
+		const JsonArray* jsonRuleSequence = dynamic_cast<const JsonArray*>(jsonRuleArray->GetValue(i).get());
 		if (!jsonRuleSequence)
 			return false;
 
@@ -286,7 +286,7 @@ bool Grammar::Rule::Read(const JsonArray* jsonRuleArray, const JsonObject* jsonR
 		{
 			if (j == jsonRuleSequence->GetSize() - 1)
 			{
-				const JsonInt* jsonInt = dynamic_cast<const JsonInt*>(jsonRuleSequence->GetValue(j));
+				const JsonInt* jsonInt = dynamic_cast<const JsonInt*>(jsonRuleSequence->GetValue(j).get());
 				if (jsonInt && jsonInt->GetValue() == -1)
 				{
 					matchSequence->type = MatchSequence::Type::RIGHT_TO_LEFT;
@@ -294,7 +294,7 @@ bool Grammar::Rule::Read(const JsonArray* jsonRuleArray, const JsonObject* jsonR
 				}
 			}
 
-			const JsonString* jsonToken = dynamic_cast<const JsonString*>(jsonRuleSequence->GetValue(j));
+			const JsonString* jsonToken = dynamic_cast<const JsonString*>(jsonRuleSequence->GetValue(j).get());
 			if (!jsonToken)
 				return false;
 

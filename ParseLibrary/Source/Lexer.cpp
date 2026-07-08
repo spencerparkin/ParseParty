@@ -66,7 +66,7 @@ bool Lexer::ReadFile(const std::string& lexiconFile, std::string& error)
 		return false;
 	}
 
-	const JsonArray* jsonTokenGeneratorArray = dynamic_cast<const JsonArray*>(jsonObject->GetValue("token_generators"));
+	const JsonArray* jsonTokenGeneratorArray = dynamic_cast<const JsonArray*>(jsonObject->GetValue("token_generators").get());
 	if (!jsonTokenGeneratorArray)
 	{
 		error = "Expected to find \"token_generators\" key as an array.";
@@ -77,21 +77,21 @@ bool Lexer::ReadFile(const std::string& lexiconFile, std::string& error)
 
 	for (int i = 0; i < (signed)jsonTokenGeneratorArray->GetSize(); i++)
 	{
-		const JsonObject* jsonTokenGenerator = dynamic_cast<const JsonObject*>(jsonTokenGeneratorArray->GetValue(i));
+		const JsonObject* jsonTokenGenerator = dynamic_cast<const JsonObject*>(jsonTokenGeneratorArray->GetValue(i).get());
 		if (!jsonTokenGenerator)
 		{
 			error = "Each token generator should be an object.";
 			return false;
 		}
 
-		const JsonString* jsonGeneratorName = dynamic_cast<const JsonString*>(jsonTokenGenerator->GetValue("name"));
+		const JsonString* jsonGeneratorName = dynamic_cast<const JsonString*>(jsonTokenGenerator->GetValue("name").get());
 		if (!jsonGeneratorName)
 		{
 			error = "No name found for token generator.";
 			return false;
 		}
 
-		const JsonObject* jsonGeneratorConfig = dynamic_cast<const JsonObject*>(jsonTokenGenerator->GetValue("config"));
+		const JsonObject* jsonGeneratorConfig = dynamic_cast<const JsonObject*>(jsonTokenGenerator->GetValue("config").get());
 		if (!jsonGeneratorConfig)
 		{
 			error = "No config found for token generator \"" + jsonGeneratorName->GetValue() + "\".";
@@ -396,7 +396,7 @@ bool Lexer::StringTokenGenerator::CollapseEscapeSequences(std::string& text)
 
 /*virtual*/ bool Lexer::StringTokenGenerator::ReadConfig(const JsonObject* jsonConfig, std::string& error)
 {
-	const JsonBool* jsonProcessEscapes = dynamic_cast<const JsonBool*>(jsonConfig->GetValue("process_escape_sequences"));
+	const JsonBool* jsonProcessEscapes = dynamic_cast<const JsonBool*>(jsonConfig->GetValue("process_escape_sequences").get());
 	if (jsonProcessEscapes)
 		this->processEscapeSequences = jsonProcessEscapes->GetValue();
 
@@ -517,14 +517,14 @@ Lexer::OperatorTokenGenerator::OperatorTokenGenerator()
 
 /*virtual*/ bool Lexer::OperatorTokenGenerator::ReadConfig(const JsonObject* jsonConfig, std::string& error)
 {
-	const JsonArray* jsonOperatorArray = dynamic_cast<const JsonArray*>(jsonConfig->GetValue("operators"));
+	const JsonArray* jsonOperatorArray = dynamic_cast<const JsonArray*>(jsonConfig->GetValue("operators").get());
 	if (jsonOperatorArray)
 	{
 		this->operatorSet->clear();
 
 		for (int i = 0; i < (signed)jsonOperatorArray->GetSize(); i++)
 		{
-			const JsonString* jsonOperatorString = dynamic_cast<const JsonString*>(jsonOperatorArray->GetValue(i));
+			const JsonString* jsonOperatorString = dynamic_cast<const JsonString*>(jsonOperatorArray->GetValue(i).get());
 			if (!jsonOperatorString)
 			{
 				error = "Expected operator entry to be a string.";
@@ -576,12 +576,12 @@ Lexer::IdentifierTokenGenerator::IdentifierTokenGenerator()
 {
 	this->keywordSet->clear();
 
-	const JsonArray* jsonKeywordArray = dynamic_cast<const JsonArray*>(jsonConfig->GetValue("keywords"));
+	const JsonArray* jsonKeywordArray = dynamic_cast<const JsonArray*>(jsonConfig->GetValue("keywords").get());
 	if (jsonKeywordArray)
 	{
 		for (int i = 0; i < (signed)jsonKeywordArray->GetSize(); i++)
 		{
-			const JsonString* jsonKeywordString = dynamic_cast<const JsonString*>(jsonKeywordArray->GetValue(i));
+			const JsonString* jsonKeywordString = dynamic_cast<const JsonString*>(jsonKeywordArray->GetValue(i).get());
 			if (jsonKeywordString)
 				this->keywordSet->insert(jsonKeywordString->GetValue());
 			else

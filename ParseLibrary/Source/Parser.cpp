@@ -143,28 +143,28 @@ Parser::SyntaxNode::SyntaxNode(const std::string& text, const Lexer::FileLocatio
 
 bool Parser::SyntaxNode::ReadFromJson(const JsonObject* jsonParentNode, std::string& parseError)
 {
-	const JsonString* jsonText = dynamic_cast<const JsonString*>(jsonParentNode->GetValue("text"));
+	const JsonString* jsonText = dynamic_cast<const JsonString*>(jsonParentNode->GetValue("text").get());
 	if (!jsonText)
 	{
 		parseError = "Expected \"text\" entry in syntax node object.";
 		return false;
 	}
 
-	const JsonInt* jsonLine = dynamic_cast<const JsonInt*>(jsonParentNode->GetValue("line"));
+	const JsonInt* jsonLine = dynamic_cast<const JsonInt*>(jsonParentNode->GetValue("line").get());
 	if (!jsonLine)
 	{
 		parseError = "Expected \"line\" entry in syntax node object.";
 		return false;
 	}
 
-	const JsonInt* jsonColumn = dynamic_cast<const JsonInt*>(jsonParentNode->GetValue("column"));
+	const JsonInt* jsonColumn = dynamic_cast<const JsonInt*>(jsonParentNode->GetValue("column").get());
 	if (!jsonColumn)
 	{
 		parseError = "Expected \"column\" entry in syntax node object.";
 		return false;
 	}
 
-	const JsonArray* jsonChildArray = dynamic_cast<const JsonArray*>(jsonParentNode->GetValue("children"));
+	const JsonArray* jsonChildArray = dynamic_cast<const JsonArray*>(jsonParentNode->GetValue("children").get());
 	if (!jsonChildArray)
 	{
 		parseError = "Expected \"children\" array entry in syntax node object.";
@@ -179,7 +179,7 @@ bool Parser::SyntaxNode::ReadFromJson(const JsonObject* jsonParentNode, std::str
 
 	for (int i = 0; i < (signed)jsonChildArray->GetSize(); i++)
 	{
-		const JsonObject* jsonChildNode = dynamic_cast<const JsonObject*>(jsonChildArray->GetValue(i));
+		const JsonObject* jsonChildNode = dynamic_cast<const JsonObject*>(jsonChildArray->GetValue(i).get());
 		if (!jsonChildNode)
 		{
 			parseError = FormatString("Expected child entry %d to be an object.", i);
@@ -244,7 +244,7 @@ bool Parser::SyntaxNode::WriteToJson(JsonObject* jsonParentNode) const
 		return false;
 	}
 
-	const JsonObject* jsonRootNode = dynamic_cast<JsonObject*>(jsonObject->GetValue("root"));
+	const JsonObject* jsonRootNode = dynamic_cast<JsonObject*>(jsonObject->GetValue("root").get());
 	if (!jsonRootNode)
 	{
 		parseError = "Expected \"root\" entry.";
