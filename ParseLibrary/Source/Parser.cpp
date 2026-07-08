@@ -244,7 +244,7 @@ bool Parser::SyntaxNode::WriteToJson(JsonObject* jsonParentNode) const
 		return false;
 	}
 
-	const JsonObject* jsonRootNode = dynamic_cast<JsonObject*>(jsonObject->GetValue("root").get());
+	const JsonObject* jsonRootNode = dynamic_cast<JsonObject*>(jsonObject->GetValue("root"));
 	if (!jsonRootNode)
 	{
 		parseError = "Expected \"root\" entry.";

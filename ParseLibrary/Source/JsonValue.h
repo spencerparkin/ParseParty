@@ -107,25 +107,25 @@ namespace ParseParty
 		void Clear();
 		unsigned int GetSize() const;
 		const JsonValue* GetValue(const std::string& key) const;
-		std::shared_ptr<JsonValue> GetValue(const std::string& key);
+		JsonValue* GetValue(const std::string& key);
 		bool SetValue(const std::string& key, std::shared_ptr<JsonValue> value);
 		bool DeleteValue(const std::string& key);
 
 		template<typename T>
-		std::shared_ptr<T> GetValueOrThrow(const std::string& key)
+		T* GetValueOrThrow(const std::string& key)
 		{
-			std::shared_ptr<T> value = std::dynamic_pointer_cast<T>(this->GetValue(key));
-			if (!value.get())
+			T* value = dynamic_cast<T*>(this->GetValue(key));
+			if (!value)
 				throw JsonException(std::format("Did not find key \"{}\".", key.c_str()));
 
 			return value;
 		}
 
 		template<typename T>
-		const std::shared_ptr<T> GetValueOrThrow(const std::string& key) const
+		const T* GetValueOrThrow(const std::string& key) const
 		{
-			const std::shared_ptr<T> value = std::dynamic_pointer_cast<T>(this->GetValue(key));
-			if (!value.get())
+			const T* value = dynamic_cast<const T*>(this->GetValue(key));
+			if (!value)
 				throw JsonException(std::format("Did not find key \"{}\".", key.c_str()));
 
 			return value;
@@ -157,7 +157,7 @@ namespace ParseParty
 		void Clear();
 		unsigned int GetSize() const;
 		const JsonValue* GetValue(unsigned int i) const;
-		std::shared_ptr<JsonValue> GetValue(unsigned int i);
+		JsonValue* GetValue(unsigned int i);
 		bool SetValue(unsigned int i, std::shared_ptr<JsonValue> value);
 		bool RemoveValue(unsigned int i);
 		bool InsertValue(unsigned int i, std::shared_ptr<JsonValue> value);
@@ -165,19 +165,19 @@ namespace ParseParty
 		std::shared_ptr<JsonValue> PopValue();
 
 		template<typename T>
-		std::shared_ptr<T> GetValueOrThrow(unsigned int i)
+		T* GetValueOrThrow(unsigned int i)
 		{
-			std::shared_ptr<T> value = std::dynamic_pointer_cast<T>(this->GetValue(i));
-			if (!value.get())
+			T* value = dynamic_cast<const T*>(this->GetValue(i));
+			if (!value)
 				throw JsonException(std::format("Did not find value at offset {}.", i));
 
 			return value;
 		}
 
 		template<typename T>
-		const std::shared_ptr<T> GetValueOrThrow(unsigned int i) const
+		const T* GetValueOrThrow(unsigned int i) const
 		{
-			const std::shared_ptr<T> value = std::dynamic_pointer_cast<T>(this->GetValue(i));
+			const T* value = dynamic_cast<T*>(this->GetValue(i));
 			if (!value.get())
 				throw JsonException(std::format("Did not find value at offset: {}.", i));
 

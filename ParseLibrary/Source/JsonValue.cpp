@@ -439,16 +439,16 @@ unsigned int JsonObject::GetSize() const
 
 const JsonValue* JsonObject::GetValue(const std::string& key) const
 {
-	return const_cast<JsonObject*>(this)->GetValue(key).get();
+	return const_cast<JsonObject*>(this)->GetValue(key);
 }
 
-std::shared_ptr<JsonValue> JsonObject::GetValue(const std::string& key)
+JsonValue* JsonObject::GetValue(const std::string& key)
 {
 	JsonValueMap::iterator iter = this->valueMap->find(key);
 	if (iter == this->valueMap->end())
 		return nullptr;
 
-	return iter->second;
+	return iter->second.get();
 }
 
 bool JsonObject::SetValue(const std::string& key, std::shared_ptr<JsonValue> value)
@@ -615,15 +615,15 @@ unsigned int JsonArray::GetSize() const
 
 const JsonValue* JsonArray::GetValue(unsigned int i) const
 {
-	return const_cast<JsonArray*>(this)->GetValue(i).get();
+	return const_cast<JsonArray*>(this)->GetValue(i);
 }
 
-std::shared_ptr<JsonValue> JsonArray::GetValue(unsigned int i)
+JsonValue* JsonArray::GetValue(unsigned int i)
 {
 	if (i >= this->valueArray->size())
 		return nullptr;
 
-	return (*this->valueArray)[i];
+	return (*this->valueArray)[i].get();
 }
 
 bool JsonArray::SetValue(unsigned int i, std::shared_ptr<JsonValue> value)

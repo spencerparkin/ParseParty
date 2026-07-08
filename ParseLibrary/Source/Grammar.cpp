@@ -78,7 +78,7 @@ bool Grammar::ReadFile(const std::string& grammarFile, std::string& error)
 		return false;
 	}
 
-	JsonString* jsonInitialRule = dynamic_cast<JsonString*>(jsonObject->GetValue("initial_rule").get());
+	JsonString* jsonInitialRule = dynamic_cast<JsonString*>(jsonObject->GetValue("initial_rule"));
 	if (!jsonInitialRule)
 	{
 		error = "No \"initial_rule\" key found or it's not a string.";
@@ -87,7 +87,7 @@ bool Grammar::ReadFile(const std::string& grammarFile, std::string& error)
 
 	*this->initialRule = jsonInitialRule->GetValue();
 
-	JsonString* jsonAlgorithm = dynamic_cast<JsonString*>(jsonObject->GetValue("algorithm").get());
+	JsonString* jsonAlgorithm = dynamic_cast<JsonString*>(jsonObject->GetValue("algorithm"));
 	if (!jsonAlgorithm)
 	{
 		error = "No \"algorithm\" key found or it's not a string.";
@@ -96,11 +96,11 @@ bool Grammar::ReadFile(const std::string& grammarFile, std::string& error)
 
 	*this->algorithmName = jsonAlgorithm->GetValue();
 
-	JsonObject* jsonFlags = dynamic_cast<JsonObject*>(jsonObject->GetValue("flags").get());
+	JsonObject* jsonFlags = dynamic_cast<JsonObject*>(jsonObject->GetValue("flags"));
 	if (!this->ReadFlags(jsonFlags))
 		return false;
 
-	JsonObject* jsonRuleMap = dynamic_cast<JsonObject*>(jsonObject->GetValue("rules").get());
+	JsonObject* jsonRuleMap = dynamic_cast<JsonObject*>(jsonObject->GetValue("rules"));
 	if (!jsonRuleMap)
 	{
 		error = "No \"rules\" key found or it's not an object.";
