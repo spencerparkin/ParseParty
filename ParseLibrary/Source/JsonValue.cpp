@@ -619,7 +619,7 @@ unsigned int JsonArray::GetSize() const
 
 std::shared_ptr<JsonValue> JsonArray::GetValue(unsigned int i)
 {
-	if (i >= this->valueArray->size())
+	if (i >= (unsigned int)this->valueArray->size())
 		return nullptr;
 
 	return (*this->valueArray)[i];
@@ -627,7 +627,7 @@ std::shared_ptr<JsonValue> JsonArray::GetValue(unsigned int i)
 
 std::shared_ptr<const JsonValue> JsonArray::GetValue(unsigned int i) const
 {
-	if (i >= this->valueArray->size())
+	if (i >= (unsigned int)this->valueArray->size())
 		return nullptr;
 
 	return (*this->valueArray)[i];
@@ -635,20 +635,29 @@ std::shared_ptr<const JsonValue> JsonArray::GetValue(unsigned int i) const
 
 bool JsonArray::SetValue(unsigned int i, std::shared_ptr<JsonValue> value)
 {
-	// STPTODO: Write this.
-	return false;
+	if (i >= (unsigned int)this->valueArray->size())
+		return false;
+
+	(*this->valueArray)[i] = value;
+	return true;
 }
 
 bool JsonArray::RemoveValue(unsigned int i)
 {
-	// STPTODO: Write this.
-	return false;
+	if (i >= (unsigned int)this->valueArray->size())
+		return false;
+
+	this->valueArray->erase(this->valueArray->begin() + i);
+	return true;
 }
 
 bool JsonArray::InsertValue(unsigned int i, std::shared_ptr<JsonValue> value)
 {
-	// STPTODO: Write this.
-	return false;
+	if (i >= (unsigned int)this->valueArray->size())
+		return false;
+
+	this->valueArray->insert(this->valueArray->begin() + i, value);
+	return true;
 }
 
 void JsonArray::PushValue(std::shared_ptr<JsonValue> value)
