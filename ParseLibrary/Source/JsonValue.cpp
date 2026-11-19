@@ -64,7 +64,12 @@ JsonValue::JsonValue()
 	else if (token.type == Lexer::Token::Type::NUMBER_LITERAL_INT)
 		return std::make_shared<JsonInt>();
 	else if (token.type == Lexer::Token::Type::IDENTIFIER)
+	{
+		if (*token.text == "null")
+			return std::make_shared<JsonNull>();
+
 		return std::make_shared<JsonBool>();
+	}
 
 	return nullptr;
 }
